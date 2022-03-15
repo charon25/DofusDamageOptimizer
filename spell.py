@@ -1,6 +1,6 @@
 import json
 
-from stats import Characteristics
+from stats import Characteristics, Stats
 
 
 class Spell():
@@ -9,6 +9,7 @@ class Spell():
         self.crit_chance = 0.0
         self.uses_per_target = -1
         self.uses_per_turn = -1
+        self.is_melee = False
 
         if from_scratch:
             self._fill_empty_dict()
@@ -16,6 +17,9 @@ class Spell():
     def _fill_empty_dict(self):
         for characteristic in Characteristics:
             self.base_damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
+
+    def get_average_damages(self, stats: Stats):
+        pass
 
 
     def get_base_damages(self, characteristic):
@@ -76,11 +80,17 @@ class Spell():
             raise ValueError(f"Uses per turn should be -1 or a positive int ('{uses_per_turn}' given instead).")
         
         self.uses_per_turn = uses_per_turn
+    
+    def set_melee(self, is_melee):
+        if not (isinstance(is_melee, bool) or (isinstance(is_melee, int) and is_melee in [0, 1])):
+            raise TypeError(f"is_melee is not a bool ('{is_melee}' of type '{type(is_melee)}' given instead).")
+        
+        self.is_melee = bool(self.is_melee)
 
 
     @classmethod
     def check_json_validity(cls, json_data):
-        for key in ('base_damages', 'crit_chance', 'uses_per_target', 'uses_per_turn'):
+        for key in ('base_damages', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_melee'):
             if not key in json_data:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
         
@@ -98,6 +108,9 @@ class Spell():
             raise TypeError(f"json_data['uses_per_turn'] is not a int ('{json_data['uses_per_turn']}' of type '{type(json_data['uses_per_turn'])}' given instead).")
         if json_data['uses_per_turn'] == 0 or json_data['uses_per_turn'] < -1:
             raise ValueError(f"json_data['uses_per_turn'] should be -1 or a positive int ('{json_data['uses_per_turn']}' given instead).")
+        
+        if not (isinstance(json_data['is_melee'], bool) or (isinstance(json_data['is_melee'], int) and json_data['is_melee'] in [0, 1])):
+            raise TypeError(f"json_data['is_melee'] is not a bool ('{json_data['is_melee']}' of type '{type(json_data['is_melee'])}' given instead).")
         
         for characteristic in Characteristics:
             if not characteristic in json_data['base_damages']:
@@ -122,5 +135,6 @@ class Spell():
         stats.crit_chance = float(json_data['crit_chance'])
         stats.uses_per_target = json_data['uses_per_target']
         stats.uses_per_turn = json_data['uses_per_turn']
+        stats.is_melee = bool(json_data['is_melee'])
 
         return stats

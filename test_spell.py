@@ -25,9 +25,9 @@ class TestSpell(unittest.TestCase):
     def test_create_from_incomplete_json(self):
         json_missing_all = '{}'
         json_missing_scalar_parameter = '{"base_damages": {}}'
-        json_missing_base_damages = '{"crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1}'
+        json_missing_base_damages = '{"crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true}'
         # Double { and } because of .format
-        json_missing_one_characteristic = '{{"crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "base_damages": {0}}}'.format(
+        json_missing_one_characteristic = '{{"crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true, "base_damages": {0}}}'.format(
             {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics if characteristic != Characteristics.LUCK}
         ).replace("'", '"')
 
@@ -41,7 +41,7 @@ class TestSpell(unittest.TestCase):
             Spell.from_json_string(json_missing_one_characteristic)
     
     def test_create_from_valid_json(self):
-        valid_json_string = '{{"crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "base_damages": {0}}}'.format(
+        valid_json_string = '{{"crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": false, "base_damages": {0}}}'.format(
             {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics}
         ).replace("'", '"')
 

@@ -38,7 +38,7 @@ class TestStats(unittest.TestCase):
             Stats.from_json_string(json_missing_characteristics)
         with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_damages)
-    
+
     def test_create_from_valid_json(self):
         valid_json_string = '{{"damages": {0}, "characteristics": {1}}}'.format(
             {damage.value: 0 for damage in Damages},
@@ -46,6 +46,15 @@ class TestStats(unittest.TestCase):
         ).replace("'", '"')
 
         Stats.from_json_string(valid_json_string)
+
+    def test_different_neutral_strength(self):
+        json_string = '{{"damages": {0}, "characteristics": {1}}}'.format(
+            {damage.value: 0 for damage in Damages},
+            {characteristic.value: (100 if characteristic == Characteristics.NEUTRAL else 0) for characteristic in Characteristics}
+        ).replace("'", '"')
+
+        with self.assertRaises(ValueError):
+            Stats.from_json_string(json_string)
     
     def test_get_characteristic(self):
         stats = Stats()
@@ -67,6 +76,15 @@ class TestStats(unittest.TestCase):
             stats.set_characteristic(Characteristics.LUCK, "string")
         with self.assertRaises(ValueError):
             stats.set_characteristic(Characteristics.AGILITY, -100)
+
+    def test_neutral_strength_equality(self):
+        stats = Stats()
+
+        stats.set_characteristic(Characteristics.STRENGTH, 150)
+        self.assertEqual(stats.get_characteristic(Characteristics.NEUTRAL), 150)
+
+        with self.assertRaises(TypeError):
+            stats.set_characteristic(Characteristics.NEUTRAL, 100)
 
 
 if __name__ == '__main__':

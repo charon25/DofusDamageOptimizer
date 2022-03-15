@@ -7,8 +7,7 @@ class Characteristics(str, Enum):
     INTELLIGENCE = 1
     LUCK = 2
     AGILITY = 3
-    POWER = 4
-    WEAPON_POWER = 5
+    NEUTRAL = 4
 
 class Damages(str, Enum):
     EARTH = 0
@@ -20,6 +19,8 @@ class Damages(str, Enum):
     SPELLS = 6
     WEAPON = 7
     CRIT = 8
+    POWER = 9
+    WEAPON_POWER = 10
 
 
 class Stats:
@@ -46,6 +47,9 @@ class Stats:
     def set_characteristic(self, characteristic, value):
         if not isinstance(characteristic, Characteristics):
             raise TypeError(f"'{characteristic} is not a valid characteristic.")
+        
+        if characteristic == Characteristics.NEUTRAL:
+            raise TypeError('Neutral caracteritics cannot be changed on its own.')
 
         if not isinstance(value, int):
             raise TypeError(f"Value should be an int ('{value}' of type '{type(value)}' given instead).")
@@ -54,6 +58,9 @@ class Stats:
             raise ValueError(f"Value should be non negative ('{value}' given instead).")
 
         self.characteristics[characteristic] = value
+
+        if characteristic == Characteristics.STRENGTH:
+            self.characteristics[Characteristics.NEUTRAL] = value
 
 
     @classmethod
@@ -65,10 +72,23 @@ class Stats:
         for characteristic in Characteristics:
             if not characteristic in json_data['characteristics']:
                 raise KeyError(f"JSON string 'characteristics' array does not contains '{characteristic}'.")
+            characteristic_value = json_data['characteristics'][characteristic]
+            if not isinstance(characteristic_value, int):
+                raise TypeError(f"json_data['characteristics'][{characteristic}] is not an int ('{characteristic_value}' of type '{type(characteristic_value)}' given instead).")
+            if characteristic_value < 0:
+                raise ValueError(f"json_data['characteristics'][{characteristic}] should be non negative ('{characteristic_value}' given instead).")
+
+        if json_data['characteristics'][Characteristics.NEUTRAL] != json_data['characteristics'][Characteristics.STRENGTH]:
+            raise ValueError("Neutral and Strength caracteristics have to be equal.")
 
         for damage in Damages:
             if not damage in json_data['damages']:
                 raise KeyError(f"JSON string 'damages' array does not contains '{damage}'.")
+            damages_value = json_data['damages'][damage]
+            if not isinstance(damages_value, int):
+                raise TypeError(f"json_data['damages'][{damage}] is not an int ('{damages_value}' of type '{type(damages_value)}' given instead).")
+            if damages_value < 0:
+                raise ValueError(f"json_data['damages'][{damage}] should be non negative ('{damages_value}' given instead).")
 
     @classmethod
     def from_json_string(cls, json_string):
