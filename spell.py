@@ -1,5 +1,6 @@
 import json
 
+from damages import compute_damage
 from stats import Characteristics, Stats
 
 
@@ -19,7 +20,17 @@ class Spell():
             self.base_damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
 
     def get_average_damages(self, stats: Stats):
-        pass
+        average_damage = 0.0
+        average_damage_crit = 0.0
+
+        for characteristic in Characteristics:
+            base_damages_no_crit = {'min': self.base_damages[characteristic]['min'], 'max': self.base_damages[characteristic]['max']}
+            average_damage += compute_damage(base_damages_no_crit, stats, characteristic, self.is_melee)
+
+            base_damages_crit = {'min': self.base_damages[characteristic]['crit_min'], 'max': self.base_damages[characteristic]['crit_max']}
+            average_damage += compute_damage(base_damages_crit, stats, characteristic, self.is_melee)
+
+        return (1 - self.crit_chance) * average_damage + self.crit_chance * average_damage_crit
 
 
     def get_base_damages(self, characteristic):
