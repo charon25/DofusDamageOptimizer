@@ -4,7 +4,7 @@ from spell import Spell
 from stats import Characteristics
 
 
-class TestStats(unittest.TestCase):
+class TestSpell(unittest.TestCase):
 
     def test_create_empty(self):
         empty_damages = {characteristic: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics}
@@ -48,31 +48,74 @@ class TestStats(unittest.TestCase):
         Spell.from_json_string(valid_json_string)
     
     def test_get_damages(self):
-        stats = Spell()
+        spell = Spell()
         empty_damages = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
 
-        self.assertDictEqual(stats.get_damages(Characteristics.STRENGTH), empty_damages)
+        self.assertDictEqual(spell.get_damages(Characteristics.STRENGTH), empty_damages)
 
         with self.assertRaises(TypeError):
-            stats.get_damages("string")
+            spell.get_damages("string")
     
     def test_set_characteristic(self):
-        stats = Spell()
+        spell = Spell()
         damage = {'min': 10, 'max': 20, 'crit_min': 12, 'crit_max': 22}
 
-        stats.set_damages(Characteristics.INTELLIGENCE, damage)
-        self.assertDictEqual(stats.get_damages(Characteristics.INTELLIGENCE), damage)
+        spell.set_damages(Characteristics.INTELLIGENCE, damage)
+        self.assertDictEqual(spell.get_damages(Characteristics.INTELLIGENCE), damage)
 
         with self.assertRaises(TypeError):
-            stats.set_damages("string", damage)
+            spell.set_damages("string", damage)
         with self.assertRaises(TypeError):
-            stats.set_damages(Characteristics.STRENGTH, 0)
+            spell.set_damages(Characteristics.STRENGTH, 0)
         with self.assertRaises(KeyError):
-            stats.set_damages(Characteristics.LUCK, {})
+            spell.set_damages(Characteristics.LUCK, {})
         with self.assertRaises(TypeError):
-            stats.set_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': "string", 'crit_max': 22})
+            spell.set_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': "string", 'crit_max': 22})
         with self.assertRaises(ValueError):
-            stats.set_damages(Characteristics.AGILITY, {'min': -10, 'max': 20, 'crit_min': 12, 'crit_max': 22})
+            spell.set_damages(Characteristics.AGILITY, {'min': -10, 'max': 20, 'crit_min': 12, 'crit_max': 22})
+    
+    def test_set_crit_chance(self):
+        spell = Spell()
+        
+        spell.set_crit_chance(0.5)
+        self.assertEqual(spell.get_crit_chance(), 0.5)
+        spell.set_crit_chance(1)
+        self.assertEqual(spell.get_crit_chance(), 1.0)
+
+        with self.assertRaises(TypeError):
+            spell.set_crit_chance("string")
+        with self.assertRaises(ValueError):
+            spell.set_crit_chance(1.5)
+
+    def test_set_uses_per_target(self):
+        spell = Spell()
+        
+        spell.set_uses_per_target(-1)
+        self.assertEqual(spell.get_uses_per_target(), -1)
+        spell.set_uses_per_target(2)
+        self.assertEqual(spell.get_uses_per_target(), 2)
+
+        with self.assertRaises(TypeError):
+            spell.set_uses_per_target("string")
+        with self.assertRaises(ValueError):
+            spell.set_uses_per_target(0)
+        with self.assertRaises(ValueError):
+            spell.set_uses_per_target(-5)
+
+    def test_set_uses_per_turn(self):
+        spell = Spell()
+        
+        spell.set_uses_per_turn(-1)
+        self.assertEqual(spell.get_uses_per_turn(), -1)
+        spell.set_uses_per_turn(2)
+        self.assertEqual(spell.get_uses_per_turn(), 2)
+
+        with self.assertRaises(TypeError):
+            spell.set_uses_per_turn("string")
+        with self.assertRaises(ValueError):
+            spell.set_uses_per_turn(0)
+        with self.assertRaises(ValueError):
+            spell.set_uses_per_turn(-5)
 
 
 if __name__ == '__main__':

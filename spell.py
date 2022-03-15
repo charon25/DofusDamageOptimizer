@@ -40,6 +40,39 @@ class Spell():
         
         self.damages[characteristic] = damages
 
+    def get_crit_chance(self):
+        return self.crit_chance
+
+    def set_crit_chance(self, crit_chance):
+        if not (isinstance(crit_chance, float) or isinstance(crit_chance, int)):
+            raise TypeError(f"Crit chance is not a float ('{crit_chance}' of type '{type(crit_chance)}' given instead).")
+        if not (0.0 <= crit_chance <= 1.0):
+            raise ValueError(f"Crit chance should be between 0 and 1 inclusive ('{crit_chance}' given instead).")
+
+        self.crit_chance = float(crit_chance)
+
+    def get_uses_per_target(self):
+        return self.uses_per_target
+
+    def set_uses_per_target(self, uses_per_target):
+        if not isinstance(uses_per_target, int):
+            raise TypeError(f"Uses per target is not a int ('{uses_per_target}' of type '{type(uses_per_target)}' given instead).")
+        if uses_per_target == 0 or uses_per_target < -1:
+            raise ValueError(f"Uses per target should be -1 or a positive int ('{uses_per_target}' given instead).")
+        
+        self.uses_per_target = uses_per_target
+
+    def get_uses_per_turn(self):
+        return self.uses_per_turn
+
+    def set_uses_per_turn(self, uses_per_turn):
+        if not isinstance(uses_per_turn, int):
+            raise TypeError(f"Uses per turn is not a int ('{uses_per_turn}' of type '{type(uses_per_turn)}' given instead).")
+        if uses_per_turn == 0 or uses_per_turn < -1:
+            raise ValueError(f"Uses per turn should be -1 or a positive int ('{uses_per_turn}' given instead).")
+        
+        self.uses_per_turn = uses_per_turn
+
 
     @classmethod
     def check_json_validity(cls, json_data):
