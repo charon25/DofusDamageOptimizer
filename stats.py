@@ -1,5 +1,6 @@
 from enum import Enum
 import json
+from random import randint
 
 class Elements(str, Enum):
     STRENGTH = 0
@@ -37,8 +38,26 @@ class Stats:
 
 
     @classmethod
-    def from_json_string(self, json_string):
+    def check_json_validity(cls, json_data):
+        if not 'elements' in json_data:
+            raise ValueError(f"JSON string does not contain an 'elements' key.")
+
+        for element in Elements:
+            if not element in json_data['elements']:
+                raise ValueError(f"JSON string 'elements' array does not contains '{element}'.")
+        
+        if not 'damages' in json_data:
+            raise ValueError("JSON string does not contain a 'damages' key.")
+
+        for damage in Damages:
+            if not damage in json_data['damages']:
+                raise ValueError(f"JSON string 'damages' array does not contains '{damage}'.")
+
+    @classmethod
+    def from_json_string(cls, json_string):
         json_data = json.loads(json_string)
+        cls.check_json_validity(json_data)
+
         stats = Stats(from_scratch=False)
         stats.elements = json_data['elements']
         stats.damages = json_data['damages']
