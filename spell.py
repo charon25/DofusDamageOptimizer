@@ -24,11 +24,8 @@ class Spell():
         average_damage_crit = 0.0
 
         for characteristic in Characteristics:
-            base_damages_no_crit = {'min': self.base_damages[characteristic]['min'], 'max': self.base_damages[characteristic]['max']}
-            average_damage += compute_damage(base_damages_no_crit, stats, characteristic, self.is_melee)
-
-            base_damages_crit = {'min': self.base_damages[characteristic]['crit_min'], 'max': self.base_damages[characteristic]['crit_max']}
-            average_damage += compute_damage(base_damages_crit, stats, characteristic, self.is_melee)
+            average_damage += compute_damage(self.base_damages[characteristic], stats, characteristic, self.is_melee)
+            average_damage += compute_damage(self.base_damages[characteristic], stats, characteristic, self.is_melee, is_crit=True)
 
         return (1 - self.crit_chance) * average_damage + self.crit_chance * average_damage_crit
 
