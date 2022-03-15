@@ -58,19 +58,17 @@ class Stats:
 
     @classmethod
     def check_json_validity(cls, json_data):
-        if not 'characteristics' in json_data:
-            raise ValueError(f"JSON string does not contain an 'characteristics' key.")
+        for key in ('characteristics', 'damages'):
+            if not key in json_data:
+                raise KeyError(f"JSON string does not contain a '{key}' key.")
 
         for characteristic in Characteristics:
             if not characteristic in json_data['characteristics']:
-                raise ValueError(f"JSON string 'characteristics' array does not contains '{characteristic}'.")
-        
-        if not 'damages' in json_data:
-            raise ValueError("JSON string does not contain a 'damages' key.")
+                raise KeyError(f"JSON string 'characteristics' array does not contains '{characteristic}'.")
 
         for damage in Damages:
             if not damage in json_data['damages']:
-                raise ValueError(f"JSON string 'damages' array does not contains '{damage}'.")
+                raise KeyError(f"JSON string 'damages' array does not contains '{damage}'.")
 
     @classmethod
     def from_json_string(cls, json_string):

@@ -25,17 +25,18 @@ class TestStats(unittest.TestCase):
         json_missing_characteristics_field = '{"damages": {}}'
         json_missing_damages_field = '{"characteristics": {}}'
         json_missing_characteristics = '{"damages": {}, "characteristics": {}}'
-        json_missing_damages = '{{"damages": {{}}, "characteristics": {0}}}'.format({characteristic.value: 0 for characteristic in Characteristics})
+        # Double { and } because of .format
+        json_missing_damages = '{{"damages": {{}}, "characteristics": {0}}}'.format({characteristic.value: 0 for characteristic in Characteristics}).replace("'", '"')
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_both_fields)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_characteristics_field)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_damages_field)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_characteristics)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_damages)
     
     def test_create_from_valid_json(self):
