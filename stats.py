@@ -61,6 +61,24 @@ class Stats:
 
         if characteristic == Characteristics.STRENGTH:
             self.characteristics[Characteristics.NEUTRAL] = value
+    
+    def get_damage(self, damage):
+        if not isinstance(damage, Damages):
+            raise TypeError(f"'{damage} is not a valid damage.")
+
+        return self.damages[damage]
+
+    def set_damage(self, damage, value):
+        if not isinstance(damage, Characteristics):
+            raise TypeError(f"'{damage} is not a valid damage.")
+
+        if not isinstance(value, int):
+            raise TypeError(f"Value should be an int ('{value}' of type '{type(value)}' given instead).")
+
+        if value < 0:
+            raise ValueError(f"Value should be non negative ('{value}' given instead).")
+
+        self.damages[damage] = value
 
 
     @classmethod
