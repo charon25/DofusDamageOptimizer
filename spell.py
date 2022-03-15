@@ -17,6 +17,30 @@ class Spell():
         for characteristic in Characteristics:
             self.damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
 
+    def get_damages(self, characteristic):
+        if not isinstance(characteristic, Characteristics):
+            raise TypeError(f"'{characteristic} is not a valid characteristic.")
+        
+        return self.damages[characteristic]
+    
+    def set_damages(self, characteristic, damages):
+        if not isinstance(characteristic, Characteristics):
+            raise TypeError(f"'{characteristic} is not a valid characteristic.")
+        
+        if not isinstance(damages, dict):
+            raise TypeError(f"Damages is not a dict ('{damages}' of type '{type(damages)}' given instead).")
+        
+        for field in ('min', 'max', 'crit_min', 'crit_max'):
+            if not field in damages:
+                raise KeyError(f"Field '{field}' missing in damages.")
+            if not isinstance(damages[field], int):
+                raise TypeError(f"Field '{field}' is not an int ('{damages[field]}' of type '{type(damages[field])}' given instead).")
+            if damages[field] < 0:
+                raise ValueError(f"Field '{field}' should be non negative ('{damages[field]}' given instead).")
+        
+        self.damages[characteristic] = damages
+
+
     @classmethod
     def check_json_validity(cls, json_data):
         for key in ('damages', 'crit_chance', 'uses_per_target', 'uses_per_turn'):

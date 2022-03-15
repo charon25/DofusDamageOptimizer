@@ -40,34 +40,39 @@ class TestStats(unittest.TestCase):
         with self.assertRaises(KeyError):
             Spell.from_json_string(json_missing_one_characteristic)
     
-    # def test_create_from_valid_json(self):
-    #     valid_json_string = '{{"damages": {0}, "characteristics": {1}}}'.format(
-    #         {damage.value: 0 for damage in Damages},
-    #         {characteristic.value: 0 for characteristic in Characteristics}
-    #     ).replace("'", '"')
+    def test_create_from_valid_json(self):
+        valid_json_string = '{{"crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "damages": {0}}}'.format(
+            {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics}
+        ).replace("'", '"')
 
-    #     Stats.from_json_string(valid_json_string)
+        Spell.from_json_string(valid_json_string)
     
-    # def test_get_characteristic(self):
-    #     stats = Stats()
+    def test_get_damages(self):
+        stats = Spell()
+        empty_damages = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
 
-    #     self.assertEqual(stats.get_characteristic(Characteristics.STRENGTH), 0)
+        self.assertDictEqual(stats.get_damages(Characteristics.STRENGTH), empty_damages)
 
-    #     with self.assertRaises(TypeError):
-    #         stats.get_characteristic("string")
+        with self.assertRaises(TypeError):
+            stats.get_damages("string")
     
-    # def test_set_characteristic(self):
-    #     stats = Stats()
+    def test_set_characteristic(self):
+        stats = Spell()
+        damage = {'min': 10, 'max': 20, 'crit_min': 12, 'crit_max': 22}
 
-    #     stats.set_characteristic(Characteristics.INTELLIGENCE, 100)
-    #     self.assertEqual(stats.get_characteristic(Characteristics.INTELLIGENCE), 100)
+        stats.set_damages(Characteristics.INTELLIGENCE, damage)
+        self.assertDictEqual(stats.get_damages(Characteristics.INTELLIGENCE), damage)
 
-    #     with self.assertRaises(TypeError):
-    #         stats.set_characteristic("string", 0)
-    #     with self.assertRaises(TypeError):
-    #         stats.set_characteristic(Characteristics.LUCK, "string")
-    #     with self.assertRaises(ValueError):
-    #         stats.set_characteristic(Characteristics.AGILITY, -100)
+        with self.assertRaises(TypeError):
+            stats.set_damages("string", damage)
+        with self.assertRaises(TypeError):
+            stats.set_damages(Characteristics.STRENGTH, 0)
+        with self.assertRaises(KeyError):
+            stats.set_damages(Characteristics.LUCK, {})
+        with self.assertRaises(TypeError):
+            stats.set_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': "string", 'crit_max': 22})
+        with self.assertRaises(ValueError):
+            stats.set_damages(Characteristics.AGILITY, {'min': -10, 'max': 20, 'crit_min': 12, 'crit_max': 22})
 
 
 if __name__ == '__main__':
