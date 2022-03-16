@@ -38,7 +38,9 @@ class Stats:
         
         for damage in Damages:
             self.damages[damage] = 0
-    
+
+
+
     def get_characteristic(self, characteristic):
         if not isinstance(characteristic, Characteristics):
             raise TypeError(f"'{characteristic} is not a valid characteristic.")
@@ -62,7 +64,8 @@ class Stats:
 
         if characteristic == Characteristics.STRENGTH:
             self.characteristics[Characteristics.NEUTRAL] = value
-    
+
+
     def get_damage(self, damage):
         if not isinstance(damage, Damages):
             raise TypeError(f"'{damage} is not a valid damage.")
@@ -80,7 +83,8 @@ class Stats:
             raise ValueError(f"Value should be non negative ('{value}' given instead).")
 
         self.damages[damage] = value
-    
+
+
     def get_name(self):
         return self.name
     

@@ -8,10 +8,12 @@ from stats import Characteristics, Stats
 class Spell():
     def __init__(self, from_scratch=True) -> None:
         self.base_damages: Dict[Characteristics, Dict] = {}
+        self.pa = 0
         self.crit_chance = 0.0
         self.uses_per_target = -1
         self.uses_per_turn = -1
         self.is_melee = False
+        self.name = ''
 
         if from_scratch:
             self._fill_empty_dict()
@@ -29,6 +31,19 @@ class Spell():
             average_damage += compute_damage(self.base_damages[characteristic], stats, characteristic, self.is_melee, is_crit=True)
 
         return (1 - self.crit_chance) * average_damage + self.crit_chance * average_damage_crit
+
+
+
+    def get_pa(self):
+        return self.pa
+    
+    def set_pa(self, pa):
+        if not isinstance(pa, int):
+            raise TypeError(f"PA count is not an int ('{pa}' of type '{type(pa)}' given instead).")
+        if pa <= 0:
+            raise ValueError(f"PA count should be a positive int ('{pa}' given instead).")
+        
+        self.pa = pa
 
 
     def get_base_damages(self, characteristic):
@@ -89,7 +104,8 @@ class Spell():
             raise ValueError(f"Uses per turn should be -1 or a positive int ('{uses_per_turn}' given instead).")
         
         self.uses_per_turn = uses_per_turn
-    
+
+
     def set_melee(self, is_melee):
         if not (isinstance(is_melee, bool) or (isinstance(is_melee, int) and is_melee in [0, 1])):
             raise TypeError(f"is_melee is not a bool ('{is_melee}' of type '{type(is_melee)}' given instead).")
@@ -97,9 +113,17 @@ class Spell():
         self.is_melee = bool(self.is_melee)
 
 
+    def get_name(self):
+        return self.name
+    
+    def set_name(self, name):
+        self.name = str(name)
+
+
+
     @classmethod
     def check_json_validity(cls, json_data):
-        for key in ('base_damages', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_melee'):
+        for key in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_melee', 'name'):
             if not key in json_data:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
         

@@ -25,9 +25,9 @@ class TestSpell(unittest.TestCase):
     def test_create_from_incomplete_json(self):
         json_missing_all = '{}'
         json_missing_scalar_parameter = '{"base_damages": {}}'
-        json_missing_base_damages = '{"crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true}'
+        json_missing_base_damages = '{"name": "", "pa": 1, "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true}'
         # Double { and } because of .format
-        json_missing_one_characteristic = '{{"crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true, "base_damages": {0}}}'.format(
+        json_missing_one_characteristic = '{{"pa": 1, "name": "", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true, "base_damages": {0}}}'.format(
             {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics if characteristic != Characteristics.LUCK}
         ).replace("'", '"')
 
@@ -39,9 +39,9 @@ class TestSpell(unittest.TestCase):
             Spell.from_json_string(json_missing_base_damages)
         with self.assertRaises(KeyError):
             Spell.from_json_string(json_missing_one_characteristic)
-    
+
     def test_create_from_valid_json(self):
-        valid_json_string = '{{"crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": false, "base_damages": {0}}}'.format(
+        valid_json_string = '{{"pa": 1, "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": false, "base_damages": {0}}}'.format(
             {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics}
         ).replace("'", '"')
 
@@ -73,7 +73,18 @@ class TestSpell(unittest.TestCase):
             spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': "string", 'crit_max': 22})
         with self.assertRaises(ValueError):
             spell.set_base_damages(Characteristics.AGILITY, {'min': -10, 'max': 20, 'crit_min': 12, 'crit_max': 22})
-    
+
+    def test_set_pa(self):
+        spell = Spell()
+
+        spell.set_pa(4)
+        self.assertEqual(spell.get_pa(), 4)
+
+        with self.assertRaises(TypeError):
+            spell.set_pa("string")
+        with self.assertRaises(ValueError):
+            spell.set_pa(0)
+
     def test_set_crit_chance(self):
         spell = Spell()
         
@@ -116,6 +127,15 @@ class TestSpell(unittest.TestCase):
             spell.set_uses_per_turn(0)
         with self.assertRaises(ValueError):
             spell.set_uses_per_turn(-5)
+
+    def test_set_name(self):
+        spell = Spell()
+
+        spell.set_name("name")
+        self.assertEqual(spell.get_name(), "name")
+
+        spell.set_name(42)
+        self.assertEqual(spell.get_name(), "42")
 
 
 if __name__ == '__main__':
