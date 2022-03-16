@@ -1,4 +1,5 @@
 import json
+from typing import Dict
 
 from damages import compute_damage
 from stats import Characteristics, Stats
@@ -6,7 +7,7 @@ from stats import Characteristics, Stats
 
 class Spell():
     def __init__(self, from_scratch=True) -> None:
-        self.base_damages = {}
+        self.base_damages: Dict[Characteristics, Dict] = {}
         self.crit_chance = 0.0
         self.uses_per_target = -1
         self.uses_per_turn = -1
@@ -102,47 +103,21 @@ class Spell():
             if not key in json_data:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
         
-        if not (isinstance(json_data['crit_chance'], float) or isinstance(json_data['crit_chance'], int)):
-            raise TypeError(f"json_data['crit_chance'] is not a float ('{json_data['crit_chance']}' of type '{type(json_data['crit_chance'])}' given instead).")
-        if not (0.0 <= json_data['crit_chance'] <= 1.0):
-            raise ValueError(f"json_data['crit_chance'] should be between 0 and 1 inclusive ('{json_data['crit_chance']}' given instead).")
-        
-        if not isinstance(json_data['uses_per_target'], int):
-            raise TypeError(f"json_data['uses_per_target'] is not a int ('{json_data['uses_per_target']}' of type '{type(json_data['uses_per_target'])}' given instead).")
-        if json_data['uses_per_target'] == 0 or json_data['uses_per_target'] < -1:
-            raise ValueError(f"json_data['uses_per_target'] should be -1 or a positive int ('{json_data['uses_per_target']}' given instead).")
-
-        if not isinstance(json_data['uses_per_turn'], int):
-            raise TypeError(f"json_data['uses_per_turn'] is not a int ('{json_data['uses_per_turn']}' of type '{type(json_data['uses_per_turn'])}' given instead).")
-        if json_data['uses_per_turn'] == 0 or json_data['uses_per_turn'] < -1:
-            raise ValueError(f"json_data['uses_per_turn'] should be -1 or a positive int ('{json_data['uses_per_turn']}' given instead).")
-        
-        if not (isinstance(json_data['is_melee'], bool) or (isinstance(json_data['is_melee'], int) and json_data['is_melee'] in [0, 1])):
-            raise TypeError(f"json_data['is_melee'] is not a bool ('{json_data['is_melee']}' of type '{type(json_data['is_melee'])}' given instead).")
-        
         for characteristic in Characteristics:
             if not characteristic in json_data['base_damages']:
                 raise KeyError(f"JSON string 'base_damages' array does not contains '{characteristic}'.")
-            for field in ('min', 'max', 'crit_min', 'crit_max'):
-                if not field in json_data['base_damages'][characteristic]:
-                    raise KeyError(f"Field '{field}' missing in json_data['base_damages'][{characteristic}].")
-                field_value = json_data['base_damages'][characteristic][field]
-                if not isinstance(field_value, int):
-                    raise TypeError(f"json_data['base_damages'][{characteristic}][{field}] is not an int ('{field_value}' of type '{type(field_value)}' given instead).")
-                if field_value < 0:
-                    raise ValueError(f"json_data['base_damages'][{characteristic}][{field}] should be non negative ('{field_value}' given instead).")
-        
 
     @classmethod
     def from_json_string(cls, json_string):
         json_data = json.loads(json_string)
         cls.check_json_validity(json_data)
 
-        stats = Spell(from_scratch=False)
-        stats.base_damages = json_data['base_damages']
-        stats.crit_chance = float(json_data['crit_chance'])
-        stats.uses_per_target = json_data['uses_per_target']
-        stats.uses_per_turn = json_data['uses_per_turn']
-        stats.is_melee = bool(json_data['is_melee'])
+        spell = Spell(from_scratch=False)
+        for characteristic in Characteristics:
+            spell.set_base_damages(characteristic, json_data['base_damages'][characteristic])
+        spell.set_crit_chance(json_data['crit_chance'])
+        spell.set_uses_per_target(json_data['uses_per_target'])
+        spell.set_uses_per_turn(json_data['uses_per_turn'])
+        spell.set_melee(json_data['is_melee'])
 
-        return stats
+        return spell
