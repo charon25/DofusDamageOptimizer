@@ -113,6 +113,45 @@ class TestStats(unittest.TestCase):
 
         stats.set_name(42)
         self.assertEqual(stats.get_name(), "42")
+    
+
+    def test_valid_simple_addition(self):
+        stats1 = Stats()
+        stats1.set_characteristic(Characteristics.INTELLIGENCE, 100)
+        stats1.set_damage(Damages.BASIC, 20)
+        stats1.set_bonus_crit_chance(0.3)
+        stats1.set_name("stats1")
+
+        stats2 = Stats()
+        stats2.set_characteristic(Characteristics.INTELLIGENCE, 80)
+        stats2.set_damage(Damages.BASIC, 15)
+        stats2.set_bonus_crit_chance(0.5)
+        stats2.set_name("stats2")
+
+        stats3 = stats1 + stats2
+
+        self.assertEqual(stats3.get_characteristic(Characteristics.INTELLIGENCE), 100 + 80)
+        self.assertEqual(stats3.get_damage(Damages.BASIC), 20 + 15)
+        self.assertAlmostEqual(stats3.get_bonus_crit_chance(), 0.3 + 0.5)
+        self.assertEqual(stats3.get_name(), "stats1")
+    
+    def test_valid_sum(self):
+        stats1 = Stats()
+        stats1.set_characteristic(Characteristics.AGILITY, 40)
+
+        stats2 = Stats()
+        stats2.set_characteristic(Characteristics.AGILITY, 50)
+
+        stats3 = sum([stats1, stats2])
+
+        self.assertEqual(stats3.get_characteristic(Characteristics.AGILITY), 40 + 50)
+    
+    def test_invalid_sum(self):
+        stats1 = Stats()
+
+        with self.assertRaises(TypeError):
+            stats2 = stats1 + 1
+            stats2 = stats1 + "string"
 
 
 if __name__ == '__main__':

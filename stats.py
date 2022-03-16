@@ -41,6 +41,29 @@ class Stats:
             self.damages[damage] = 0
 
 
+    def __add__(self, other: 'Stats'):
+        if not isinstance(other, Stats):
+            raise TypeError(f"unsupported operand type(s) for +: 'Stats' and '{type(other)}'.")
+        
+        result = Stats()
+        for characteristic in Characteristics:
+            if characteristic != Characteristics.NEUTRAL:
+                result.set_characteristic(characteristic, self.get_characteristic(characteristic) + other.get_characteristic(characteristic))
+
+        for damage in Damages:
+            result.set_damage(damage, self.get_damage(damage) + other.get_damage(damage))
+
+        result.set_bonus_crit_chance(self.get_bonus_crit_chance() + other.get_bonus_crit_chance())
+        result.set_name(self.get_name())
+    
+        return result
+    
+    def __radd__(self, other):
+        if other == 0:
+            return self
+        else:
+            return self + other
+
 
     def get_characteristic(self, characteristic):
         if not isinstance(characteristic, Characteristics):
