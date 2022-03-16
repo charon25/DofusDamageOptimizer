@@ -1,7 +1,7 @@
 import unittest
 
 from spell import Spell
-from stats import Characteristics
+from stats import Characteristics, Damages, Stats
 
 
 class TestSpell(unittest.TestCase):
@@ -136,6 +136,98 @@ class TestSpell(unittest.TestCase):
 
         spell.set_name(42)
         self.assertEqual(spell.get_name(), "42")
+
+    def test_no_damage(self):
+        stats = Stats()
+        spell = Spell()
+
+        self.assertAlmostEqual(spell.get_average_damages(stats), 0.0)
+
+    def test_damage_simple_no_crit(self):
+        stats = Stats()
+        spell = Spell()
+
+        spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 10, 'crit_min': 10, 'crit_max': 10})
+        damage_no_var = spell.get_average_damages(stats) # (10 + 10) / 2
+
+        spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 16, 'crit_min': 10, 'crit_max': 10})
+        damage_var = spell.get_average_damages(stats) # (10 + 16) / 2
+
+        self.assertAlmostEqual(damage_no_var, 10)
+        self.assertAlmostEqual(damage_var, 13)
+
+    def test_damage_multiline_no_crit(self):
+        stats = Stats()
+        spell = Spell()
+
+        spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 18, 'crit_min': 10, 'crit_max': 10})
+        spell.set_base_damages(Characteristics.INTELLIGENCE, {'min': 20, 'max': 30, 'crit_min': 10, 'crit_max': 10})
+        damage = spell.get_average_damages(stats) # (10 + 18) / 2 + (20 + 30) / 2
+
+        self.assertAlmostEqual(damage, 39)
+
+    def test_damage_crit(self):
+        stats = Stats()
+        spell = Spell()
+
+        spell.set_base_damages(Characteristics.LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
+        spell.set_crit_chance(0.5)
+        damage_no_bonus = spell.get_average_damages(stats) # 0.5 * (10 + 20) / 2 + 0.5 * (50 + 70) / 2
+
+        stats.set_bonus_crit_chance(0.1)
+        damage_bonus = spell.get_average_damages(stats) # 0.4 * (10 + 20) / 2 + 0.6 * (50 + 70) / 2
+
+        self.assertAlmostEqual(damage_bonus, 42.0)
+
+    def test_damage_too_much_crit_chance(self):
+        stats = Stats()
+        spell = Spell()
+
+        spell.set_base_damages(Characteristics.STRENGTH, {'min': 10, 'max': 20, 'crit_min': 100, 'crit_max': 110})
+        spell.set_crit_chance(0.8)
+        stats.set_bonus_crit_chance(0.9)
+        damage = spell.get_average_damages(stats) # 0 * (10 + 20) / 2 + 1 * (100 + 110) / 2
+
+        self.assertAlmostEqual(damage, 105.0)
+
+    def test_damage_multi_caracteristics(self):
+        stats = Stats()
+        spell = Spell()
+
+        spell.set_base_damages(Characteristics.INTELLIGENCE, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
+        spell.set_base_damages(Characteristics.LUCK, {'min': 20, 'max': 30, 'crit_min': 20, 'crit_max': 30})
+        spell.set_base_damages(Characteristics.STRENGTH, {'min': 30, 'max': 40, 'crit_min': 30, 'crit_max': 40})
+        stats.set_characteristic(Characteristics.INTELLIGENCE, 100)
+        stats.set_characteristic(Characteristics.LUCK, 200)
+
+        damage = spell.get_average_damages(stats) # 15 * 2 + 25 * 3 + 35 * 1
+
+        self.assertAlmostEqual(damage, 140.0)
+
+    def test_damage_melee(self):
+        stats = Stats()
+        spell = Spell()
+
+        spell.set_melee(True)
+        spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
+        stats.set_damage(Damages.SPELL, 100)
+        stats.set_damage(Damages.WEAPON_POWER, 300)
+
+        damage = spell.get_average_damages(stats) # 15 * 4
+
+        self.assertAlmostEqual(damage, 60.0)
+
+    def test_neutral_damage(self):
+        stats = Stats()
+        spell = Spell()
+
+        spell.set_base_damages(Characteristics.NEUTRAL, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
+        stats.set_characteristic(Characteristics.STRENGTH, 200)
+        stats.set_characteristic(Characteristics.INTELLIGENCE, 100)
+
+        damage = spell.get_average_damages(stats) # 15 * 3
+
+        self.assertAlmostEqual(damage, 45.0)
 
 
 if __name__ == '__main__':

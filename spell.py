@@ -8,7 +8,7 @@ from stats import Characteristics, Stats
 class Spell():
     def __init__(self, from_scratch=True) -> None:
         self.base_damages: Dict[Characteristics, Dict] = {}
-        self.pa = 0
+        self.pa = 1
         self.crit_chance = 0.0
         self.uses_per_target = -1
         self.uses_per_turn = -1
@@ -27,12 +27,12 @@ class Spell():
         average_damage_crit = 0.0
 
         for characteristic in Characteristics:
-            min_damage = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, self.is_melee)
-            max_damage = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, self.is_melee)
+            min_damage = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, is_melee=self.is_melee)
+            max_damage = compute_damage(self.base_damages[characteristic]['max'], stats, characteristic, is_melee=self.is_melee)
             average_damage += (min_damage + max_damage) / 2
 
-            min_damage_crit = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, self.is_melee, is_crit=True)
-            max_damage_crit = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, self.is_melee, is_crit=True)
+            min_damage_crit = compute_damage(self.base_damages[characteristic]['crit_min'], stats, characteristic, is_melee=self.is_melee, is_crit=True)
+            max_damage_crit = compute_damage(self.base_damages[characteristic]['crit_max'], stats, characteristic, is_melee=self.is_melee, is_crit=True)
             average_damage_crit += (min_damage_crit + max_damage_crit) / 2
 
         final_crit_chance = self.crit_chance + stats.bonus_crit_chance
@@ -120,7 +120,7 @@ class Spell():
         if not (isinstance(is_melee, bool) or (isinstance(is_melee, int) and is_melee in [0, 1])):
             raise TypeError(f"is_melee is not a bool ('{is_melee}' of type '{type(is_melee)}' given instead).")
         
-        self.is_melee = bool(self.is_melee)
+        self.is_melee = bool(is_melee)
 
 
     def get_name(self):
