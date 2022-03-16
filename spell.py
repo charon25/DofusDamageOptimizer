@@ -76,6 +76,7 @@ class Spell():
     def set_crit_chance(self, crit_chance):
         if not (isinstance(crit_chance, float) or isinstance(crit_chance, int)):
             raise TypeError(f"Crit chance is not a float ('{crit_chance}' of type '{type(crit_chance)}' given instead).")
+
         if not (0.0 <= crit_chance <= 1.0):
             raise ValueError(f"Crit chance should be between 0 and 1 inclusive ('{crit_chance}' given instead).")
 

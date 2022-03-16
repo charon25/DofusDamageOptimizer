@@ -28,6 +28,7 @@ class Stats:
     def __init__(self) -> None:
         self.characteristics: Dict[Characteristics, int] = {}
         self.damages: Dict[Characteristics, int] = {}
+        self.bonus_crit_chance = 0.0
         self.name = ''
 
         self._fill_empty_dicts()
@@ -85,6 +86,18 @@ class Stats:
         self.damages[damage] = value
 
 
+    def get_bonus_crit_chance(self):
+        return self.bonus_crit_chance
+    
+    def set_bonus_crit_chance(self, bonus_crit_chance):
+        if not (isinstance(bonus_crit_chance, float) or isinstance(bonus_crit_chance, int)):
+            raise TypeError(f"Bonus crit chance is not a float ('{bonus_crit_chance}' of type '{type(bonus_crit_chance)}' given instead).")
+
+        if not (0.0 <= bonus_crit_chance <= 1.0):
+            raise ValueError(f"Bonus crit chance should be between 0 and 1 inclusive ('{bonus_crit_chance}' given instead).")
+
+        self.bonus_crit_chance = float(bonus_crit_chance)
+
     def get_name(self):
         return self.name
     
@@ -94,7 +107,7 @@ class Stats:
 
     @classmethod
     def check_json_validity(cls, json_data):
-        for key in ('characteristics', 'damages', 'name'):
+        for key in ('characteristics', 'damages', 'name', 'bonus_crit_chance'):
             if not key in json_data:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
 
@@ -124,5 +137,6 @@ class Stats:
             stats.set_damage(damage, json_data['damages'][damage])
         
         stats.set_name(json_data['name'])
+        stats.set_bonus_crit_chance(json_data['bonus_crit_chance'])
 
         return stats
