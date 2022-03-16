@@ -50,7 +50,7 @@ class TestSpell(unittest.TestCase):
 
     def test_create_from_file(self):
         filepath = 'test_spell.json'
-        # Check if the file still exists
+        # Check if the file still exists and is accessible
         assert os.path.isfile(filepath) and os.access(filepath, os.R_OK)
         spell = Spell.from_file(filepath)
 
