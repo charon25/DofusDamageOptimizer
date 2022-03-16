@@ -31,6 +31,7 @@ class Stats:
         self.damages: Dict[Characteristics, int] = {}
         self.bonus_crit_chance = 0.0
         self.name = ''
+        self.short_name = ''
 
         self._fill_empty_dicts()
     
@@ -40,6 +41,16 @@ class Stats:
         
         for damage in Damages:
             self.damages[damage] = 0
+
+    def save_to_file(self, filepath):
+        json_valid_data = {
+            'characteristics': self.characteristics,
+            'damages': self.damages,
+            'bonus_crit_chance': self.bonus_crit_chance,
+            'name': self.name,
+            'short_name': self.short_name
+        }
+        json.dump(json_valid_data, open(filepath, 'w', encoding='utf-8'))
 
 
     def __add__(self, other: 'Stats'):
@@ -129,9 +140,16 @@ class Stats:
         self.name = str(name)
 
 
+    def get_short_name(self):
+        return self.short_name
+    
+    def set_short_name(self, short_name):
+        self.short_name = str(short_name)
+
+
     @classmethod
     def check_json_validity(cls, json_data):
-        for key in ('characteristics', 'damages', 'name', 'bonus_crit_chance'):
+        for key in ('characteristics', 'damages', 'name', 'bonus_crit_chance', 'short_name'):
             if not key in json_data:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
 
@@ -140,7 +158,7 @@ class Stats:
                 raise KeyError(f"JSON string 'characteristics' array does not contains '{characteristic}'.")
 
         if json_data['characteristics'][Characteristics.NEUTRAL] != json_data['characteristics'][Characteristics.STRENGTH]:
-            raise ValueError("Neutral and Strength caracteristics have to be equal.")
+            raise ValueError("Neutral and Strength characteristics have to be equal.")
 
         for damage in Damages:
             if not damage in json_data['damages']:
@@ -160,7 +178,14 @@ class Stats:
         for damage in Damages:
             stats.set_damage(damage, json_data['damages'][damage])
         
-        stats.set_name(json_data['name'])
         stats.set_bonus_crit_chance(json_data['bonus_crit_chance'])
+        stats.set_name(json_data['name'])
+        stats.set_short_name(json_data['short_name'])
 
         return stats
+
+    @classmethod
+    def from_file(cls, filepath):
+        with open(filepath, 'r', encoding='utf-8') as fi:
+            json_string = fi.read()
+        return Stats.from_json_string(json_string)

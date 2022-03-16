@@ -14,6 +14,7 @@ class Spell():
         self.uses_per_turn = -1
         self.is_melee = False
         self.name = ''
+        self.short_name = ''
 
         if from_scratch:
             self._fill_empty_dict()
@@ -41,6 +42,19 @@ class Spell():
 
         return (1 - final_crit_chance) * average_damage + final_crit_chance * average_damage_crit
 
+    
+    def save_to_file(self, filepath):
+        json_valid_data = {
+            'base_damages': self.base_damages,
+            'pa': self.pa,
+            'crit_chance': self.crit_chance,
+            'uses_per_target': self.uses_per_target,
+            'uses_per_turn': self.uses_per_turn,
+            'is_melee': self.is_melee,
+            'name': self.name,
+            'short_name': self.short_name
+        }
+        json.dump(json_valid_data, open(filepath, 'w', encoding='utf-8'))
 
 
     def get_pa(self):
@@ -130,10 +144,17 @@ class Spell():
         self.name = str(name)
 
 
+    def get_short_name(self):
+        return self.short_name
+    
+    def set_short_name(self, short_name):
+        self.short_name = str(short_name)
+
+
 
     @classmethod
     def check_json_validity(cls, json_data):
-        for key in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_melee', 'name'):
+        for key in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_melee', 'name', 'short_name'):
             if not key in json_data:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
         
@@ -149,9 +170,18 @@ class Spell():
         spell = Spell(from_scratch=False)
         for characteristic in Characteristics:
             spell.set_base_damages(characteristic, json_data['base_damages'][characteristic])
+        spell.set_pa(json_data['pa'])
         spell.set_crit_chance(json_data['crit_chance'])
         spell.set_uses_per_target(json_data['uses_per_target'])
         spell.set_uses_per_turn(json_data['uses_per_turn'])
         spell.set_melee(json_data['is_melee'])
+        spell.set_name(json_data['name'])
+        spell.set_short_name(json_data['short_name'])
 
         return spell
+
+    @classmethod
+    def from_file(cls, filepath):
+        with open(filepath, 'r', encoding='utf-8') as fi:
+            json_string = fi.read()
+        return Spell.from_json_string(json_string)

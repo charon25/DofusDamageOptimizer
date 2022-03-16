@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from spell import Spell
@@ -41,11 +42,19 @@ class TestSpell(unittest.TestCase):
             Spell.from_json_string(json_missing_one_characteristic)
 
     def test_create_from_valid_json(self):
-        valid_json_string = '{{"pa": 1, "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": false, "base_damages": {0}}}'.format(
+        valid_json_string = '{{"short_name": "sn", "pa": 1, "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": false, "base_damages": {0}}}'.format(
             {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics}
         ).replace("'", '"')
 
         Spell.from_json_string(valid_json_string)
+
+    def test_create_from_file(self):
+        filepath = 'test_spell.json'
+        # Check if the file still exists
+        assert os.path.isfile(filepath) and os.access(filepath, os.R_OK)
+        spell = Spell.from_file(filepath)
+
+        self.assertEqual(spell.get_name(), 'test spell')
     
     def test_get_base_damages(self):
         spell = Spell()
@@ -190,7 +199,7 @@ class TestSpell(unittest.TestCase):
 
         self.assertAlmostEqual(damage, 105.0)
 
-    def test_damage_multi_caracteristics(self):
+    def test_damage_multi_characteristics(self):
         stats = Stats()
         spell = Spell()
 

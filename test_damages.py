@@ -20,7 +20,7 @@ class TestDamages(unittest.TestCase):
         self.assertEqual(damage_spell_crit, 10)
         self.assertEqual(damage_melee_crit, 10)
     
-    def test_only_caracteristic_multiplier(self):
+    def test_only_characteristic_multiplier(self):
         stats = Stats()
 
         stats.set_characteristic(Characteristics.AGILITY, 100)
@@ -50,7 +50,7 @@ class TestDamages(unittest.TestCase):
         self.assertEqual(damage2, 29)
         self.assertEqual(damage3, 22)
 
-    def test_caracteristic_and_flat_damages(self):
+    def test_characteristic_and_flat_damages(self):
         stats = Stats()
 
         stats.set_characteristic(Characteristics.LUCK, 200)
@@ -79,13 +79,13 @@ class TestDamages(unittest.TestCase):
         damage_melee = compute_damage(10, stats, Characteristics.STRENGTH, is_melee=True) # 10 * (1 + 300 / 100)
 
         stats.set_characteristic(Characteristics.STRENGTH, 50)
-        damage_spell_with_caracteristic = compute_damage(10, stats, Characteristics.STRENGTH, is_melee=False) # 10 * (1 + 50 / 100)
-        damage_melee_with_caracteristic = compute_damage(10, stats, Characteristics.STRENGTH, is_melee=True) # 10 * (1 + (50 + 300) / 100)
+        damage_spell_with_characteristic = compute_damage(10, stats, Characteristics.STRENGTH, is_melee=False) # 10 * (1 + 50 / 100)
+        damage_melee_with_characteristic = compute_damage(10, stats, Characteristics.STRENGTH, is_melee=True) # 10 * (1 + (50 + 300) / 100)
 
         self.assertEqual(damage_spell, 10)
         self.assertEqual(damage_melee, 40)
-        self.assertEqual(damage_spell_with_caracteristic, 15)
-        self.assertEqual(damage_melee_with_caracteristic, 45)
+        self.assertEqual(damage_spell_with_characteristic, 15)
+        self.assertEqual(damage_melee_with_characteristic, 45)
 
     def test_final_damages(self):
         stats = Stats()

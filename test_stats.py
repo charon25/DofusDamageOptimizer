@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from stats import Damages, Characteristics, Stats
@@ -26,9 +27,10 @@ class TestStats(unittest.TestCase):
         json_missing_damages_field = '{"bonus_crit_chance": 0, "name": "", "characteristics": {}}'
         json_missing_bonus_crit_chance_field = '{"name": "", "damages": {}, "characteristics": {}}'
         json_missing_name_field = '{"bonus_crit_chance": 0, "damages": {}, "characteristics": {}}'
+        json_missing_short_name_field = '{"name": "", "bonus_crit_chance": 0, "damages": {}, "characteristics": {}}'
         json_missing_characteristics = '{"bonus_crit_chance": 0, "damages": {}, "characteristics": {}, "name": ""}'
         # Double { and } because of .format
-        json_missing_damages = '{{"bonus_crit_chance": 0, "name": "", "damages": {{}}, "characteristics": {0}}}'.format({characteristic.value: 0 for characteristic in Characteristics}).replace("'", '"')
+        json_missing_damages = '{{"short_name": "sn", "bonus_crit_chance": 0, "name": "", "damages": {{}}, "characteristics": {0}}}'.format({characteristic.value: 0 for characteristic in Characteristics}).replace("'", '"')
 
         with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_both_fields)
@@ -39,6 +41,8 @@ class TestStats(unittest.TestCase):
         with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_name_field)
         with self.assertRaises(KeyError):
+            Stats.from_json_string(json_missing_short_name_field)
+        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_damages_field)
         with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_characteristics)
@@ -46,7 +50,7 @@ class TestStats(unittest.TestCase):
             Stats.from_json_string(json_missing_damages)
 
     def test_create_from_valid_json(self):
-        valid_json_string = '{{"bonus_crit_chance": 0, "name": "name", "damages": {0}, "characteristics": {1}}}'.format(
+        valid_json_string = '{{"short_name": "sn", "bonus_crit_chance": 0, "name": "name", "damages": {0}, "characteristics": {1}}}'.format(
             {damage.value: 0 for damage in Damages},
             {characteristic.value: 0 for characteristic in Characteristics}
         ).replace("'", '"')
@@ -54,13 +58,21 @@ class TestStats(unittest.TestCase):
         Stats.from_json_string(valid_json_string)
 
     def test_different_neutral_strength(self):
-        json_string = '{{"bonus_crit_chance": 0, "name": "", "damages": {0}, "characteristics": {1}}}'.format(
+        json_string = '{{"short_name": "sn", "bonus_crit_chance": 0, "name": "", "damages": {0}, "characteristics": {1}}}'.format(
             {damage.value: 0 for damage in Damages},
             {characteristic.value: (100 if characteristic == Characteristics.NEUTRAL else 0) for characteristic in Characteristics}
         ).replace("'", '"')
 
         with self.assertRaises(ValueError):
             Stats.from_json_string(json_string)
+
+    def test_create_from_file(self):
+        filepath = 'test_stats.json'
+        # Check if the file still exists
+        assert os.path.isfile(filepath) and os.access(filepath, os.R_OK)
+        stats = Stats.from_file(filepath)
+
+        self.assertEqual(stats.get_name(), 'test stats')
     
     def test_get_characteristic(self):
         stats = Stats()

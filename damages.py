@@ -6,7 +6,7 @@ def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, i
     if is_melee:
         power += stats.get_damage(Damages.WEAPON_POWER)
 
-    caracteristic_multiplier = 1 + (stats.get_characteristic(characteristic) + power) / 100
+    characteristic_multiplier = 1 + (stats.get_characteristic(characteristic) + power) / 100
 
     flat_damages = stats.get_damage(Damages.BASIC) + stats.get_damage(Damages(characteristic.value))
     if is_crit:
@@ -19,4 +19,4 @@ def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, i
         final_multiplier += stats.get_damage(Damages.SPELL) / 100
 
     # Game rounds down the damage
-    return int((base_damage * caracteristic_multiplier + flat_damages) * final_multiplier)
+    return int((base_damage * characteristic_multiplier + flat_damages) * final_multiplier)
