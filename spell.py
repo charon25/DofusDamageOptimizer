@@ -45,6 +45,31 @@ class Spell():
         return (1 - final_crit_chance) * average_damage + final_crit_chance * average_damage_crit
 
 
+    def get_max_uses_single_target(self, max_used_pa):
+        if not isinstance(max_used_pa, int):
+            raise TypeError(f"Max used pa is not an int ('{max_used_pa}' of type '{type(max_used_pa)}' given instead).")
+        
+        if max_used_pa < 0:
+            raise ValueError(f"Max used pa should be non negative ('{max_used_pa}' given instead).")
+
+        if self.uses_per_target == -1:
+            return max_used_pa // self.pa
+        else:
+            return min(max_used_pa // self.pa, self.uses_per_target)
+
+    def get_max_uses_multiple_targets(self, max_used_pa):
+        if not isinstance(max_used_pa, int):
+            raise TypeError(f"Max used pa is not an int ('{max_used_pa}' of type '{type(max_used_pa)}' given instead).")
+        
+        if max_used_pa < 0:
+            raise ValueError(f"Max used pa should be non negative ('{max_used_pa}' given instead).")
+
+        if self.uses_per_turn == -1:
+            return max_used_pa // self.pa
+        else:
+            return min(max_used_pa // self.pa, self.uses_per_turn)
+
+
     def save_to_file(self, filepath):
         json_valid_data = {
             'base_damages': self.base_damages,

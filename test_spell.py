@@ -281,6 +281,34 @@ class TestSpell(unittest.TestCase):
 
         self.assertAlmostEqual(damage, 45.0)
 
+    def test_max_uses_single_target(self):
+        spell = Spell()
+        spell.set_pa(4)
+        max_used_pa = 10
+
+        spell.set_uses_per_target(-1) # Unlimited uses per target
+        self.assertEqual(spell.get_max_uses_single_target(max_used_pa), 2) # 10 // 4
+
+        spell.set_uses_per_target(1) # 1 use per target
+        self.assertEqual(spell.get_max_uses_single_target(max_used_pa), 1) # min(1, 10 // 4)
+
+        spell.set_uses_per_target(3) # 3 uses per target
+        self.assertEqual(spell.get_max_uses_single_target(max_used_pa), 2) # min(3, 10 // 4)
+
+    def test_max_uses_multiple_targets(self):
+        spell = Spell()
+        spell.set_pa(4)
+        max_used_pa = 10
+
+        spell.set_uses_per_turn(-1) # Unlimited uses per target
+        self.assertEqual(spell.get_max_uses_multiple_targets(max_used_pa), 2) # 10 // 4
+
+        spell.set_uses_per_turn(1) # 1 use per target
+        self.assertEqual(spell.get_max_uses_multiple_targets(max_used_pa), 1) # min(1, 10 // 4)
+
+        spell.set_uses_per_turn(3) # 3 uses per target
+        self.assertEqual(spell.get_max_uses_multiple_targets(max_used_pa), 2) # min(3, 10 // 4)
+
 
 if __name__ == '__main__':
     unittest.main()
