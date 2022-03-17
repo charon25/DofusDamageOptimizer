@@ -26,9 +26,9 @@ class TestSpell(unittest.TestCase):
     def test_create_from_incomplete_json(self):
         json_missing_all = '{}'
         json_missing_scalar_parameter = '{"base_damages": {}}'
-        json_missing_base_damages = '{"name": "", "pa": 1, "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true}'
+        json_missing_base_damages = '{"short_name": "sn", "name": "name", "pa": 1, "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true}'
         # Double { and } because of .format
-        json_missing_one_characteristic = '{{"pa": 1, "name": "", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true, "base_damages": {0}}}'.format(
+        json_missing_one_characteristic = '{{"pa": 1, "short_name": "sn", "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true, "base_damages": {0}}}'.format(
             {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics if characteristic != Characteristics.LUCK}
         ).replace("'", '"')
 

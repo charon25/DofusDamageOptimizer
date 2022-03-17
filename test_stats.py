@@ -23,14 +23,14 @@ class TestStats(unittest.TestCase):
 
     def test_create_from_incomplete_json(self):
         json_missing_both_fields = '{}'
-        json_missing_characteristics_field = '{"name": "", "damages": {}}'
-        json_missing_damages_field = '{"bonus_crit_chance": 0, "name": "", "characteristics": {}}'
-        json_missing_bonus_crit_chance_field = '{"name": "", "damages": {}, "characteristics": {}}'
-        json_missing_name_field = '{"bonus_crit_chance": 0, "damages": {}, "characteristics": {}}'
-        json_missing_short_name_field = '{"name": "", "bonus_crit_chance": 0, "damages": {}, "characteristics": {}}'
+        json_missing_characteristics_field = '{"name": "name", "damages": {}}'
+        json_missing_damages_field = '{"short_name": "sn", "bonus_crit_chance": 0, "name": "name", "characteristics": {}}'
+        json_missing_bonus_crit_chance_field = '{"short_name": "sn", "name": "name", "damages": {}, "characteristics": {}}'
+        json_missing_name_field = '{"short_name": "sn", "bonus_crit_chance": 0, "damages": {}, "characteristics": {}}'
+        json_missing_short_name_field = '{"name": "name", "bonus_crit_chance": 0, "damages": {}, "characteristics": {}}'
         json_missing_characteristics = '{"bonus_crit_chance": 0, "damages": {}, "characteristics": {}, "name": ""}'
         # Double { and } because of .format
-        json_missing_damages = '{{"short_name": "sn", "bonus_crit_chance": 0, "name": "", "damages": {{}}, "characteristics": {0}}}'.format({characteristic.value: 0 for characteristic in Characteristics}).replace("'", '"')
+        json_missing_damages = '{{"short_name": "sn", "bonus_crit_chance": 0, "name": "name", "damages": {{}}, "characteristics": {0}}}'.format({characteristic.value: 0 for characteristic in Characteristics}).replace("'", '"')
 
         with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_both_fields)
@@ -150,6 +150,7 @@ class TestStats(unittest.TestCase):
     def test_valid_sum(self):
         stats1 = Stats()
         stats1.set_characteristic(Characteristics.AGILITY, 40)
+        stats1.set_name('stats1')
 
         stats2 = Stats()
         stats2.set_characteristic(Characteristics.AGILITY, 50)

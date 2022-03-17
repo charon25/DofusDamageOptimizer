@@ -141,6 +141,9 @@ class Spell():
         return self.name
     
     def set_name(self, name):
+        if len(str(name)) == 0:
+            raise ValueError('Name cannnot be an empty string.')
+
         self.name = str(name)
 
 
@@ -148,6 +151,9 @@ class Spell():
         return self.short_name
     
     def set_short_name(self, short_name):
+        if len(str(short_name)) == 0:
+            raise ValueError('Short name cannnot be an empty string.')
+
         self.short_name = str(short_name)
 
 
@@ -165,7 +171,7 @@ class Spell():
     @classmethod
     def from_json_string(cls, json_string):
         json_data = json.loads(json_string)
-        cls.check_json_validity(json_data)
+        Spell.check_json_validity(json_data)
 
         spell = Spell(from_scratch=False)
         for characteristic in Characteristics:
