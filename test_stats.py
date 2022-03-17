@@ -67,7 +67,7 @@ class TestStats(unittest.TestCase):
             Stats.from_json_string(json_string)
 
     def test_create_from_file(self):
-        filepath = 'test_stats.json'
+        filepath = 'test_files\\test_stats.json'
         # Check if the file still exists and is accessible
         assert os.path.isfile(filepath) and os.access(filepath, os.R_OK)
         stats = Stats.from_file(filepath)
