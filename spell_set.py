@@ -8,12 +8,12 @@ from spell import Spell
 
 class SpellSet:
     def __init__(self):
-        self.spells: List[Spell] = {}
+        self.spells: List[Spell] = []
         self.name = ''
         self.short_name = ''
 
     def add_spell(self, spell: Spell):
-        self.spells.add(spell)
+        self.spells.append(spell)
 
     def add_spell_from_file(self, spell_file):
         self.add_spell(Spell.from_file(spell_file))
@@ -40,7 +40,8 @@ class SpellSet:
             'short_name': self.short_name
         }
 
-        json.dump(json_valid_data, open(filepath, 'w', encoding='utf-8'))
+        with open(filepath, 'w', encoding='utf-8') as fo:
+            json.dump(json_valid_data, fo)
 
 
     def __len__(self):
@@ -96,3 +97,15 @@ class SpellSet:
 
         spell_set.set_name(json_data['name'])
         spell_set.set_short_name(json_data['name'])
+
+        return spell_set
+
+    @classmethod
+    def from_file(cls, filepath):
+        if not (os.path.isfile(filepath) and os.access(filepath, os.R_OK)):
+            raise FileNotFoundError(f"Cannot create spell from file {filepath} : file not found or innaccessible.")
+
+        with open(filepath, 'r', encoding='utf-8') as fi:
+            json_string = fi.read()
+
+        return SpellSet.from_json_string(json_string)
