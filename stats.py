@@ -51,7 +51,9 @@ class Stats:
             'name': self.name,
             'short_name': self.short_name
         }
-        json.dump(json_valid_data, open(filepath, 'w', encoding='utf-8'))
+
+        with open(filepath, 'w', encoding='utf-8') as fo:
+            json.dump(json_valid_data, fo)
 
 
     def __add__(self, other: 'Stats'):

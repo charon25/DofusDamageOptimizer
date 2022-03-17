@@ -24,7 +24,7 @@ class TestSpell(unittest.TestCase):
             Spell.from_json_string(invalid_json_string)
 
     def test_create_from_incomplete_json(self):
-        json_missing_all = '{}'
+        json_missing_all_fields = '{}'
         json_missing_scalar_parameter = '{"base_damages": {}}'
         json_missing_base_damages = '{"short_name": "sn", "name": "name", "pa": 1, "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true}'
         # Double { and } because of .format
@@ -33,7 +33,7 @@ class TestSpell(unittest.TestCase):
         ).replace("'", '"')
 
         with self.assertRaises(KeyError):
-            Spell.from_json_string(json_missing_all)
+            Spell.from_json_string(json_missing_all_fields)
         with self.assertRaises(KeyError):
             Spell.from_json_string(json_missing_scalar_parameter)
         with self.assertRaises(KeyError):
@@ -145,6 +145,21 @@ class TestSpell(unittest.TestCase):
 
         spell.set_name(42)
         self.assertEqual(spell.get_name(), "42")
+
+        with self.assertRaises(ValueError):
+            spell.set_name('')
+
+    def test_set_short_name(self):
+        spell = Spell()
+
+        spell.set_short_name("name")
+        self.assertEqual(spell.get_short_name(), "name")
+
+        spell.set_short_name(42)
+        self.assertEqual(spell.get_short_name(), "42")
+
+        with self.assertRaises(ValueError):
+            spell.set_short_name('')
 
     def test_no_damage(self):
         stats = Stats()

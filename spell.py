@@ -55,7 +55,9 @@ class Spell():
             'name': self.name,
             'short_name': self.short_name
         }
-        json.dump(json_valid_data, open(filepath, 'w', encoding='utf-8'))
+
+        with open(filepath, 'w', encoding='utf-8') as fo:
+            json.dump(json_valid_data, fo)
 
 
     def get_pa(self):

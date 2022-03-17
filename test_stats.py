@@ -22,7 +22,7 @@ class TestStats(unittest.TestCase):
             Stats.from_json_string(invalid_json_string)
 
     def test_create_from_incomplete_json(self):
-        json_missing_both_fields = '{}'
+        json_missing_all_fields = '{}'
         json_missing_characteristics_field = '{"name": "name", "damages": {}}'
         json_missing_damages_field = '{"short_name": "sn", "bonus_crit_chance": 0, "name": "name", "characteristics": {}}'
         json_missing_bonus_crit_chance_field = '{"short_name": "sn", "name": "name", "damages": {}, "characteristics": {}}'
@@ -33,7 +33,7 @@ class TestStats(unittest.TestCase):
         json_missing_damages = '{{"short_name": "sn", "bonus_crit_chance": 0, "name": "name", "damages": {{}}, "characteristics": {0}}}'.format({characteristic.value: 0 for characteristic in Characteristics}).replace("'", '"')
 
         with self.assertRaises(KeyError):
-            Stats.from_json_string(json_missing_both_fields)
+            Stats.from_json_string(json_missing_all_fields)
         with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_characteristics_field)
         with self.assertRaises(KeyError):
@@ -125,6 +125,21 @@ class TestStats(unittest.TestCase):
 
         stats.set_name(42)
         self.assertEqual(stats.get_name(), "42")
+
+        with self.assertRaises(ValueError):
+            stats.set_name('')
+
+    def test_set_short_name(self):
+        stats = Stats()
+
+        stats.set_short_name("name")
+        self.assertEqual(stats.get_short_name(), "name")
+
+        stats.set_short_name(42)
+        self.assertEqual(stats.get_short_name(), "42")
+
+        with self.assertRaises(ValueError):
+            stats.set_short_name('')
     
 
     def test_valid_simple_addition(self):
