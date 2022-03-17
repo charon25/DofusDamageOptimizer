@@ -126,6 +126,77 @@ class TestDamages(unittest.TestCase):
         self.assertEqual(damage_spell_crit, 214)
         self.assertEqual(damage_melee_crit, 272)
 
+    def get_real_stats(self):
+        stats = Stats()
+
+        stats.set_characteristic(Characteristics.AGILITY, 779)
+        stats.set_characteristic(Characteristics.LUCK, 86)
+        stats.set_characteristic(Characteristics.STRENGTH, 101)
+        stats.set_characteristic(Characteristics.INTELLIGENCE, 81)
+
+        stats.set_damage(Damages.POWER, 121)
+        stats.set_damage(Damages.BASIC, 17)
+        stats.set_damage(Damages.NEUTRAL, 29)
+        stats.set_damage(Damages.EARTH, 31)
+        stats.set_damage(Damages.FIRE, 7)
+        stats.set_damage(Damages.WATER, 7)
+        stats.set_damage(Damages.AIR, 49)
+        stats.set_damage(Damages.SPELL, 7)
+
+        return stats
+
+    # Done with the real game
+    def test_real_values_spell1(self):
+        stats = self.get_real_stats()
+
+        base_damages = [20, 22, 23, 25]
+        is_crit = [False, False, True, True]
+
+        damages = [compute_damage(base_damages[i], stats, Characteristics.AGILITY, is_melee=False, is_crit=is_crit[i]) for i in range(4)]
+
+        self.assertListEqual(damages, [284, 306, 316, 338])
+
+    def test_real_values_spell2(self):
+        stats = self.get_real_stats()
+
+        base_damages = [32, 35, 36, 39]
+        is_crit = [False, False, True, True]
+
+        damages = [compute_damage(base_damages[i], stats, Characteristics.AGILITY, is_melee=False, is_crit=is_crit[i]) for i in range(4)]
+
+        self.assertListEqual(damages, [413, 445, 455, 487])
+
+    def test_real_values_spell3(self):
+        stats = self.get_real_stats()
+
+        base_damages_air = [24, 28, 29, 33]
+        base_damages_fire = [24, 28, 29, 33]
+        is_crit = [False, False, True, True]
+
+        damages = [
+            compute_damage(base_damages_air[i], stats, Characteristics.AGILITY, is_melee=False, is_crit=is_crit[i])
+            + compute_damage(base_damages_fire[i], stats, Characteristics.INTELLIGENCE, is_melee=False, is_crit=is_crit[i])
+            for i in range(4)
+        ]
+
+        self.assertListEqual(damages, [429, 485, 498, 554])
+    
+    def test_real_value_melee(self):
+        stats = self.get_real_stats()
+
+        base_damages = [7, 13, 12, 18]
+        is_crit = [False, False, True, True]
+
+        damages = [
+            compute_damage(base_damages[i], stats, Characteristics.AGILITY, is_melee=True, is_crit=is_crit[i])
+            + compute_damage(base_damages[i], stats, Characteristics.INTELLIGENCE, is_melee=True, is_crit=is_crit[i])
+            + compute_damage(base_damages[i], stats, Characteristics.LUCK, is_melee=True, is_crit=is_crit[i])
+            + compute_damage(base_damages[i], stats, Characteristics.NEUTRAL, is_melee=True, is_crit=is_crit[i])
+            for i in range(4)
+        ]
+
+        self.assertListEqual(damages, [294, 409, 390, 506])
+
 
 if __name__ == '__main__':
     unittest.main()
