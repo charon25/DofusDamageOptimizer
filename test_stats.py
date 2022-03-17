@@ -34,19 +34,12 @@ class TestStats(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_all_fields)
-        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_characteristics_field)
-        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_bonus_crit_chance_field)
-        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_name_field)
-        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_short_name_field)
-        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_damages_field)
-        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_characteristics)
-        with self.assertRaises(KeyError):
             Stats.from_json_string(json_missing_damages)
 
     def test_create_from_valid_json(self):
@@ -73,7 +66,7 @@ class TestStats(unittest.TestCase):
         stats = Stats.from_file(filepath)
 
         self.assertEqual(stats.get_name(), 'test stats')
-    
+
     def test_get_characteristic(self):
         stats = Stats()
 
@@ -81,7 +74,7 @@ class TestStats(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             stats.get_characteristic("string")
-    
+
     def test_set_characteristic(self):
         stats = Stats()
 
@@ -90,8 +83,8 @@ class TestStats(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             stats.set_characteristic("string", 0)
-        with self.assertRaises(TypeError):
             stats.set_characteristic(Characteristics.LUCK, "string")
+
         with self.assertRaises(ValueError):
             stats.set_characteristic(Characteristics.AGILITY, -100)
 
@@ -114,6 +107,7 @@ class TestStats(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             stats.set_bonus_crit_chance("string")
+
         with self.assertRaises(ValueError):
             stats.set_bonus_crit_chance(1.5)
 
@@ -140,7 +134,7 @@ class TestStats(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             stats.set_short_name('')
-    
+
 
     def test_valid_simple_addition(self):
         stats1 = Stats()
@@ -161,7 +155,7 @@ class TestStats(unittest.TestCase):
         self.assertEqual(stats3.get_damage(Damages.BASIC), 20 + 15)
         self.assertAlmostEqual(stats3.get_bonus_crit_chance(), 0.3 + 0.5)
         self.assertEqual(stats3.get_name(), "stats1")
-    
+
     def test_valid_sum(self):
         stats1 = Stats()
         stats1.set_characteristic(Characteristics.AGILITY, 40)
@@ -173,7 +167,7 @@ class TestStats(unittest.TestCase):
         stats3 = sum([stats1, stats2])
 
         self.assertEqual(stats3.get_characteristic(Characteristics.AGILITY), 40 + 50)
-    
+
     def test_invalid_sum(self):
         stats1 = Stats()
 

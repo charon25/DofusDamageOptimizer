@@ -35,11 +35,11 @@ class Stats:
         self.short_name = ''
 
         self._fill_empty_dicts()
-    
+
     def _fill_empty_dicts(self):
         for characteristic in Characteristics:
             self.characteristics[characteristic] = 0
-        
+
         for damage in Damages:
             self.damages[damage] = 0
 
@@ -59,7 +59,7 @@ class Stats:
     def __add__(self, other: 'Stats'):
         if not isinstance(other, Stats):
             raise TypeError(f"unsupported operand type(s) for +: 'Stats' and '{type(other)}'.")
-        
+
         result = Stats()
         for characteristic in Characteristics:
             if characteristic != Characteristics.NEUTRAL:
@@ -70,9 +70,9 @@ class Stats:
 
         result.set_bonus_crit_chance(self.get_bonus_crit_chance() + other.get_bonus_crit_chance())
         result.set_name(self.get_name())
-    
+
         return result
-    
+
     def __radd__(self, other):
         if other == 0:
             return self
@@ -89,7 +89,7 @@ class Stats:
     def set_characteristic(self, characteristic, value):
         if not isinstance(characteristic, Characteristics):
             raise TypeError(f"'{characteristic} is not a valid characteristic.")
-        
+
         if characteristic == Characteristics.NEUTRAL:
             raise TypeError('Neutral caracteritics cannot be changed on its own.')
 
@@ -126,7 +126,7 @@ class Stats:
 
     def get_bonus_crit_chance(self):
         return self.bonus_crit_chance
-    
+
     def set_bonus_crit_chance(self, bonus_crit_chance):
         if not (isinstance(bonus_crit_chance, float) or isinstance(bonus_crit_chance, int)):
             raise TypeError(f"Bonus crit chance is not a float ('{bonus_crit_chance}' of type '{type(bonus_crit_chance)}' given instead).")
@@ -138,7 +138,7 @@ class Stats:
 
     def get_name(self):
         return self.name
-    
+
     def set_name(self, name):
         if len(str(name)) == 0:
             raise ValueError('Name cannnot be an empty string.')
@@ -148,7 +148,7 @@ class Stats:
 
     def get_short_name(self):
         return self.short_name
-    
+
     def set_short_name(self, short_name):
         if len(str(short_name)) == 0:
             raise ValueError('Short name cannnot be an empty string.')
@@ -179,14 +179,14 @@ class Stats:
         Stats.check_json_validity(json_data)
 
         stats = Stats()
-        
+
         for characteristic in Characteristics:
             if characteristic != Characteristics.NEUTRAL:
                 stats.set_characteristic(characteristic, json_data['characteristics'][characteristic])
-        
+
         for damage in Damages:
             stats.set_damage(damage, json_data['damages'][damage])
-        
+
         stats.set_bonus_crit_chance(json_data['bonus_crit_chance'])
         stats.set_name(json_data['name'])
         stats.set_short_name(json_data['short_name'])

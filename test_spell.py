@@ -34,11 +34,8 @@ class TestSpell(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             Spell.from_json_string(json_missing_all_fields)
-        with self.assertRaises(KeyError):
             Spell.from_json_string(json_missing_scalar_parameter)
-        with self.assertRaises(KeyError):
             Spell.from_json_string(json_missing_base_damages)
-        with self.assertRaises(KeyError):
             Spell.from_json_string(json_missing_one_characteristic)
 
     def test_create_from_valid_json(self):
@@ -55,7 +52,7 @@ class TestSpell(unittest.TestCase):
         spell = Spell.from_file(filepath)
 
         self.assertEqual(spell.get_name(), 'test spell')
-    
+
     def test_get_base_damages(self):
         spell = Spell()
         empty_base_damages = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
@@ -64,7 +61,7 @@ class TestSpell(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             spell.get_base_damages("string")
-    
+
     def test_set_characteristic(self):
         spell = Spell()
         damage = {'min': 10, 'max': 20, 'crit_min': 12, 'crit_max': 22}
@@ -74,12 +71,12 @@ class TestSpell(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             spell.set_base_damages("string", damage)
-        with self.assertRaises(TypeError):
             spell.set_base_damages(Characteristics.STRENGTH, 0)
+            spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': "string", 'crit_max': 22})
+
         with self.assertRaises(KeyError):
             spell.set_base_damages(Characteristics.LUCK, {})
-        with self.assertRaises(TypeError):
-            spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': "string", 'crit_max': 22})
+
         with self.assertRaises(ValueError):
             spell.set_base_damages(Characteristics.AGILITY, {'min': -10, 'max': 20, 'crit_min': 12, 'crit_max': 22})
 
@@ -91,12 +88,13 @@ class TestSpell(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             spell.set_pa("string")
+
         with self.assertRaises(ValueError):
             spell.set_pa(0)
 
     def test_set_crit_chance(self):
         spell = Spell()
-        
+
         spell.set_crit_chance(0.5)
         self.assertEqual(spell.get_crit_chance(), 0.5)
         spell.set_crit_chance(1)
@@ -104,12 +102,13 @@ class TestSpell(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             spell.set_crit_chance("string")
+
         with self.assertRaises(ValueError):
             spell.set_crit_chance(1.5)
 
     def test_set_uses_per_target(self):
         spell = Spell()
-        
+
         spell.set_uses_per_target(-1)
         self.assertEqual(spell.get_uses_per_target(), -1)
         spell.set_uses_per_target(2)
@@ -117,14 +116,14 @@ class TestSpell(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             spell.set_uses_per_target("string")
+
         with self.assertRaises(ValueError):
             spell.set_uses_per_target(0)
-        with self.assertRaises(ValueError):
             spell.set_uses_per_target(-5)
 
     def test_set_uses_per_turn(self):
         spell = Spell()
-        
+
         spell.set_uses_per_turn(-1)
         self.assertEqual(spell.get_uses_per_turn(), -1)
         spell.set_uses_per_turn(2)
@@ -132,9 +131,9 @@ class TestSpell(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             spell.set_uses_per_turn("string")
+
         with self.assertRaises(ValueError):
             spell.set_uses_per_turn(0)
-        with self.assertRaises(ValueError):
             spell.set_uses_per_turn(-5)
 
     def test_set_name(self):
@@ -160,6 +159,35 @@ class TestSpell(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             spell.set_short_name('')
+
+    def test_set_po(self):
+        spell = Spell()
+
+        spell.set_po(1, 5)
+
+        self.assertEqual(spell.get_min_po(), 1)
+        self.assertEqual(spell.get_max_po(), 5)
+
+        spell.set_po(max_po=8)
+        self.assertEqual(spell.get_min_po(), 1)
+        self.assertEqual(spell.get_max_po(), 8)
+
+        spell.set_po(min_po=3)
+        self.assertEqual(spell.get_min_po(), 3)
+        self.assertEqual(spell.get_max_po(), 8)
+
+        spell.set_po(min_po=5, max_po=5)
+        self.assertEqual(spell.get_min_po(), 5)
+        self.assertEqual(spell.get_max_po(), 5)
+
+        with self.assertRaises(TypeError):
+            spell.set_po(min_po="string")
+            spell.set_po(max_po="string")
+
+        with self.assertRaises(ValueError):
+            spell.set_po(min_po=-5)
+            spell.set_po(max_po=-1)
+            spell.set_po(min_po = 5, max_po=4)
 
     def test_no_damage(self):
         stats = Stats()

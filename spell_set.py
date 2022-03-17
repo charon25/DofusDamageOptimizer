@@ -22,7 +22,7 @@ class SpellSet:
     def save_to_files(self, filepath, spell_dir: str=None):
         if spell_dir is None:
             spell_dir = os.path.dirname(filepath)
-        
+
         if not spell_dir.endswith('\\'):
             spell_dir += '\\'
 
@@ -59,7 +59,7 @@ class SpellSet:
 
     def get_name(self):
         return self.name
-    
+
     def set_name(self, name):
         if len(str(name)) == 0:
             raise ValueError('Name cannnot be an empty string.')
@@ -69,7 +69,7 @@ class SpellSet:
 
     def get_short_name(self):
         return self.short_name
-    
+
     def set_short_name(self, short_name):
         if len(str(short_name)) == 0:
             raise ValueError('Short name cannnot be an empty string.')

@@ -6,7 +6,7 @@ from stats import Damages, Characteristics, Stats
 
 
 class TestDamages(unittest.TestCase):
-    
+
     def test_no_stats(self):
         stats = Stats()
 
@@ -19,7 +19,7 @@ class TestDamages(unittest.TestCase):
         self.assertEqual(damage_melee_no_crit, 10)
         self.assertEqual(damage_spell_crit, 10)
         self.assertEqual(damage_melee_crit, 10)
-    
+
     def test_only_characteristic_multiplier(self):
         stats = Stats()
 
@@ -34,7 +34,7 @@ class TestDamages(unittest.TestCase):
         self.assertEqual(damage, 20)
         self.assertEqual(damage2, 25)
         self.assertEqual(damage3, 15)
-    
+
     def test_flat_damages(self):
         stats = Stats()
 
@@ -180,7 +180,7 @@ class TestDamages(unittest.TestCase):
         ]
 
         self.assertListEqual(damages, [429, 485, 498, 554])
-    
+
     def test_real_value_melee(self):
         stats = self.get_real_stats()
 

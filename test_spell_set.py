@@ -28,12 +28,10 @@ class TestStats(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             SpellSet.from_json_string(json_missing_all_fields)
-        with self.assertRaises(KeyError):
             SpellSet.from_json_string(json_missing_spells_field)
-        with self.assertRaises(KeyError):
             SpellSet.from_json_string(json_missing_name_field)
-        with self.assertRaises(KeyError):
             SpellSet.from_json_string(json_missing_short_name_field)
+
         with self.assertRaises(TypeError):
             SpellSet.from_json_string(json_spells_field_wrong_type)
 

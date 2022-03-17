@@ -14,12 +14,13 @@ class Spell():
         self.uses_per_target = -1
         self.uses_per_turn = -1
         self.is_melee = False
+        self.po = (-1, -1)
         self.name = ''
         self.short_name = ''
 
         if from_scratch:
             self._fill_empty_dict()
-    
+
     def _fill_empty_dict(self):
         for characteristic in Characteristics:
             self.base_damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
@@ -62,29 +63,29 @@ class Spell():
 
     def get_pa(self):
         return self.pa
-    
+
     def set_pa(self, pa):
         if not isinstance(pa, int):
             raise TypeError(f"PA count is not an int ('{pa}' of type '{type(pa)}' given instead).")
         if pa <= 0:
             raise ValueError(f"PA count should be a positive int ('{pa}' given instead).")
-        
+
         self.pa = pa
 
 
     def get_base_damages(self, characteristic):
         if not isinstance(characteristic, Characteristics):
             raise TypeError(f"'{characteristic} is not a valid characteristic.")
-        
+
         return self.base_damages[characteristic]
-    
+
     def set_base_damages(self, characteristic, base_damages):
         if not isinstance(characteristic, Characteristics):
             raise TypeError(f"'{characteristic} is not a valid characteristic.")
-        
+
         if not isinstance(base_damages, dict):
             raise TypeError(f"base_damages is not a dict ('{base_damages}' of type '{type(base_damages)}' given instead).")
-        
+
         for field in ('min', 'max', 'crit_min', 'crit_max'):
             if not field in base_damages:
                 raise KeyError(f"Field '{field}' missing in base_damages.")
@@ -92,7 +93,7 @@ class Spell():
                 raise TypeError(f"Field '{field}' is not an int ('{base_damages[field]}' of type '{type(base_damages[field])}' given instead).")
             if base_damages[field] < 0:
                 raise ValueError(f"Field '{field}' should be non negative ('{base_damages[field]}' given instead).")
-        
+
         self.base_damages[characteristic] = base_damages
 
 
@@ -117,7 +118,7 @@ class Spell():
             raise TypeError(f"Uses per target is not a int ('{uses_per_target}' of type '{type(uses_per_target)}' given instead).")
         if uses_per_target == 0 or uses_per_target < -1:
             raise ValueError(f"Uses per target should be -1 or a positive int ('{uses_per_target}' given instead).")
-        
+
         self.uses_per_target = uses_per_target
 
 
@@ -129,20 +130,42 @@ class Spell():
             raise TypeError(f"Uses per turn is not a int ('{uses_per_turn}' of type '{type(uses_per_turn)}' given instead).")
         if uses_per_turn == 0 or uses_per_turn < -1:
             raise ValueError(f"Uses per turn should be -1 or a positive int ('{uses_per_turn}' given instead).")
-        
+
         self.uses_per_turn = uses_per_turn
 
 
     def set_melee(self, is_melee):
         if not (isinstance(is_melee, bool) or (isinstance(is_melee, int) and is_melee in [0, 1])):
             raise TypeError(f"is_melee is not a bool ('{is_melee}' of type '{type(is_melee)}' given instead).")
-        
+
         self.is_melee = bool(is_melee)
+
+
+    def get_min_po(self):
+        return self.po[0]
+
+    def get_max_po(self):
+        return self.po[1]
+
+    def set_po(self, min_po=None, max_po=None):
+        if min_po is None:
+            min_po = self.get_min_po()
+
+        if max_po is None:
+            max_po = self.get_max_po()
+
+        if not (isinstance(min_po, int) and isinstance(max_po, int)):
+            raise TypeError(f"Minimum PO or maximum PO is not an int or None ('{min_po}' and '{max_po}' of types '{type(min_po)}' and '{type(max_po)}' given instead).")
+
+        if min_po < 0 or max_po < 0 or max_po < min_po:
+            raise ValueError(f"Minimum PO and maximum PO should be non negative and minimum should be <= than maximum ('{min_po}' and '{max_po}' given instead).")
+
+        self.po = (min_po, max_po)
 
 
     def get_name(self):
         return self.name
-    
+
     def set_name(self, name):
         if len(str(name)) == 0:
             raise ValueError('Name cannnot be an empty string.')
@@ -152,7 +175,7 @@ class Spell():
 
     def get_short_name(self):
         return self.short_name
-    
+
     def set_short_name(self, short_name):
         if len(str(short_name)) == 0:
             raise ValueError('Short name cannnot be an empty string.')
@@ -166,7 +189,7 @@ class Spell():
         for key in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_melee', 'name', 'short_name'):
             if not key in json_data:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
-        
+
         for characteristic in Characteristics:
             if not characteristic in json_data['base_damages']:
                 raise KeyError(f"JSON string 'base_damages' array does not contains '{characteristic}'.")
