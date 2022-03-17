@@ -114,6 +114,62 @@ class TestStats(unittest.TestCase):
         with self.assertRaises(ValueError):
             spell_set.set_short_name('')
 
+    def test_spell_list_single_target(self):
+        spell_set = SpellSet()
+        spell1 = Spell()
+        spell1.set_uses_per_target(2)
+        spell1.set_pa(4)
+
+        spell2 = Spell()
+        spell2.set_uses_per_target(1)
+        spell2.pa(4)
+
+        spell_set.add_spell(spell1)
+        spell_set.add_spell(spell2)
+
+        spell_list = spell_set.get_spell_list_single_target(10)
+
+        self.assertEqual(spell_list.count(spell1), 2)
+        self.assertEqual(spell_list.count(spell2), 1)
+
+    def test_spell_list_single_target(self):
+        spell_set = SpellSet()
+        spell1 = Spell()
+        spell1.set_uses_per_turn(2)
+        spell1.set_pa(4)
+
+        spell2 = Spell()
+        spell2.set_uses_per_turn(2)
+        spell2.pa(6)
+
+        spell_set.add_spell(spell1)
+        spell_set.add_spell(spell2)
+
+        spell_list = spell_set.get_spell_list_multiple_targets(10)
+
+        self.assertEqual(spell_list.count(spell1), 2)
+        self.assertEqual(spell_list.count(spell2), 1)
+
+    def test_spell_list_single_target(self):
+        spell_set = SpellSet()
+        spell1 = Spell()
+        spell1.set_uses_per_turn(5)
+        spell1.set_uses_per_target(5)
+        spell1.set_pa(1)
+
+        spell2 = Spell()
+        spell2.set_uses_per_turn(5)
+        spell2.set_uses_per_target(5)
+        spell2.set_pa(8)
+
+        spell_set.add_spell(spell1)
+        spell_set.add_spell(spell2)
+
+        spell_list = spell_set.get_spell_list_versatile(6)
+
+        self.assertEqual(spell_list.count(spell1), 1)
+        self.assertTrue(spell2 not in spell_list)
+
 
 if __name__ == '__main__':
     unittest.main()

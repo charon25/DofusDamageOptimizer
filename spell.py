@@ -14,7 +14,7 @@ class Spell():
         self.uses_per_target = -1
         self.uses_per_turn = -1
         self.is_melee = False
-        self.po = (-1, -1)
+        self.po = (0, 1024)
         self.name = ''
         self.short_name = ''
 

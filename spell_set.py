@@ -19,6 +19,34 @@ class SpellSet:
         self.add_spell(Spell.from_file(spell_file))
 
 
+    def get_spell_list_single_target(self, max_used_pa):
+        spell_list: List[Spell] = []
+
+        for spell in self.spells:
+            uses = spell.get_max_uses_single_target(max_used_pa)
+            spell_list.extend([self for _ in range(uses)])
+        
+        return spell_list
+
+    def get_spell_list_multiple_target(self, max_used_pa):
+        spell_list: List[Spell] = []
+
+        for spell in self.spells:
+            uses = spell.get_max_uses_multiple_targets(max_used_pa)
+            spell_list.extend([self for _ in range(uses)])
+        
+        return spell_list
+
+    def get_spell_list_versatile(self, max_used_pa):
+        if not isinstance(max_used_pa, int):
+            raise TypeError(f"Max used pa is not an int ('{max_used_pa}' of type '{type(max_used_pa)}' given instead).")
+        
+        if max_used_pa < 0:
+            raise ValueError(f"Max used pa should be non negative ('{max_used_pa}' given instead).")
+
+        return [spell for spell in self.spells if spell.get_pa() <= max_used_pa]
+
+
     def save_to_files(self, filepath, spell_dir: str=None):
         if spell_dir is None:
             spell_dir = os.path.dirname(filepath)
