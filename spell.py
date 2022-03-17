@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Dict
 
 from damages import compute_damage
@@ -42,7 +43,7 @@ class Spell():
 
         return (1 - final_crit_chance) * average_damage + final_crit_chance * average_damage_crit
 
-    
+
     def save_to_file(self, filepath):
         json_valid_data = {
             'base_damages': self.base_damages,
@@ -188,6 +189,10 @@ class Spell():
 
     @classmethod
     def from_file(cls, filepath):
+        if not (os.path.isfile(filepath) and os.access(filepath, os.R_OK)):
+            raise FileNotFoundError(f"Cannot create spell from file {filepath} : file not found or innaccessible.")
+
         with open(filepath, 'r', encoding='utf-8') as fi:
             json_string = fi.read()
+
         return Spell.from_json_string(json_string)
