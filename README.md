@@ -1,43 +1,54 @@
-## Commandes
+# Dofus Damage Optimizer
 
-### Générales
+This program is designed to help determine to best combinations of spells to use in each turn in the [Dofus MMORPG](https://www.dofus.com/en).
 
-Enregistrer : `s`
-Informations : `i`
-Définir options par défaut pour le calcul de dégâts : `def <param> <value>`
-Paramètres : `pa`, `pomin`, `pomax`, `t`
-Help : `h`
-Fermer : `q`
+It can handle multiple stats pages, spells and spell sets, as well as multiple conditions for the damage computations, in order to give the most freedom possible.
 
-### Stats
+It runs on a Python 3 console (developed on 3.9.10, probably work for older versions) and does not require any external package. This means the right commands should be used to use it.
 
-Créer nouvelle page de stats : `st new <short_name>`
-Lister les pages de stats : `st ls`
-Afficher les détails d'une page de stats : `st show <short_name>`
-Modifier page de stats : `st mod <short_name>`
-Supprimer page de stats : `st rm <short_name>`
+## Commands
 
-### Sorts
+Every `<name>` parameter in the commands below should not contains spaces and is unique for each type of commands.
 
-Créer nouveau sort : `sp new <short_name>`
-Lister les sorts : `sp ls`
-Afficher les détails d'un sort : `sp show <short_name>`
-Modifier sort : `sp mod <short_name>`
-Supprimer sort : `sp rm <short_name>`
+### General
 
-### Ensembles de sorts
+ - `s` : save everything (automatically done after most actions)
+ - `i` : get informations on current state (TODO)
+ - `def <param> <value>` : define default options for the damage computation, where `param` and `value` should respect :
+   - `param = pa` and `value > 0`
+   - `param = pomin` and `pomax >= value >= 0`
+   - `param = pomax` and `value >= pomin >= 0`
+   - `param = t` and `value = mono|multi|versa`
+ - `h` : help
+ - `q` : quit
 
-Créer nouvel ensemble : `ss new <short_name>`
-Supprimer ensemble : `ss rm <short_name>`
-Lister les ensembles de sorts : `ss ls`
-Afficher les détails d'un ensemble : `ss show <short_name>`
-Ajouter un sort à un ensemble : `ss add <spell_set_short_name> <spell_short_name>`
-Retirer un sort d'un ensemble : `ss del <spell_set_short_name> <spell_short_name>`
+### Stats-related
 
-### Dégâts
+ - `st new <name>` : create a new stats page and prompt the user for all the required informations
+ - `st rm <name> ` : delete a stats page
+ - `st mod <name>` : modify a stats page (prompt the user for all the changes)
+ - `st ls` : list all the currently available stats pages
+ - `st show <name>` : show more details on the specified stats pages
 
-Calculer meilleurs dégâts pour un ensemble (options : nombre de PA, PO min et max, monocible/multicible/versatile) : `dmg <spell_set_short_name> <stats_short_name> [<param> <value>]+`
-Paramètres :
- - Nombre de PA : `pa <value>`
- - PO : `pomin <value>` et `pomax <value>`
- - Type : `t <mono/multi/versa>`
+### Spells-related
+
+ - `sp new <name>` : create a new spell and prompt the user for all the required informations
+ - `sp rm <name> ` : delete a spell
+ - `sp mod <name>` : modify a spell (prompt the user for all the changes)
+ - `sp ls` : list all the currently available spells
+ - `sp show <name>` : show more details on the specified spell
+
+### Spell sets-related
+
+ - `ss new <name>` : creates a new spell set
+ - `ss rm <name> ` : deletes a spell set
+ - `ss add <spell_set_name> <spell_name>` : add the specified spell to the spell set
+ - `ss del <spell_set_name> <spell_name>` : remove the specified spell from the spell set
+ - `ss ls` : lists all the currently available spell sets
+ - `ss show <name>` : shows more details on the specified spell set
+
+### Damage-related
+
+The command to get the best combination of spells for given constraints is : 
+`dmg <spell_set_name> <stats_page_name> [[<param> <value>] ...]`
+where the params should follow the same constraints as in the "General" section. If some parameters are not specified, the default value will be used.
