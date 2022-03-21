@@ -8,9 +8,9 @@ from stats import Characteristics, Damages, Stats
 
 
 class Manager:
-    GENERAL_INSTRUCTIONS = ('s', 'def', 'h', 'q')
-    STATS_INSTRUCTION = 'sp'
-    SPELL_INSTRUCTION = 'st'
+    GENERAL_INSTRUCTIONS = ('s', 'def', 'h', 'q', 'i')
+    STATS_INSTRUCTION = 'st'
+    SPELL_INSTRUCTION = 'sp'
     SPELL_SET_INSTRUCTION = 'ss'
     DAMAGES_INSTRUCTION = 'dmg'
 
@@ -84,7 +84,7 @@ class Manager:
             return
 
 
-    def _save(self):
+    def save(self):
         stats_filepaths = []
         for stats in self.stats.values():
             filepath = f'stats\\{stats.get_safe_name()}.json'
@@ -115,6 +115,8 @@ class Manager:
         with open('manager.json', 'w', encoding='utf-8') as fo:
             json.dump(json_valid_data, fo)
 
+        self.print(0, 'Data successfully saved!')
+
     def _set_default_param(self, args: List[str]):
         if len(args) < 2:
             self.print(1, f'Invalid syntax : missing argument{"s" if len(args) < 1 else ""}.')
@@ -135,6 +137,7 @@ class Manager:
                 self.print(1, 'Default value for PA should be positive.')
                 return
             self.default_params[param] = value
+            self.print(0, f"Default PA count successfully set to '{value}'.")
 
         elif param == 'pomin':
             try:
@@ -146,6 +149,7 @@ class Manager:
                 self.print(1, 'Default value for minimum PO should be non-negative and smaller or equal to maximum PO.')
                 return
             self.default_params[param] = value
+            self.print(0, f"Default minimum PO successfully set to '{value}'.")
 
         elif param == 'pomax':
             try:
@@ -157,23 +161,30 @@ class Manager:
                 self.print(1, 'Default value for maximum PO should be non-negative and greater or equal to minimum PO.')
                 return
             self.default_params[param] = value
+            self.print(0, f"Default maximum PO successfully set to '{value}'.")
         
         elif param == 't':
             if not value in ('mono', 'multi', 'versa'):
                 self.print(1, "Type should be one of 'mono', 'multi', 'versa'.")
                 return
             self.default_params[param] = value
+            self.print(0, f"Default type successfully set to '{value}'.")
 
     def _print_help(self):
         pass
 
-    def execute_general_command(self, instr, args: List[str]):
+    def _print_infos(self):
+        pass
+
+    def _execute_general_command(self, instr, args: List[str]):
         if instr == 's':
-            self._save()
+            self.save()
         elif instr == 'def':
             self._set_default_param(args)
         elif instr == 'h':
             self._print_help()
+        elif instr == 'i':
+            self._print_infos()
 
 
     def _create_stats(self, stats: Stats = Stats()) -> Stats:
@@ -222,7 +233,8 @@ class Manager:
             self.stats[short_name] = stats
             self.print(0, f"Page '{short_name}' successfully created!")
         elif command_action == 'list':
-            pass
+            for stats in sorted(self.stats.values(), key=lambda stat: stat.get_name()):
+                self.print(0)
         elif command_action == 'show':
             pass
         elif command_action == 'mod':
@@ -267,18 +279,23 @@ class Manager:
         instr, *args = command.split(' ')
 
         if instr in Manager.GENERAL_INSTRUCTIONS:
-            self.execute_general_command(instr, args)
+            self._execute_general_command(instr, args)
+            return
 
         elif instr == Manager.STATS_INSTRUCTION:
             self._execute_stats_command(args)
+            return
 
         elif instr == Manager.SPELL_INSTRUCTION:
             self._execute_spell_command(args)
+            return
 
         elif instr == Manager.SPELL_SET_INSTRUCTION:
             self._execute_spell_set_command(args)
+            return
 
         elif instr == Manager.DAMAGES_INSTRUCTION:
             self._execute_damages_command(args)
+            return
 
         self.print(1, f"Unknown command instruction : '{instr}'.")
