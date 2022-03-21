@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Callable, List
+from typing import Any, Callable, Dict, List
 
 from spell import Spell
 from spell_set import SpellSet
@@ -14,22 +14,106 @@ class Manager:
     SPELL_SET_INSTRUCTION = 'ss'
     DAMAGES_INSTRUCTION = 'dmg'
 
-    def __init__(self, filename: str, print_method: Callable[[str, str], Any]) -> None:
+    DIRECTORIES = ('stats', 'spells')
+
+    def __init__(self, print_method: Callable[[str, str], Any]) -> None:
         self.print = print_method
-        self.stats = []
-        self.spells = []
-        self.spell_set = []
+        self.stats: Dict[str, Stats] = {}
+        self.spells: Dict[str, Spell] = {}
+        self.spell_sets: Dict[str, SpellSet] = {}
         self.default_params = {}
 
-        self.load_from_file(filename)
+        self.create_dirs()
+        self.load_from_file()
 
+    def create_dirs(self):
+        for directory in Manager.DIRECTORIES:
+            if not os.path.isdir(directory):
+                os.mkdir(directory)
 
-    def load_from_file(self, filename):
-        pass
+    def load_default(self):
+        self.default_params = {
+            'pa': 1,
+            'pomin': 0,
+            'pomax': 2048,
+            't': 'mono'
+        }
+
+    def load_from_file(self):
+        try:
+            with open('manager.json', 'r', encoding='utf-8') as fi:
+                json_data = json.load(fi)
+
+            # STATS
+            for stats_filepath in json_data['stats']:
+                try:
+                    stats = Stats.from_file(stats_filepath)
+                    self.stats[stats.get_short_name()] = stats
+                except Exception:
+                    self.print('warning', f"Could not open or read stats page '{stats_filepath}'.")
+
+            # SPELLS
+            for spells_filepath in json_data['spells']:
+                try:
+                    spell = Spell.from_file(spells_filepath)
+                    self.spells[spell.get_short_name()] = spell
+                except Exception:
+                    self.print('warning', f"Could not open or read spell '{spells_filepath}'.")
+
+            # SPELL SETS
+            for spell_set_data in json_data['spell_sets']:
+                try:
+                    spell_set = SpellSet()
+                    try:
+                        for spell_short_name in spell_set_data['spells']:
+                            spell_set.add_spell(self.spells[spell_short_name])
+                    except KeyError:
+                        self.print('warning', f"Cannot add spell '{spell_short_name}' to spell set '{spell_set_data['short_name']}' : it does not exist.")
+
+                    spell_set.set_name(spell_set_data['name'])
+                    spell_set.set_short_name(spell_set_data['short_name'])
+                    self.spell_sets[spell_set.get_short_name()] = spell_set
+                except Exception:
+                    self.print('warning', f"Could not load spell set '{spell_set_data['name']}'.")
+
+            # DEFAULT PARAMS
+            self.default_params = json_data['default_params']
+        except Exception:
+            self.print('error', "'manager.json' file does not exist or is innaccessible, using default load.")
+            self.load_default()
+            return
 
 
     def save(self):
-        pass
+        stats_filepaths = []
+        for stats in self.stats.values():
+            filepath = f'stats\\{stats.get_safe_name()}.json'
+            stats.save_to_file(filepath)
+            stats_filepaths.append(filepath)
+
+        spells_filepaths = []
+        for spell in self.spells.values():
+            filepath = f'spells\\{spell.get_safe_name()}.json'
+            spell.save_to_file(filepath)
+            spells_filepaths.append(filepath)
+
+        spell_sets = []
+        for spell_set in self.spell_sets.values():
+            spell_sets.append({
+                'spells': [spell.get_short_name() for spell in spell_set.spells],
+                'name': spell_set.get_name(),
+                'short_name': spell_set.get_short_name()
+            })
+
+        json_valid_data = {
+            'stats': stats_filepaths,
+            'spells': spells_filepaths,
+            'spell_sets': spell_sets,
+            'default_params': self.default_params
+        }
+
+        with open('manager.json', 'w', encoding='utf-8') as fo:
+            json.dump(json_valid_data, fo)
 
     def set_default_param(self, args: List[str]):
         if len(args) < 2:
