@@ -4,6 +4,7 @@
 
 Enregistrer : `s`
 Définir options par défaut pour le calcul de dégâts : `def <param> <value>`
+Paramètres : `pa`, `pomin`, `pomax`, `t`
 Help : `h`
 Fermer : `q`
 
