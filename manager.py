@@ -220,6 +220,7 @@ class Manager:
             return
 
         command_action = args[0]
+
         if command_action == 'new':
             if len(args) < 2:
                 self.print(1, 'Missing short name to create stats page.')
@@ -232,11 +233,38 @@ class Manager:
 
             self.stats[short_name] = stats
             self.print(0, f"Page '{short_name}' successfully created!")
-        elif command_action == 'list':
+
+        elif command_action == 'ls':
+            self.print(0, '=== Stats pages\n')
             for stats in sorted(self.stats.values(), key=lambda stat: stat.get_name()):
-                self.print(0)
+                self.print(0, f"Page '{stats.get_name()}' ({stats.get_short_name()})")
+
         elif command_action == 'show':
-            pass
+            if len(args) < 2:
+                self.print(1, 'Missing stats page short name.')
+                return
+
+            short_name = args[1]
+
+            if short_name in self.stats:
+                stats = self.stats[short_name]
+                printed_string = [f"===== Page '{stats.get_name()}' ({short_name})", '=== Characteristics\n']
+                for characteristic in Characteristics:
+                    if characteristic == Characteristics.NEUTRAL:
+                        continue
+                    printed_string.append(f"{characteristic.name:.<15}{stats.get_characteristic(characteristic)}")
+                
+                printed_string.append('\n=== Damages\n')
+                for damage in Damages:
+                    printed_string.append(f"{damage.name:.<15}{stats.get_damage(damage)}")
+                
+                printed_string.append(f'\n{"BONUS CRIT":.<15}{100 * stats.get_bonus_crit_chance():.1f} %')
+
+                self.print(0, "\n".join(printed_string))
+            else:
+                self.print(1, f"Stats page '{short_name}' does not exist.")
+
+
         elif command_action == 'mod':
             if len(args) < 2:
                 self.print(1, 'Missing stats page short name.')
@@ -249,6 +277,7 @@ class Manager:
                 self.print(0, f"Page '{short_name}' successfully modified!")
             else:
                 self.print(1, f"Stats page '{short_name}' does not exist.")
+
         elif command_action == 'rm':
             if len(args) < 2:
                 self.print(1, 'Missing stats page short name.')

@@ -13,16 +13,16 @@ class Characteristics(str, Enum):
     NEUTRAL = 4
 
 class Damages(str, Enum):
+    POWER = 9
+    BASIC = 5
+    CRIT = 8
     EARTH = 0
     FIRE = 1
     WATER = 2
     AIR = 3
     NEUTRAL = 4
-    BASIC = 5
     SPELL = 6
     WEAPON = 7
-    CRIT = 8
-    POWER = 9
     WEAPON_POWER = 10
     FINAL = 11
 
