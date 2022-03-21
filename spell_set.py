@@ -47,6 +47,16 @@ class SpellSet:
         return [spell for spell in self.spells if spell.get_pa() <= max_used_pa]
 
 
+    def save_only_set_file(self, filepath, spell_filepaths):
+        json_valid_data = {
+            'spells': spell_filepaths,
+            'name': self.name,
+            'short_name': self.short_name
+        }
+
+        with open(filepath, 'w', encoding='utf-8') as fo:
+            json.dump(json_valid_data, fo)
+
     def save_to_files(self, filepath, spell_dir: str=None):
         if spell_dir is None:
             spell_dir = os.path.dirname(filepath)
@@ -62,14 +72,7 @@ class SpellSet:
             spell.save_to_file(spell_filepath)
             spell_filepaths.append(spell_filepath)
 
-        json_valid_data = {
-            'spells': spell_filepaths,
-            'name': self.name,
-            'short_name': self.short_name
-        }
-
-        with open(filepath, 'w', encoding='utf-8') as fo:
-            json.dump(json_valid_data, fo)
+        self.save_only_set_file(filepath, spell_filepaths)
 
 
     def __len__(self):
@@ -131,7 +134,7 @@ class SpellSet:
     @classmethod
     def from_file(cls, filepath):
         if not (os.path.isfile(filepath) and os.access(filepath, os.R_OK)):
-            raise FileNotFoundError(f"Cannot create spell from file {filepath} : file not found or innaccessible.")
+            raise FileNotFoundError(f"Cannot create spell set from file {filepath} : file not found or innaccessible.")
 
         with open(filepath, 'r', encoding='utf-8') as fi:
             json_string = fi.read()
