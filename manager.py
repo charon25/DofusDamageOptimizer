@@ -51,7 +51,7 @@ class Manager:
                 try:
                     stats = Stats.from_file(stats_filepath)
                     self.stats[stats.get_short_name()] = stats
-                except Exception:
+                except (FileNotFoundError, KeyError, TypeError, ValueError):
                     self.print(1, f"Could not open or read stats page '{stats_filepath}'.")
 
             # SPELLS
@@ -59,7 +59,7 @@ class Manager:
                 try:
                     spell = Spell.from_file(spells_filepath)
                     self.spells[spell.get_short_name()] = spell
-                except Exception:
+                except (FileNotFoundError, KeyError, TypeError, ValueError):
                     self.print(1, f"Could not open or read spell '{spells_filepath}'.")
 
             # SPELL SETS
@@ -75,12 +75,18 @@ class Manager:
                     spell_set.set_name(spell_set_data['name'])
                     spell_set.set_short_name(spell_set_data['short_name'])
                     self.spell_sets[spell_set.get_short_name()] = spell_set
-                except Exception:
+                except KeyError:
                     self.print(1, f"Could not load spell set '{spell_set_data['name']}'.")
 
             # DEFAULT PARAMS
             self.default_params = json_data['default_params']
-        except Exception:
+            self.default_params['pa'] = int(self.default_params['pa'])
+            self.default_params['pomin'] = int(self.default_params['pomin'])
+            self.default_params['pomax'] = int(self.default_params['pomax'])
+            if not self.default_params['t'] in ('mono', 'multi', 'versa'):
+                raise TypeError
+
+        except (FileNotFoundError, KeyError, TypeError):
             self.print(1, "'manager.json' file does not exist or is innaccessible, using default load.")
             self._load_default()
             return
@@ -133,7 +139,7 @@ class Manager:
         if param == 'pa':
             try:
                 value = int(value)
-            except:
+            except ValueError:
                 self.print(1, 'Default value for PA should be an int.')
                 return
             if value <= 0:
@@ -145,7 +151,7 @@ class Manager:
         elif param in ('pomin', 'po_min', 'minpo', 'min_po'):
             try:
                 value = int(value)
-            except:
+            except ValueError:
                 self.print(1, 'Default value for minimum PO should be an int.')
                 return
             if value < 0 or value > self.default_params['pomax']:
@@ -157,7 +163,7 @@ class Manager:
         elif param in ('pomax', 'po_max', 'maxpo', 'max_po'):
             try:
                 value = int(value)
-            except:
+            except ValueError:
                 self.print(1, 'Default value for maximum PO should be an int.')
                 return
             if value < 0 or value < self.default_params['pomin']:
@@ -165,7 +171,7 @@ class Manager:
                 return
             self.default_params[param] = value
             self.print(0, f"Default maximum PO successfully set to '{value}'.")
-        
+
         elif param == 't':
             if not value in ('mono', 'multi', 'versa'):
                 self.print(1, "Type should be one of 'mono', 'multi', 'versa'.")
@@ -264,11 +270,11 @@ class Manager:
                     if characteristic == Characteristics.NEUTRAL:
                         continue
                     printed_string.append(f"{characteristic.name:.<15}{stats.get_characteristic(characteristic)}")
-                
+
                 printed_string.append('\n=== Damages\n')
                 for damage in Damages:
                     printed_string.append(f"{damage.name:.<15}{stats.get_damage(damage)}")
-                
+
                 printed_string.append(f'\n{"BONUS CRIT":.<15}{100 * stats.get_bonus_crit_chance():.1f} %')
 
                 self.print(0, "\n".join(printed_string))
@@ -294,7 +300,7 @@ class Manager:
             if len(args) < 2:
                 self.print(1, 'Missing stats page short name.')
                 return
-                
+
             short_name = args[1]
             if short_name in self.stats:
                 self.stats.pop(short_name)
@@ -347,17 +353,17 @@ class Manager:
         uses_per_target = input(f'Uses per target ({spell.get_uses_per_target()}) : ')
         if uses_per_target:
             spell.set_uses_per_target(int(uses_per_target))
-        
+
         uses_per_turn = input(f'Uses per turn ({spell.get_uses_per_turn()}) : ')
         if uses_per_turn:
             spell.set_uses_per_turn(int(uses_per_turn))
-        
+
         self.print(0, '')
         min_po = input(f'Minimum PO ({spell.get_min_po()}) : ')
         min_po = int(min_po) if min_po else None
         max_po = input(f'Maximum PO ({spell.get_max_po()}) : ')
         max_po = int(max_po) if min_po else None
-        
+
         spell.set_po(min_po=min_po, max_po=max_po)
 
         return spell
@@ -493,8 +499,8 @@ class Manager:
                 spell_set = self.spell_sets[short_name]
                 printed_string = [f"===== Spell set '{spell_set.get_name()}' ({short_name})"]
 
-                printed_string.append(f"Spells : ")
-                
+                printed_string.append("Spells : ")
+
                 for spell in spell_set:
                     printed_string.append(f" - {spell.get_name()} ({spell.get_short_name()})")
 
@@ -537,7 +543,7 @@ class Manager:
             if len(args) < 3:
                 self.print(1, 'Missing spell set or spell short name.')
                 return
-            
+
             spell_set_short_name = args[1]
             spell_short_name = args[2]
 
@@ -563,7 +569,7 @@ class Manager:
 
         spell_set_short_name = args[0]
         stats_short_name = args[1]
-        
+
         if not spell_set_short_name in self.spell_sets or not stats_short_name in self.stats:
             self.print(1, f"Spell set '{spell_set_short_name}' or stats page '{stats_short_name}' do not exist.")
             return
@@ -574,7 +580,7 @@ class Manager:
         pa = self.default_params['pa']
         min_po = self.default_params['pomin']
         max_po = self.default_params['pomax']
-        type = self.default_params['t']
+        list_type = self.default_params['t']
 
         try:
             index = 2
@@ -599,8 +605,8 @@ class Manager:
                 elif param == 't':
                     if not value in ('mono', 'multi', 'versa'):
                         raise ValueError
-                    type = value
-        except Exception:
+                    list_type = value
+        except ValueError:
             self.print(1, "Error while parsing damage command.")
             return
 
@@ -609,18 +615,18 @@ class Manager:
             return
 
         spell_list = []
-        if type == 'mono':
+        if list_type == 'mono':
             spell_list = spell_set.get_spell_list_single_target(max_used_pa=pa, min_po=min_po, max_po=max_po)
-        elif type == 'multi':
+        elif list_type == 'multi':
             spell_list = spell_set.get_spell_list_multiple_targets(max_used_pa=pa, min_po=min_po, max_po=max_po)
-        elif type == 'versa':
+        elif list_type == 'versa':
             spell_list = spell_set.get_spell_list_versatile(max_used_pa=pa, min_po=min_po, max_po=max_po)
 
         best_spells, max_damage = get_best_combination(spell_list, stats, pa)
 
         best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
 
-        self.print(0, f"Maximum average damages (PA = {pa} ; PO = {min_po} - {max_po} ; type = {type}) is : {int(max_damage):.0f}\n")
+        self.print(0, f"Maximum average damages (PA = {pa} ; PO = {min_po} - {max_po} ; type = {list_type}) is : {int(max_damage):.0f}\n")
         self.print(0, 'Using : ')
         for spell in best_spells:
             self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(stats)):.0f} dmg)")

@@ -49,7 +49,7 @@ class Spell():
     def get_max_uses_single_target(self, max_used_pa):
         if not isinstance(max_used_pa, int):
             raise TypeError(f"Max used pa is not an int ('{max_used_pa}' of type '{type(max_used_pa)}' given instead).")
-        
+
         if max_used_pa < 0:
             raise ValueError(f"Max used pa should be non negative ('{max_used_pa}' given instead).")
 
@@ -61,7 +61,7 @@ class Spell():
     def get_max_uses_multiple_targets(self, max_used_pa):
         if not isinstance(max_used_pa, int):
             raise TypeError(f"Max used pa is not an int ('{max_used_pa}' of type '{type(max_used_pa)}' given instead).")
-        
+
         if max_used_pa < 0:
             raise ValueError(f"Max used pa should be non negative ('{max_used_pa}' given instead).")
 

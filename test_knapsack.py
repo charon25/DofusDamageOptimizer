@@ -4,7 +4,7 @@ from knapsack import _dp_knapsack
 
 
 class TestDamages(unittest.TestCase):
-    
+
     def test_empty_knapsack(self):
         weights = []
         values = []

@@ -24,7 +24,7 @@ def _dp_knapsack(weights: List[int], values: List[int], W):
             indexes.append(i - 1)
             c -= weights[i]
         i -= 1
-    
+
     indexes.sort()
     return (indexes, T[N][W])
 

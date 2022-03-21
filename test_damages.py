@@ -204,7 +204,7 @@ class TestDamages(unittest.TestCase):
 
         stats.set_damage(Damages.SPELL, 0)
         damages_no_bonus_spell_damages = [compute_damage(base_damages[i], stats, Characteristics.AGILITY, is_melee=False, is_crit=is_crit[i]) for i in range(4)]
-        
+
         stats.set_damage(Damages.SPELL, 7)
         damages_bonus_spell_damages = [compute_damage(base_damages[i], stats, Characteristics.AGILITY, is_melee=False, is_crit=is_crit[i]) for i in range(4)]
 

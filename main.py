@@ -7,7 +7,7 @@ def command_loop(manager: Manager):
 
     while True:
         command = input('>>> ').strip().lower()
-        
+
         if command == 'q':
             manager.save()
             break

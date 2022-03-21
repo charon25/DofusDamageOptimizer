@@ -31,7 +31,7 @@ class SpellSet:
             if spell.can_reach_po(min_po, max_po):
                 uses = spell.get_max_uses_single_target(max_used_pa)
                 spell_list.extend([spell for _ in range(uses)])
-        
+
         return spell_list
 
     def get_spell_list_multiple_targets(self, max_used_pa, min_po=-1, max_po=1024):
@@ -41,13 +41,13 @@ class SpellSet:
             if spell.can_reach_po(min_po, max_po):
                 uses = spell.get_max_uses_multiple_targets(max_used_pa)
                 spell_list.extend([spell for _ in range(uses)])
-        
+
         return spell_list
 
     def get_spell_list_versatile(self, max_used_pa, min_po=-1, max_po=1024):
         if not isinstance(max_used_pa, int):
             raise TypeError(f"Max used pa is not an int ('{max_used_pa}' of type '{type(max_used_pa)}' given instead).")
-        
+
         if max_used_pa < 0:
             raise ValueError(f"Max used pa should be non negative ('{max_used_pa}' given instead).")
 
@@ -125,7 +125,7 @@ class SpellSet:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
 
         if not isinstance(json_data['spells'], list):
-            raise TypeError(f"json_data['spells'] is not a list.")
+            raise TypeError("json_data['spells'] is not a list.")
 
     @classmethod
     def from_json_string(cls, json_string):
