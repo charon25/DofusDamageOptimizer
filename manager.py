@@ -3,6 +3,7 @@ import json
 import os
 from typing import Any, Callable, Dict, List
 
+from knapsack import get_best_combination
 from spell import Spell
 from spell_set import SpellSet
 from stats import Characteristics, Damages, Stats
@@ -141,7 +142,7 @@ class Manager:
             self.default_params[param] = value
             self.print(0, f"Default PA count successfully set to '{value}'.")
 
-        elif param == 'pomin':
+        elif param in ('pomin', 'po_min', 'minpo', 'min_po'):
             try:
                 value = int(value)
             except:
@@ -153,7 +154,7 @@ class Manager:
             self.default_params[param] = value
             self.print(0, f"Default minimum PO successfully set to '{value}'.")
 
-        elif param == 'pomax':
+        elif param in ('pomax', 'po_max', 'maxpo', 'max_po'):
             try:
                 value = int(value)
             except:
@@ -556,7 +557,74 @@ class Manager:
 
 
     def _execute_damages_command(self, args: List[str]):
-        pass
+        if len(args) < 2:
+            self.print(1, 'Missing spell set or stats page.')
+            return
+
+        spell_set_short_name = args[0]
+        stats_short_name = args[1]
+        
+        if not spell_set_short_name in self.spell_sets or not stats_short_name in self.stats:
+            self.print(1, f"Spell set '{spell_set_short_name}' or stats page '{stats_short_name}' do not exist.")
+            return
+
+        spell_set = self.spell_sets[spell_set_short_name]
+        stats = self.stats[stats_short_name]
+
+        pa = self.default_params['pa']
+        min_po = self.default_params['pomin']
+        max_po = self.default_params['pomax']
+        type = self.default_params['t']
+
+        try:
+            index = 2
+            while index < len(args):
+                param, value = args[index], args[index+1]
+                index += 2
+                if param == 'pa':
+                    value = int(value)
+                    if value <= 0:
+                        raise ValueError
+                    pa = value
+                elif param in ('pomin', 'po_min', 'minpo', 'min_po'):
+                    value = int(value)
+                    if value < 0:
+                        raise ValueError
+                    min_po = value
+                elif param in ('pomax', 'po_max', 'maxpo', 'max_po'):
+                    value = int(value)
+                    if value < 0:
+                        raise ValueError
+                    max_po = value
+                elif param == 't':
+                    if not value in ('mono', 'multi', 'versa'):
+                        raise ValueError
+                    type = value
+        except Exception:
+            self.print(1, "Error while parsing damage command.")
+            return
+
+        if min_po > max_po:
+            self.print(1, "Error while parsing damage command.")
+            return
+
+        spell_list = []
+        if type == 'mono':
+            spell_list = spell_set.get_spell_list_single_target(max_used_pa=pa, min_po=min_po, max_po=max_po)
+        elif type == 'multi':
+            spell_list = spell_set.get_spell_list_multiple_targets(max_used_pa=pa, min_po=min_po, max_po=max_po)
+        elif type == 'versa':
+            spell_list = spell_set.get_spell_list_versatile(max_used_pa=pa, min_po=min_po, max_po=max_po)
+
+        best_spells, max_damage = get_best_combination(spell_list, stats, pa)
+
+        best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
+
+        self.print(0, f"Maximum average damages (PA = {pa} ; PO = {min_po} - {max_po} ; type = {type}) is : {int(max_damage):.0f}\n")
+        self.print(0, 'Using : ')
+        for spell in best_spells:
+            self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(stats)):.0f} dmg)")
+
 
     def execute_command(self, command: str):
         if command == '':

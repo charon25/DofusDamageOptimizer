@@ -122,7 +122,7 @@ class TestStats(unittest.TestCase):
 
         spell2 = Spell()
         spell2.set_uses_per_target(1)
-        spell2.pa(4)
+        spell2.set_pa(4)
 
         spell_set.add_spell(spell1)
         spell_set.add_spell(spell2)
@@ -132,7 +132,7 @@ class TestStats(unittest.TestCase):
         self.assertEqual(spell_list.count(spell1), 2)
         self.assertEqual(spell_list.count(spell2), 1)
 
-    def test_spell_list_single_target(self):
+    def test_spell_list_multiple_targets(self):
         spell_set = SpellSet()
         spell1 = Spell()
         spell1.set_uses_per_turn(2)
@@ -140,7 +140,7 @@ class TestStats(unittest.TestCase):
 
         spell2 = Spell()
         spell2.set_uses_per_turn(2)
-        spell2.pa(6)
+        spell2.set_pa(6)
 
         spell_set.add_spell(spell1)
         spell_set.add_spell(spell2)
@@ -150,7 +150,7 @@ class TestStats(unittest.TestCase):
         self.assertEqual(spell_list.count(spell1), 2)
         self.assertEqual(spell_list.count(spell2), 1)
 
-    def test_spell_list_single_target(self):
+    def test_spell_list_versatile(self):
         spell_set = SpellSet()
         spell1 = Spell()
         spell1.set_uses_per_turn(5)

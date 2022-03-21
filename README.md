@@ -39,5 +39,5 @@ Retirer un sort d'un ensemble : `ss del <spell_set_short_name> <spell_short_name
 Calculer meilleurs dégâts pour un ensemble (options : nombre de PA, PO min et max, monocible/multicible/versatile) : `dmg <spell_set_short_name> <stats_short_name> [<param> <value>]+`
 Paramètres :
  - Nombre de PA : `pa <value>`
- - PO : `po [min <value>] [max <value>]`
+ - PO : `pomin <value>` et `pomax <value>`
  - Type : `t <mono/multi/versa>`
