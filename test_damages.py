@@ -123,7 +123,7 @@ class TestDamages(unittest.TestCase):
 
         self.assertEqual(damage_spell_no_crit, 198)
         self.assertEqual(damage_melee_no_crit, 255)
-        self.assertEqual(damage_spell_crit, 214)
+        self.assertEqual(damage_spell_crit, 213)
         self.assertEqual(damage_melee_crit, 272)
 
     def get_real_stats(self):
@@ -196,6 +196,21 @@ class TestDamages(unittest.TestCase):
         ]
 
         self.assertListEqual(damages, [294, 409, 390, 506])
+
+    def test_real_value_spell3(self):
+        stats = self.get_real_stats()
+
+        base_damages = [38, 47, 49, 49]
+        is_crit = [False, False, True, True]
+
+        stats.set_damage(Damages.SPELL, 0)
+        damages_no_bonus_spell_damages = [compute_damage(base_damages[i], stats, Characteristics.AGILITY, is_melee=False, is_crit=is_crit[i]) for i in range(4)]
+        
+        stats.set_damage(Damages.SPELL, 7)
+        damages_bonus_spell_damages = [compute_damage(base_damages[i], stats, Characteristics.AGILITY, is_melee=False, is_crit=is_crit[i]) for i in range(4)]
+
+        self.assertListEqual(damages_no_bonus_spell_damages, [446, 536, 556, 556])
+        self.assertListEqual(damages_bonus_spell_damages, [477, 573, 594, 594])
 
 
 if __name__ == '__main__':

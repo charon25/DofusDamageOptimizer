@@ -19,4 +19,4 @@ def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, i
         final_multiplier += stats.get_damage(Damages.SPELL) / 100
 
     # Game rounds down the damage
-    return int((base_damage * characteristic_multiplier + flat_damages) * final_multiplier)
+    return int(int((base_damage * characteristic_multiplier + flat_damages)) * final_multiplier)
