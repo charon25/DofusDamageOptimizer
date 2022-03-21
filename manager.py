@@ -101,7 +101,7 @@ class Manager:
         spell_sets = []
         for spell_set in self.spell_sets.values():
             spell_sets.append({
-                'spells': [spell.get_short_name() for spell in spell_set.spells],
+                'spells': [spell.get_short_name() for spell in spell_set],
                 'name': spell_set.get_name(),
                 'short_name': spell_set.get_short_name()
             })
@@ -451,7 +451,109 @@ class Manager:
             self.print(1, f"Unknown action '{command_action}' for spell commands.")
 
     def _execute_spell_set_command(self, args: List[str]):
-        pass
+        if len(args) == 0:
+            self.print(1, 'Action missing in the command.')
+            return
+
+        command_action = args[0]
+
+        if command_action == 'new':
+            if len(args) < 2:
+                self.print(1, 'Missing short name to create spell set.')
+                return
+
+            short_name = args[1]
+
+            if short_name in self.spell_sets:
+                self.print(1, f"Spell set '{short_name}' already exists.")
+                return
+
+            spell_set = SpellSet()
+            spell_set.set_short_name(short_name)
+            spell_set.set_name(input("Spell set name : ") or short_name)
+
+            self.spell_sets[short_name] = spell_set
+            self.save(False)
+            self.print(0, f"Spell set '{short_name}' successfully created!")
+
+        elif command_action == 'ls':
+            self.print(0, '=== Spell sets\n')
+            for spell_set in sorted(self.spell_sets.values(), key=lambda spell_set: spell_set.get_name()):
+                self.print(0, f" - '{spell_set.get_name()}' ({spell_set.get_short_name()}) : {len(spell_set)} spell{'s' if len(spell_set) > 1 else ''}")
+
+        elif command_action == 'show':
+            if len(args) < 2:
+                self.print(1, 'Missing spell set short name.')
+                return
+
+            short_name = args[1]
+
+            if short_name in self.spell_sets:
+                spell_set = self.spell_sets[short_name]
+                printed_string = [f"===== Spell set '{spell_set.get_name()}' ({short_name})"]
+
+                printed_string.append(f"Spells : ")
+                
+                for spell in spell_set:
+                    printed_string.append(f" - {spell.get_name()} ({spell.get_short_name()})")
+
+                self.print(0, '\n'.join(printed_string))
+            else:
+                self.print(1, f"Spell set '{short_name}' does not exist.")
+
+        elif command_action == 'rm':
+            if len(args) < 2:
+                self.print(1, 'Missing spell set short name.')
+                return
+
+            short_name = args[1]
+            if short_name in self.spell_sets:
+                self.spell_sets.pop(short_name)
+                self.print(0, f"Spell set '{short_name}' successfully deleted!")
+            else:
+                self.print(1, f"Spell set '{short_name}' does not exist.")
+
+        elif command_action == 'add':
+            if len(args) < 3:
+                self.print(1, 'Missing spell set or spell short name.')
+                return
+
+            spell_set_short_name = args[1]
+            spell_short_name = args[2]
+
+            if spell_set_short_name in self.spell_sets and spell_short_name in self.spells:
+                spell_set = self.spell_sets[spell_set_short_name]
+                spell = self.spells[spell_short_name]
+                if not spell in spell_set:
+                    spell_set.add_spell(spell)
+                    self.print(0, f"Spell '{spell_short_name}' successfully added to spell set '{spell_set_short_name}'!")
+                else:
+                    self.print(1, f"Spell '{spell_short_name}' already in spell set '{spell_set_short_name}'!")
+            else:
+                self.print(1, f"Spell set '{spell_set_short_name}' or spell '{spell_short_name}' do not exist.")
+
+        elif command_action == 'del':
+            if len(args) < 3:
+                self.print(1, 'Missing spell set or spell short name.')
+                return
+            
+            spell_set_short_name = args[1]
+            spell_short_name = args[2]
+
+            if spell_set_short_name in self.spell_sets and spell_short_name in self.spells:
+                spell_set = self.spell_sets[spell_set_short_name]
+                spell = self.spells[spell_short_name]
+                if spell in spell_set:
+                    spell_set.remove_spell(spell)
+                    self.print(0, f"Spell '{spell_short_name}' successfully removed from spell set '{spell_set_short_name}'!")
+                else:
+                    self.print(1, f"Spell '{spell_short_name}' is not in spell set '{spell_set_short_name}'!")
+            else:
+                self.print(1, f"Spell set '{spell_set_short_name}' or spell '{spell_short_name}' do not exist.")
+
+        else:
+            self.print(1, f"Unknown action '{command_action}' for spell commands.")
+
 
     def _execute_damages_command(self, args: List[str]):
         pass

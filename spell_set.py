@@ -18,6 +18,11 @@ class SpellSet:
     def add_spell_from_file(self, spell_file):
         self.add_spell(Spell.from_file(spell_file))
 
+    def remove_spell(self, spell: Spell):
+        if not spell in self:
+            raise ValueError(f"Spell '{spell}' not in spell set.")
+
+        self.spells.remove(spell)
 
     def get_spell_list_single_target(self, max_used_pa):
         spell_list: List[Spell] = []
@@ -81,7 +86,7 @@ class SpellSet:
     def __getitem__(self, indices):
         return self.spells[indices]
 
-    def __iter__(self, indices):
+    def __iter__(self):
         return iter(self.spells)
 
     def __contains__(self, spell):
