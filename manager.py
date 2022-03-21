@@ -85,7 +85,7 @@ class Manager:
             return
 
 
-    def save(self):
+    def save(self, print_message=True):
         stats_filepaths = []
         for stats in self.stats.values():
             filepath = f'stats\\{stats.get_safe_name()}.json'
@@ -116,7 +116,8 @@ class Manager:
         with open('manager.json', 'w', encoding='utf-8') as fo:
             json.dump(json_valid_data, fo)
 
-        self.print(0, 'Data successfully saved!')
+        if print_message:
+            self.print(0, 'Data successfully saved!')
 
     def _set_default_param(self, args: List[str]):
         if len(args) < 2:
@@ -240,6 +241,7 @@ class Manager:
             stats.set_short_name(short_name)
 
             self.stats[short_name] = stats
+            self.save(False)
             self.print(0, f"Page '{short_name}' successfully created!")
 
         elif command_action == 'ls':
@@ -282,6 +284,7 @@ class Manager:
 
             if short_name in self.stats:
                 self.stats[short_name] = self._create_stats(self.stats[short_name])
+                self.save(False)
                 self.print(0, f"Page '{short_name}' successfully modified!")
             else:
                 self.print(1, f"Stats page '{short_name}' does not exist.")
@@ -381,6 +384,7 @@ class Manager:
             spell.set_short_name(short_name)
 
             self.spells[short_name] = spell
+            self.save(False)
             self.print(0, f"Spell '{short_name}' successfully created!")
 
         elif command_action == 'ls':
@@ -395,8 +399,25 @@ class Manager:
 
             short_name = args[1]
 
-            if short_name in self.stats:
-                pass
+            if short_name in self.spells:
+                spell = self.spells[short_name]
+                printed_string = [f"===== Spell '{spell.get_name()}' ({short_name})", '=== Spell characteristics']
+
+                printed_string.append(f"PA : {spell.get_pa()}")
+                printed_string.append(f"PO : {spell.get_min_po()} - {spell.get_max_po()}")
+                printed_string.append(f"Uses per target : {spell.get_uses_per_target() if spell.get_uses_per_target() > 0 else '∞'}")
+                printed_string.append(f"Uses per turn : {spell.get_uses_per_turn() if spell.get_uses_per_turn() > 0 else '∞'}")
+                printed_string.append(f'Crit chance : {100 * spell.get_crit_chance():.1f} %')
+
+                printed_string.append("\n=== Base damages\n")
+                for characteristic in Characteristics:
+                    base_damages = spell.get_base_damages(characteristic)
+                    if all(value == 0 for value in base_damages.values()):
+                        continue
+
+                    printed_string.append(f" {characteristic.name} : {base_damages['min']} - {base_damages['max']} ({base_damages['crit_min']} - {base_damages['crit_max']})")
+
+                self.print(0, '\n'.join(printed_string))
             else:
                 self.print(1, f"Spell '{short_name}' does not exist.")
 
@@ -408,8 +429,9 @@ class Manager:
 
             short_name = args[1]
 
-            if short_name in self.stats:
-                self.stats[short_name] = self._create_stats(self.stats[short_name])
+            if short_name in self.spells:
+                self.spells[short_name] = self._create_spell(self.spells[short_name])
+                self.save(False)
                 self.print(0, f"Spell '{short_name}' successfully modified!")
             else:
                 self.print(1, f"Spell '{short_name}' does not exist.")
@@ -418,10 +440,10 @@ class Manager:
             if len(args) < 2:
                 self.print(1, 'Missing spell short name.')
                 return
-                
+
             short_name = args[1]
-            if short_name in self.stats:
-                self.stats.pop(short_name)
+            if short_name in self.spells:
+                self.spells.pop(short_name)
                 self.print(0, f"Spell '{short_name}' successfully deleted!")
             else:
                 self.print(1, f"Spell '{short_name}' does not exist.")

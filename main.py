@@ -3,8 +3,7 @@ from manager import Manager
 def manager_print(code, message):
     print(f"{'[ERROR] ' if code == 1 else ''}{message}")
 
-def command_loop():
-    manager = Manager(manager_print)
+def command_loop(manager: Manager):
 
     while True:
         command = input('>>> ').strip().lower()
@@ -19,8 +18,11 @@ def command_loop():
         print()
 
 if __name__ == '__main__':
+    manager = Manager(manager_print)
+
     try:
-        command_loop()
+        command_loop(manager)
     except KeyboardInterrupt:
+        manager.save()
         print('\nExiting...')
 
