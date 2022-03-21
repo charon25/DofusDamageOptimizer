@@ -1,7 +1,6 @@
 import unittest
 
 from damages import compute_damage
-from spell import Spell
 from stats import Damages, Characteristics, Stats
 
 
