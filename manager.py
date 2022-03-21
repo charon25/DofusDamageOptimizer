@@ -1,3 +1,4 @@
+import distutils.util
 import json
 import os
 from typing import Any, Callable, Dict, List
@@ -187,8 +188,11 @@ class Manager:
             self._print_infos()
 
 
-    def _create_stats(self, stats: Stats = Stats()) -> Stats:
-        name = input(f'Stats page name {f"({stats.get_name()})" if stats.get_name() != "" else ""} : ')
+    def _create_stats(self, stats: Stats = None) -> Stats:
+        if stats is None:
+            stats = Stats()
+
+        name = input(f'Stats page name {f"({stats.get_name()}) " if stats.get_name() != "" else ""}: ')
         if name:
             stats.set_name(name)
 
@@ -227,6 +231,10 @@ class Manager:
                 return
 
             short_name = args[1]
+
+            if short_name in self.stats:
+                self.print(1, f"Stats page '{short_name}' already exists.")
+                return
 
             stats = self._create_stats()
             stats.set_short_name(short_name)
@@ -292,8 +300,133 @@ class Manager:
         else:
             self.print(1, f"Unknown action '{command_action}' for stats commands.")
 
+    def _create_spell(self, spell: Spell = None) -> Spell:
+        if spell is None:
+            spell = Spell()
+
+        name = input(f'Spell name {f"({spell.get_name()}) " if spell.get_name() != "" else ""}: ')
+        if name:
+            spell.set_name(name)
+
+        is_melee = input(f'Melee ({spell.is_melee}) (0/1) : ')
+        if is_melee:
+            spell.set_melee(distutils.util.strtobool(is_melee))
+
+        self.print(0, '\n=== Base damages\n')
+        for characteristic in Characteristics:
+            unused_characteristic = False
+            self.print(0, f'{characteristic.name} : ')
+            base_damages = spell.get_base_damages(characteristic)
+
+            for field in ('min', 'max', 'crit_min', 'crit_max'):
+                value = input(f'  - {field.replace("_", " ").capitalize()} ({base_damages[field]}) : ')
+                if value == '/':
+                    unused_characteristic = True
+                    break
+                if value:
+                    base_damages[field] = int(value)
+
+            if not unused_characteristic:
+                spell.set_base_damages(characteristic, base_damages)
+
+        self.print(0, '')
+        pa = input(f'PA count ({spell.get_pa()}) : ')
+        if pa:
+            spell.set_pa(int(pa))
+
+        self.print(0, '')
+        crit_chance = input(f'Crit chance % ({100 * spell.get_crit_chance():.1f} %) : ')
+        if crit_chance:
+            spell.set_crit_chance(float(crit_chance) / 100)
+
+        self.print(0, '')
+        uses_per_target = input(f'Uses per target ({spell.get_uses_per_target()}) : ')
+        if uses_per_target:
+            spell.set_uses_per_target(int(uses_per_target))
+        
+        uses_per_turn = input(f'Uses per turn ({spell.get_uses_per_turn()}) : ')
+        if uses_per_turn:
+            spell.set_uses_per_turn(int(uses_per_turn))
+        
+        self.print(0, '')
+        min_po = input(f'Minimum PO ({spell.get_min_po()}) : ')
+        min_po = int(min_po) if min_po else None
+        max_po = input(f'Maximum PO ({spell.get_max_po()}) : ')
+        max_po = int(max_po) if min_po else None
+        
+        spell.set_po(min_po=min_po, max_po=max_po)
+
+        return spell
+
+
     def _execute_spell_command(self, args: List[str]):
-        pass
+        if len(args) == 0:
+            self.print(1, 'Action missing in the command.')
+            return
+
+        command_action = args[0]
+
+        if command_action == 'new':
+            if len(args) < 2:
+                self.print(1, 'Missing short name to create spell.')
+                return
+
+            short_name = args[1]
+
+            if short_name in self.spells:
+                self.print(1, f"Spell '{short_name}' already exists.")
+                return
+
+            spell = self._create_spell()
+            spell.set_short_name(short_name)
+
+            self.spells[short_name] = spell
+            self.print(0, f"Spell '{short_name}' successfully created!")
+
+        elif command_action == 'ls':
+            self.print(0, '=== Spells\n')
+            for spell in sorted(self.spells.values(), key=lambda spell: spell.get_name()):
+                self.print(0, f" - '{spell.get_name()}' ({spell.get_short_name()})")
+
+        elif command_action == 'show':
+            if len(args) < 2:
+                self.print(1, 'Missing spell short name.')
+                return
+
+            short_name = args[1]
+
+            if short_name in self.stats:
+                pass
+            else:
+                self.print(1, f"Spell '{short_name}' does not exist.")
+
+
+        elif command_action == 'mod':
+            if len(args) < 2:
+                self.print(1, 'Missing spell short name.')
+                return
+
+            short_name = args[1]
+
+            if short_name in self.stats:
+                self.stats[short_name] = self._create_stats(self.stats[short_name])
+                self.print(0, f"Spell '{short_name}' successfully modified!")
+            else:
+                self.print(1, f"Spell '{short_name}' does not exist.")
+
+        elif command_action == 'rm':
+            if len(args) < 2:
+                self.print(1, 'Missing spell short name.')
+                return
+                
+            short_name = args[1]
+            if short_name in self.stats:
+                self.stats.pop(short_name)
+                self.print(0, f"Spell '{short_name}' successfully deleted!")
+            else:
+                self.print(1, f"Spell '{short_name}' does not exist.")
+        else:
+            self.print(1, f"Unknown action '{command_action}' for spell commands.")
 
     def _execute_spell_set_command(self, args: List[str]):
         pass
