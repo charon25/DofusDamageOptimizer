@@ -66,7 +66,7 @@ class SpellSet:
 
         spell_filepaths = []
         for spell in self.spells:
-            spell_safe_filename = re.sub(r'\W', '_', spell.name) # replaces all non alphanumeric chars by an underscore
+            spell_safe_filename = spell.get_safe_name() # replaces all non alphanumeric chars by an underscore
             spell_filepath = f'{spell_dir}{spell_safe_filename}.json'
 
             spell.save_to_file(spell_filepath)
@@ -90,6 +90,9 @@ class SpellSet:
 
     def get_name(self):
         return self.name
+
+    def get_safe_name(self):
+        return re.sub(r'\W', '_', self.name)
 
     def set_name(self, name):
         if len(str(name)) == 0:

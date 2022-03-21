@@ -1,6 +1,7 @@
 from enum import Enum
 import json
 import os
+import re
 from typing import Dict
 
 
@@ -138,6 +139,9 @@ class Stats:
 
     def get_name(self):
         return self.name
+
+    def get_safe_name(self):
+        return re.sub(r'\W', '_', self.name)
 
     def set_name(self, name):
         if len(str(name)) == 0:
