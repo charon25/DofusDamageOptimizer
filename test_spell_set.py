@@ -170,6 +170,21 @@ class TestStats(unittest.TestCase):
         self.assertEqual(spell_list.count(spell1), 1)
         self.assertTrue(spell2 not in spell_list)
 
+    def test_spell_list_single_target_po(self):
+        spell_set = SpellSet()
+        spell1 = Spell()
+        spell1.set_uses_per_target(2)
+        spell1.set_pa(4)
+        spell1.set_po(min_po=4, max_po=8)
+
+        spell_set.add_spell(spell1)
+
+        spell_list_too_close = spell_set.get_spell_list_single_target(10, max_po=2)
+        spell_list_too_far = spell_set.get_spell_list_single_target(10, min_po=10)
+
+        self.assertEqual(len(spell_list_too_close), 0)
+        self.assertEqual(len(spell_list_too_far), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

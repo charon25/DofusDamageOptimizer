@@ -70,6 +70,8 @@ class Spell():
         else:
             return min(max_used_pa // self.pa, self.uses_per_turn)
 
+    def can_reach_po(self, min_po, max_po):
+        return not (self.get_min_po() > max_po or self.get_max_po() < min_po)
 
     def save_to_file(self, filepath):
         json_valid_data = {
