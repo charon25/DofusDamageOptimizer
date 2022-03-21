@@ -96,7 +96,7 @@ class SpellSet:
 
     def set_name(self, name):
         if len(str(name)) == 0:
-            raise ValueError('Name cannnot be an empty string.')
+            raise ValueError('Name cannot be an empty string.')
 
         self.name = str(name)
 
@@ -106,7 +106,7 @@ class SpellSet:
 
     def set_short_name(self, short_name):
         if len(str(short_name)) == 0:
-            raise ValueError('Short name cannnot be an empty string.')
+            raise ValueError('Short name cannot be an empty string.')
 
         self.short_name = str(short_name)
 
