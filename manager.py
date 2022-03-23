@@ -583,6 +583,7 @@ class Manager:
         po = None
         resistances = {characteristic: 0 for characteristic in Characteristics}
         list_type = self.default_params['t']
+        additional_stats = []
 
         try:
             index = 2
@@ -627,6 +628,14 @@ class Manager:
                         # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
                         characteristic_key = str(k - 1) if k > 0 else '4' 
                         resistances[Characteristics(characteristic_key)] = int(value)
+                elif param in ('s', 'st', 'stats'):
+                    values = args[index + 1:]
+                    for value in values:
+                        if not value in self.stats:
+                            self.print(0, f"[WARNING] Unknown additional stats page : '{value}'.")
+                        else:
+                            additional_stats.append(self.stats[value])
+                    break # Must be the last argument
                 else:
                     self.print(0, f"[WARNING] Unknown parameter : '{param}'.")
                     index += 1
@@ -648,6 +657,8 @@ class Manager:
             spell_list = spell_set.get_spell_list_multiple_targets(max_used_pa=pa, min_po=min_po, max_po=max_po)
         elif list_type == 'versa':
             spell_list = spell_set.get_spell_list_versatile(max_used_pa=pa, min_po=min_po, max_po=max_po)
+
+        stats = sum([stats] + additional_stats)
 
         best_spells, max_damage = get_best_combination(spell_list, stats, pa, resistances)
 

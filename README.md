@@ -54,5 +54,5 @@ The command to get the best combination of spells for given constraints is :
 where the params can be : 
  - Those presented in the "General" section
  - `po <value>` which sets both minimum and maximum PO to the value
- - `r|res <neutral_res> <earth_res> <fire_res> <water_res> <air_res>` which sets ennemy resistances for damages calculation
- 
+ - `r|res <neutral_res> <earth_res> <fire_res> <water_res> <air_res>` which sets ennemy resistances for damages computation
+ - `s <add_stats_page1> <add_stats_page2>...` which adds additional stats page to the damages computation (simple addition between the same stats). Must be the **LAST** parameter, as everything following it will be considered as a stats page
