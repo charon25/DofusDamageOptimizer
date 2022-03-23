@@ -26,6 +26,6 @@ if __name__ == '__main__':
     try:
         command_loop(manager)
     except KeyboardInterrupt:
-        manager.save()
         print('\nExiting...')
+        manager.save()
 

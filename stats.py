@@ -140,9 +140,6 @@ class Stats:
     def get_name(self):
         return self.name
 
-    def get_safe_name(self):
-        return re.sub(r'\W', '_', self.name)
-
     def set_name(self, name):
         if len(str(name)) == 0:
             raise ValueError('Name cannot be an empty string.')
@@ -152,6 +149,9 @@ class Stats:
 
     def get_short_name(self):
         return self.short_name
+
+    def get_safe_name(self):
+        return re.sub(r'\W', '_', self.short_name)
 
     def set_short_name(self, short_name):
         if len(str(short_name)) == 0:
