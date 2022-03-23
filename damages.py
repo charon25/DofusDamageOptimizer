@@ -2,6 +2,9 @@ from stats import Characteristics, Damages, Stats
 
 
 def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, is_melee, is_crit=False):
+    if base_damage == 0:
+        return 0
+
     power = stats.get_damage(Damages.POWER)
     if is_melee:
         power += stats.get_damage(Damages.WEAPON_POWER)

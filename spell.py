@@ -82,7 +82,8 @@ class Spell():
             'uses_per_turn': self.uses_per_turn,
             'is_melee': self.is_melee,
             'name': self.name,
-            'short_name': self.short_name
+            'short_name': self.short_name,
+            'po': list(self.po)
         }
 
         with open(filepath, 'w', encoding='utf-8') as fo:
@@ -217,7 +218,7 @@ class Spell():
 
     @classmethod
     def check_json_validity(cls, json_data):
-        for key in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_melee', 'name', 'short_name'):
+        for key in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_melee', 'name', 'short_name', 'po'):
             if not key in json_data:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
 
@@ -240,6 +241,7 @@ class Spell():
         spell.set_melee(json_data['is_melee'])
         spell.set_name(json_data['name'])
         spell.set_short_name(json_data['short_name'])
+        spell.set_po(min_po=json_data['po'][0], max_po=json_data['po'][1])
 
         return spell
 
