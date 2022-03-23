@@ -56,3 +56,39 @@ where the params can be :
  - `po <value>` which sets both minimum and maximum PO to the value
  - `r|res <neutral_res> <earth_res> <fire_res> <water_res> <air_res>` which sets ennemy resistances for damages computation
  - `s <add_stats_page1> <add_stats_page2>...` which adds additional stats page to the damages computation (simple addition between the same stats). Must be the **LAST** parameter, as everything following it will be considered as a stats page
+
+## Examples of damages computation
+
+```
+>>> dmg base base
+Maximum average damages (PA = 11 ; PO = 1 - 10 ; type = mono) is : 1278
+
+Using :
+ - Ether (300 dmg)
+ - Ether (300 dmg)
+ - Morph (air) (408 dmg)
+ - Ouragan (270 dmg)
+```
+Here, there are both a spell set named `base` and a stats page named `base`.
+
+With parameters :
+```
+>>> dmg base base po 8 t multi
+Maximum average damages (PA = 11 ; PO = 8 - 8 ; type = multi) is : 1287
+
+Using :
+ - Lame Astrale (439 dmg)
+ - Lame Astrale (439 dmg)
+ - Morph (air) (408 dmg)
+```
+
+With an additional stats page :
+```
+>>> dmg base base po 8 t versa s turquoise
+Maximum average damages (PA = 11 ; PO = 8 - 8 ; type = versa) is : 1324
+
+Using :
+ - Comète (425 dmg)
+ - Lame Astrale (464 dmg)
+ - Morph (air) (433 dmg)
+```
