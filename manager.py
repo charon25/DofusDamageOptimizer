@@ -244,7 +244,11 @@ class Manager:
                 self.print(1, f"Stats page '{short_name}' already exists.")
                 return
 
-            stats = self._create_stats()
+            try:
+                stats = self._create_stats()
+            except KeyboardInterrupt:
+                self.print(0, '\nCancelled stats page creation.')
+                return
             stats.set_short_name(short_name)
 
             self.stats[short_name] = stats
@@ -290,7 +294,12 @@ class Manager:
             short_name = args[1]
 
             if short_name in self.stats:
-                self.stats[short_name] = self._create_stats(self.stats[short_name])
+                try:
+                    self.stats[short_name] = self._create_stats(self.stats[short_name])
+                except KeyboardInterrupt:
+                    self.print(0, '\nCancelled stats page modification.')
+                    return
+
                 self.save(False)
                 self.print(0, f"Page '{short_name}' successfully modified!")
             else:
@@ -387,7 +396,11 @@ class Manager:
                 self.print(1, f"Spell '{short_name}' already exists.")
                 return
 
-            spell = self._create_spell()
+            try:
+                spell = self._create_spell()
+            except KeyboardInterrupt:
+                self.print(0, '\nCancelled spell creation.')
+                return
             spell.set_short_name(short_name)
 
             self.spells[short_name] = spell
@@ -437,7 +450,12 @@ class Manager:
             short_name = args[1]
 
             if short_name in self.spells:
-                self.spells[short_name] = self._create_spell(self.spells[short_name])
+                try:
+                    self.spells[short_name] = self._create_spell(self.spells[short_name])
+                except:
+                    self.print(0, '\nCancelled spell modification.')
+                    return
+
                 self.save(False)
                 self.print(0, f"Spell '{short_name}' successfully modified!")
             else:
@@ -477,7 +495,11 @@ class Manager:
 
             spell_set = SpellSet()
             spell_set.set_short_name(short_name)
-            spell_set.set_name(input("Spell set name : ") or short_name)
+            try:
+                spell_set.set_name(input("Spell set name : ") or short_name)
+            except KeyboardInterrupt:
+                self.print(0, '\nCancelled spell set creation.')
+                return
 
             self.spell_sets[short_name] = spell_set
             self.save(False)
