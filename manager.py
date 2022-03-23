@@ -66,11 +66,11 @@ class Manager:
             for spell_set_data in json_data['spell_sets']:
                 try:
                     spell_set = SpellSet()
-                    try:
-                        for spell_short_name in spell_set_data['spells']:
+                    for spell_short_name in spell_set_data['spells']:
+                        try:
                             spell_set.add_spell(self.spells[spell_short_name])
-                    except KeyError:
-                        self.print(1, f"Cannot add spell '{spell_short_name}' to spell set '{spell_set_data['short_name']}' : it does not exist.")
+                        except KeyError:
+                            self.print(1, f"Cannot add spell '{spell_short_name}' to spell set '{spell_set_data['short_name']}' : it does not exist.")
 
                     spell_set.set_name(spell_set_data['name'])
                     spell_set.set_short_name(spell_set_data['short_name'])
@@ -580,35 +580,50 @@ class Manager:
         pa = self.default_params['pa']
         min_po = self.default_params['pomin']
         max_po = self.default_params['pomax']
+        po = None
         list_type = self.default_params['t']
 
         try:
             index = 2
             while index < len(args):
-                param, value = args[index], args[index+1]
-                index += 2
+                param = args[index]
                 if param == 'pa':
-                    value = int(value)
+                    value = int(args[index + 1])
+                    index += 2
                     if value <= 0:
                         raise ValueError
                     pa = value
                 elif param in ('pomin', 'po_min', 'minpo', 'min_po'):
-                    value = int(value)
+                    value = int(args[index + 1])
+                    index += 2
                     if value < 0:
                         raise ValueError
                     min_po = value
                 elif param in ('pomax', 'po_max', 'maxpo', 'max_po'):
-                    value = int(value)
+                    value = int(args[index + 1])
+                    index += 2
                     if value < 0:
                         raise ValueError
                     max_po = value
+                elif param == 'po':
+                    value = int(args[index + 1])
+                    index += 2
+                    if value < 0:
+                        raise ValueError
+                    po = value
                 elif param == 't':
+                    value = args[index + 1]
+                    index += 2
                     if not value in ('mono', 'multi', 'versa'):
                         raise ValueError
                     list_type = value
         except ValueError:
             self.print(1, "Error while parsing damage command.")
             return
+
+        if po is not None:
+            min_po = po
+            max_po = po
 
         if min_po > max_po:
             self.print(1, "Error while parsing damage command.")
