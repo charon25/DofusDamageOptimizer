@@ -51,4 +51,8 @@ Every `<name>` parameter in the commands below should not contains spaces and is
 
 The command to get the best combination of spells for given constraints is : 
 `dmg <spell_set_name> <stats_page_name> [[<param> <value>] ...]`
-where the params should follow the same constraints as in the "General" section. If some parameters are not specified, the default value will be used.
+where the params can be : 
+ - Those presented in the "General" section
+ - `po <value>` which sets both minimum and maximum PO to the value
+ - `r|res <neutral_res> <earth_res> <fire_res> <water_res> <air_res>` which sets ennemy resistances for damages calculation
+ 

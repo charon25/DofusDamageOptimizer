@@ -581,6 +581,7 @@ class Manager:
         min_po = self.default_params['pomin']
         max_po = self.default_params['pomax']
         po = None
+        resistances = {characteristic: 0 for characteristic in Characteristics}
         list_type = self.default_params['t']
 
         try:
@@ -617,10 +618,21 @@ class Manager:
                     if not value in ('mono', 'multi', 'versa'):
                         raise ValueError
                     list_type = value
+                elif param in ('r', 'res'):
+                    values = args[index + 1:index + 6] # 5 values
+                    if len(values) < 5:
+                        raise ValueError
+                    index += 6
+                    for k, value in enumerate(values):
+                        # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
+                        characteristic_key = str(k - 1) if k > 0 else '4' 
+                        resistances[Characteristics(characteristic_key)] = int(value)
+                else:
+                    self.print(0, f"[WARNING] Unknown parameter : '{param}'.")
+                    index += 1
         except ValueError:
             self.print(1, "Error while parsing damage command.")
             return
-
         if po is not None:
             min_po = po
             max_po = po
@@ -637,14 +649,14 @@ class Manager:
         elif list_type == 'versa':
             spell_list = spell_set.get_spell_list_versatile(max_used_pa=pa, min_po=min_po, max_po=max_po)
 
-        best_spells, max_damage = get_best_combination(spell_list, stats, pa)
+        best_spells, max_damage = get_best_combination(spell_list, stats, pa, resistances)
 
         best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
 
         self.print(0, f"Maximum average damages (PA = {pa} ; PO = {min_po} - {max_po} ; type = {list_type}) is : {int(max_damage):.0f}\n")
         self.print(0, 'Using : ')
         for spell in best_spells:
-            self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(stats)):.0f} dmg)")
+            self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(stats, resistances)):.0f} dmg)")
 
 
     def execute_command(self, command: str):

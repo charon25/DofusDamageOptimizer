@@ -1,7 +1,7 @@
 from stats import Characteristics, Damages, Stats
 
 
-def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, is_melee, is_crit=False):
+def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, is_melee, resistance: int = 0, is_crit=False):
     if base_damage == 0:
         return 0
 
@@ -21,5 +21,8 @@ def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, i
     else:
         final_multiplier += stats.get_damage(Damages.SPELL) / 100
 
+    resistance_multiplier = max(0, 1 - resistance / 100) # Can't be negative damages
+
     # Game rounds down the damage
-    return int(int(base_damage * characteristic_multiplier + flat_damages) * final_multiplier)
+    # TODO check if rounding is done between final multiplier and resistance multiplier
+    return int(int(int(base_damage * characteristic_multiplier + flat_damages) * final_multiplier) * resistance_multiplier)

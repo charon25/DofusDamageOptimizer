@@ -26,17 +26,19 @@ class Spell():
         for characteristic in Characteristics:
             self.base_damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
 
-    def get_average_damages(self, stats: Stats):
+    def get_average_damages(self, stats: Stats, resistances=None):
+        if resistances is None:
+            resistances = {characteristic: 0 for characteristic in Characteristics}
         average_damage = 0.0
         average_damage_crit = 0.0
 
         for characteristic in Characteristics:
-            min_damage = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, is_melee=self.is_melee)
-            max_damage = compute_damage(self.base_damages[characteristic]['max'], stats, characteristic, is_melee=self.is_melee)
+            min_damage = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, is_melee=self.is_melee, resistance=resistances[characteristic])
+            max_damage = compute_damage(self.base_damages[characteristic]['max'], stats, characteristic, is_melee=self.is_melee, resistance=resistances[characteristic])
             average_damage += (min_damage + max_damage) / 2
 
-            min_damage_crit = compute_damage(self.base_damages[characteristic]['crit_min'], stats, characteristic, is_melee=self.is_melee, is_crit=True)
-            max_damage_crit = compute_damage(self.base_damages[characteristic]['crit_max'], stats, characteristic, is_melee=self.is_melee, is_crit=True)
+            min_damage_crit = compute_damage(self.base_damages[characteristic]['crit_min'], stats, characteristic, is_melee=self.is_melee, resistance=resistances[characteristic], is_crit=True)
+            max_damage_crit = compute_damage(self.base_damages[characteristic]['crit_max'], stats, characteristic, is_melee=self.is_melee, resistance=resistances[characteristic], is_crit=True)
             average_damage_crit += (min_damage_crit + max_damage_crit) / 2
 
         final_crit_chance = self.crit_chance + stats.bonus_crit_chance

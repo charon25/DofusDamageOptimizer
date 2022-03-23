@@ -29,9 +29,9 @@ def _dp_knapsack(weights: List[int], values: List[int], W):
     return (indexes, T[N][W])
 
 
-def get_best_combination(spell_list: List[Spell], stats: Stats, max_used_pa) -> Tuple[List[Spell], int]:
+def get_best_combination(spell_list: List[Spell], stats: Stats, max_used_pa, resistances=None) -> Tuple[List[Spell], int]:
     weights = [spell.get_pa() for spell in spell_list]
-    values = [int(10000 * spell.get_average_damages(stats)) for spell in spell_list]
+    values = [int(10000 * spell.get_average_damages(stats, resistances)) for spell in spell_list]
 
     indexes, max_damages = _dp_knapsack(weights, values, max_used_pa)
 

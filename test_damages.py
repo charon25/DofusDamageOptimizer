@@ -19,6 +19,17 @@ class TestDamages(unittest.TestCase):
         self.assertEqual(damage_spell_crit, 10)
         self.assertEqual(damage_melee_crit, 10)
 
+    def test_resistance(self):
+        stats = Stats()
+
+        damage_spell_50_res = compute_damage(10, stats, Characteristics.AGILITY, is_melee=False, resistance=50, is_crit=False)
+        damage_spell_150_res = compute_damage(10, stats, Characteristics.AGILITY, is_melee=False, resistance=200, is_crit=False)
+        damage_spell_minus_200_res = compute_damage(10, stats, Characteristics.AGILITY, is_melee=False, resistance=-200, is_crit=False)
+
+        self.assertEqual(damage_spell_50_res, 5)
+        self.assertEqual(damage_spell_150_res, 0)
+        self.assertEqual(damage_spell_minus_200_res, 30)
+
     def test_only_characteristic_multiplier(self):
         stats = Stats()
 
