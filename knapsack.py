@@ -18,7 +18,7 @@ def _dp_knapsack(weights: List[int], values: List[int], W):
                 T[i][c] = T[i - 1][c]
 
     i, c = N, W
-    indexes = []
+    indexes = list()
     while T[i][c] != 0:
         if T[i-1][c] < T[i][c]:
             indexes.append(i - 1)

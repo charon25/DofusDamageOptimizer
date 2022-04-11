@@ -8,7 +8,7 @@ from spell import Spell
 
 class SpellSet:
     def __init__(self):
-        self.spells: List[Spell] = []
+        self.spells: List[Spell] = list()
         self.name = ''
         self.short_name = ''
 
@@ -25,7 +25,7 @@ class SpellSet:
         self.spells.remove(spell)
 
     def get_spell_list_single_target(self, max_used_pa, min_po=-1, max_po=1024):
-        spell_list: List[Spell] = []
+        spell_list: List[Spell] = list()
 
         for spell in self.spells:
             if spell.can_reach_po(min_po, max_po):
@@ -35,7 +35,7 @@ class SpellSet:
         return spell_list
 
     def get_spell_list_multiple_targets(self, max_used_pa, min_po=-1, max_po=1024):
-        spell_list: List[Spell] = []
+        spell_list: List[Spell] = list()
 
         for spell in self.spells:
             if spell.can_reach_po(min_po, max_po):
@@ -71,7 +71,7 @@ class SpellSet:
         if not spell_dir.endswith('\\'):
             spell_dir += '\\'
 
-        spell_filepaths = []
+        spell_filepaths = list()
         for spell in self.spells:
             spell_safe_filename = spell.get_safe_name() # replaces all non alphanumeric chars by an underscore
             spell_filepath = f'{spell_dir}{spell_safe_filename}.json'

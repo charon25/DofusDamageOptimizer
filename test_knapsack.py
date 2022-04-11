@@ -6,8 +6,8 @@ from knapsack import _dp_knapsack
 class TestDamages(unittest.TestCase):
 
     def test_empty_knapsack(self):
-        weights = []
-        values = []
+        weights = list()
+        values = list()
         W = 1
 
         indexes, max_value = _dp_knapsack(weights, values, W)

@@ -29,8 +29,8 @@ class Damages(str, Enum):
 
 class Stats:
     def __init__(self) -> None:
-        self.characteristics: Dict[Characteristics, int] = {}
-        self.damages: Dict[Characteristics, int] = {}
+        self.characteristics: Dict[Characteristics, int] = dict()
+        self.damages: Dict[Characteristics, int] = dict()
         self.bonus_crit_chance = 0.0
         self.name = ''
         self.short_name = ''

@@ -20,10 +20,10 @@ class Manager:
 
     def __init__(self, print_method: Callable[[int, str], Any]) -> None:
         self.print = print_method
-        self.stats: Dict[str, Stats] = {}
-        self.spells: Dict[str, Spell] = {}
-        self.spell_sets: Dict[str, SpellSet] = {}
-        self.default_params = {}
+        self.stats: Dict[str, Stats] = dict()
+        self.spells: Dict[str, Spell] = dict()
+        self.spell_sets: Dict[str, SpellSet] = dict()
+        self.default_params = dict()
 
         self._create_dirs()
         self._load_from_file()
@@ -93,19 +93,19 @@ class Manager:
 
 
     def save(self, print_message=True):
-        stats_filepaths = []
+        stats_filepaths = list()
         for stats in self.stats.values():
             filepath = f'stats\\{stats.get_safe_name()}.json'
             stats.save_to_file(filepath)
             stats_filepaths.append(filepath)
 
-        spells_filepaths = []
+        spells_filepaths = list()
         for spell in self.spells.values():
             filepath = f'spells\\{spell.get_safe_name()}.json'
             spell.save_to_file(filepath)
             spells_filepaths.append(filepath)
 
-        spell_sets = []
+        spell_sets = list()
         for spell_set in self.spell_sets.values():
             spell_sets.append({
                 'spells': [spell.get_short_name() for spell in spell_set],
@@ -605,7 +605,7 @@ class Manager:
         po = None
         resistances = {characteristic: 0 for characteristic in Characteristics}
         list_type = self.default_params['t']
-        additional_stats = []
+        additional_stats = list()
 
         try:
             index = 2
@@ -672,7 +672,7 @@ class Manager:
             self.print(1, "Error while parsing damage command.")
             return
 
-        spell_list = []
+        spell_list = list()
         if list_type == 'mono':
             spell_list = spell_set.get_spell_list_single_target(max_used_pa=pa, min_po=min_po, max_po=max_po)
         elif list_type == 'multi':
