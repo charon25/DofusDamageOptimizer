@@ -144,7 +144,7 @@ class SpellSet:
     @classmethod
     def from_file(cls, filepath):
         if not (os.path.isfile(filepath) and os.access(filepath, os.R_OK)):
-            raise FileNotFoundError(f"Cannot create spell set from file {filepath} : file not found or innaccessible.")
+            raise FileNotFoundError(f"Cannot create spell set from file {filepath}: file not found or innaccessible.")
 
         with open(filepath, 'r', encoding='utf-8') as fi:
             json_string = fi.read()

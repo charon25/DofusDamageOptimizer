@@ -37,6 +37,7 @@ Every `<name>` parameter in the commands below should not contains spaces and is
  - `sp mod <name>` : modify a spell (prompt the user for all the changes)
  - `sp ls` : list all the currently available spells
  - `sp show <name>` : show more details on the specified spell
+ - `sp dmg|d <spell_name> <stats_page_name> [[<param> <value>] ...]` : compute and show the detailed damages of a spell with the specified stats page (the params are the `r` and `s` parameters defined in the Damage-related part)
 
 ### Spell sets-related
 
@@ -91,4 +92,17 @@ Using :
  - Comète (425 dmg)
  - Lame Astrale (464 dmg)
  - Morph (air) (433 dmg)
+```
+
+Calculating only one spell damages :
+```
+>>> sp d tison base
+Damages of the spell Tison:
+
+Individual characteristics:
+ - INTELLIGENCE: 102 - 115 (118 - 131)
+ - AGILITY: 327 - 370 (380 - 423)
+
+Total damages:   429 - 485 (498 - 554)
+Average damages: 457 (526) => 468 with 16 % crit chance
 ```

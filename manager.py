@@ -70,7 +70,7 @@ class Manager:
                         try:
                             spell_set.add_spell(self.spells[spell_short_name])
                         except KeyError:
-                            self.print(1, f"Cannot add spell '{spell_short_name}' to spell set '{spell_set_data['short_name']}' : it does not exist.")
+                            self.print(1, f"Cannot add spell '{spell_short_name}' to spell set '{spell_set_data['short_name']}': it does not exist.")
 
                     spell_set.set_name(spell_set_data['name'])
                     spell_set.set_short_name(spell_set_data['short_name'])
@@ -128,12 +128,12 @@ class Manager:
 
     def _set_default_param(self, args: List[str]):
         if len(args) < 2:
-            self.print(1, f'Invalid syntax : missing argument{"s" if len(args) < 1 else ""}.')
+            self.print(1, f'Invalid syntax: missing argument{"s" if len(args) < 1 else ""}.')
             return
 
         param, value = args[:2]
         if not param in self.default_params:
-            self.print(1, f"Unknown parameter : '{param}'.")
+            self.print(1, f"Unknown parameter: '{param}'.")
             return
 
         if param == 'pa':
@@ -209,18 +209,18 @@ class Manager:
             if characteristic == Characteristics.NEUTRAL:
                 continue
 
-            characteristic_value = input(f'{characteristic.name} ({stats.get_characteristic(characteristic)}) : ')
+            characteristic_value = input(f'{characteristic.name} ({stats.get_characteristic(characteristic)}): ')
             if characteristic_value:
                 stats.set_characteristic(characteristic, int(characteristic_value))
 
         self.print(0, '\n=== Damages\n')
         for damage in Damages:
-            damage_value = input(f'{damage.name} ({stats.get_damage(damage)}) : ')
+            damage_value = input(f'{damage.name} ({stats.get_damage(damage)}): ')
             if damage_value:
                 stats.set_damage(damage, int(damage_value))
 
         self.print(0, '')
-        bonus_crit_chance = input(f'Bonus crit chance % ({100 * stats.get_bonus_crit_chance():.1f} %) : ')
+        bonus_crit_chance = input(f'Bonus crit chance % ({100 * stats.get_bonus_crit_chance():.1f} %): ')
         if bonus_crit_chance:
             stats.set_bonus_crit_chance(float(bonus_crit_chance) / 100.0)
 
@@ -327,18 +327,18 @@ class Manager:
         if name:
             spell.set_name(name)
 
-        is_melee = input(f'Melee ({spell.is_melee}) (0/1) : ')
+        is_melee = input(f'Melee ({spell.is_melee}) (0/1): ')
         if is_melee:
             spell.set_melee(distutils.util.strtobool(is_melee))
 
         self.print(0, '\n=== Base damages\n')
         for characteristic in Characteristics:
             unused_characteristic = False
-            self.print(0, f'{characteristic.name} : ')
+            self.print(0, f'{characteristic.name}: ')
             base_damages = spell.get_base_damages(characteristic)
 
             for field in ('min', 'max', 'crit_min', 'crit_max'):
-                value = input(f'  - {field.replace("_", " ").capitalize()} ({base_damages[field]}) : ')
+                value = input(f'  - {field.replace("_", " ").capitalize()} ({base_damages[field]}): ')
                 if value == '/':
                     unused_characteristic = True
                     break
@@ -349,28 +349,28 @@ class Manager:
                 spell.set_base_damages(characteristic, base_damages)
 
         self.print(0, '')
-        pa = input(f'PA count ({spell.get_pa()}) : ')
+        pa = input(f'PA count ({spell.get_pa()}): ')
         if pa:
             spell.set_pa(int(pa))
 
         self.print(0, '')
-        crit_chance = input(f'Crit chance % ({100 * spell.get_crit_chance():.1f} %) : ')
+        crit_chance = input(f'Crit chance % ({100 * spell.get_crit_chance():.1f} %): ')
         if crit_chance:
             spell.set_crit_chance(float(crit_chance) / 100)
 
         self.print(0, '')
-        uses_per_target = input(f'Uses per target ({spell.get_uses_per_target()}) : ')
+        uses_per_target = input(f'Uses per target ({spell.get_uses_per_target()}): ')
         if uses_per_target:
             spell.set_uses_per_target(int(uses_per_target))
 
-        uses_per_turn = input(f'Uses per turn ({spell.get_uses_per_turn()}) : ')
+        uses_per_turn = input(f'Uses per turn ({spell.get_uses_per_turn()}): ')
         if uses_per_turn:
             spell.set_uses_per_turn(int(uses_per_turn))
 
         self.print(0, '')
-        min_po = input(f'Minimum PO ({spell.get_min_po()}) : ')
+        min_po = input(f'Minimum PO ({spell.get_min_po()}): ')
         min_po = int(min_po) if min_po else None
-        max_po = input(f'Maximum PO ({spell.get_max_po()}) : ')
+        max_po = input(f'Maximum PO ({spell.get_max_po()}): ')
         max_po = int(max_po) if min_po else None
 
         spell.set_po(min_po=min_po, max_po=max_po)
@@ -423,11 +423,11 @@ class Manager:
                 spell = self.spells[short_name]
                 printed_string = [f"===== Spell '{spell.get_name()}' ({short_name})", '=== Spell characteristics']
 
-                printed_string.append(f"PA : {spell.get_pa()}")
-                printed_string.append(f"PO : {spell.get_min_po()} - {spell.get_max_po()}")
-                printed_string.append(f"Uses per target : {spell.get_uses_per_target() if spell.get_uses_per_target() > 0 else '∞'}")
-                printed_string.append(f"Uses per turn : {spell.get_uses_per_turn() if spell.get_uses_per_turn() > 0 else '∞'}")
-                printed_string.append(f'Crit chance : {100 * spell.get_crit_chance():.1f} %')
+                printed_string.append(f"PA: {spell.get_pa()}")
+                printed_string.append(f"PO: {spell.get_min_po()} - {spell.get_max_po()}")
+                printed_string.append(f"Uses per target: {spell.get_uses_per_target() if spell.get_uses_per_target() > 0 else '∞'}")
+                printed_string.append(f"Uses per turn: {spell.get_uses_per_turn() if spell.get_uses_per_turn() > 0 else '∞'}")
+                printed_string.append(f'Crit chance: {100 * spell.get_crit_chance():.1f} %')
 
                 printed_string.append("\n=== Base damages\n")
                 for characteristic in Characteristics:
@@ -435,7 +435,7 @@ class Manager:
                     if all(value == 0 for value in base_damages.values()):
                         continue
 
-                    printed_string.append(f" {characteristic.name} : {base_damages['min']} - {base_damages['max']} ({base_damages['crit_min']} - {base_damages['crit_max']})")
+                    printed_string.append(f" {characteristic.name}: {base_damages['min']} - {base_damages['max']} ({base_damages['crit_min']} - {base_damages['crit_max']})")
 
                 self.print(0, '\n'.join(printed_string))
             else:
@@ -472,6 +472,75 @@ class Manager:
                 self.print(0, f"Spell '{short_name}' successfully deleted!")
             else:
                 self.print(1, f"Spell '{short_name}' does not exist.")
+        elif command_action in ('dmg', 'd'):
+            if len(args) < 3:
+                self.print(1, 'Missing spell name and/or stats page name.')
+                return
+
+            spell_short_name = args[1]
+            if not spell_short_name in self.spells:
+                self.print(1, f"Spell '{spell_short_name}' does not exist.")
+                return
+
+            spell = self.spells[spell_short_name]
+
+            stats_short_name = args[2]
+            if not stats_short_name in self.stats:
+                self.print(1, f"Stats page '{stats_short_name}' does not exist.")
+                return
+            
+            stats = self.stats[stats_short_name]
+
+            resistances = {characteristic: 0 for characteristic in Characteristics}
+            additional_stats = list()
+
+            try:
+                index = 3
+                while index < len(args):
+                    param = args[index]
+                    if param in ('r', 'res'):
+                        values = args[index + 1:index + 6] # 5 values
+                        if len(values) < 5:
+                            raise ValueError
+                        index += 6
+                        for k, value in enumerate(values):
+                            # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
+                            characteristic_key = str(k - 1) if k > 0 else '4' 
+                            resistances[Characteristics(characteristic_key)] = int(value)
+                    elif param in ('s', 'st', 'stats'):
+                        values = args[index + 1:]
+                        for value in values:
+                            if not value in self.stats:
+                                self.print(0, f"[WARNING] Unknown additional stats page: '{value}'.")
+                            else:
+                                additional_stats.append(self.stats[value])
+                        break # Must be the last argument
+                    else:
+                        self.print(0, f"[WARNING] Unknown parameter: '{param}'.")
+                        index += 1
+            except ValueError:
+                self.print(1, "Error while parsing the command.")
+                return
+
+            total_stats = sum([stats] + additional_stats)
+            dmg_characs, dmg_total, (average_dmg, average_dmg_crit) = spell.get_detailed_damages(total_stats, resistances)
+
+            final_crit_chance = spell.get_crit_chance() + total_stats.get_bonus_crit_chance()
+            if final_crit_chance > 1.0:
+                final_crit_chance = 1.0
+
+            average_dmg_final = average_dmg * (1 - final_crit_chance) + average_dmg_crit * final_crit_chance
+
+            self.print(0, f'Damages of the spell {spell.get_name()}:\n')
+            self.print(0, 'Individual characteristics:')
+            for characteristic in Characteristics:
+                if sum(dmg_characs[characteristic][field] for field in ('min', 'max', 'crit_min', 'crit_max')) > 0:
+                    self.print(0, f' - {characteristic.name}: {dmg_characs[characteristic]["min"]} - {dmg_characs[characteristic]["max"]} ({dmg_characs[characteristic]["crit_min"]} - {dmg_characs[characteristic]["crit_max"]})')
+
+            self.print(0, '')
+            self.print(0, f'Total damages:   {dmg_total["min"]} - {dmg_total["max"]} ({dmg_total["crit_min"]} - {dmg_total["crit_max"]})')
+            self.print(0, f'Average damages: {average_dmg:.0f} ({average_dmg_crit:.0f}) => {average_dmg_final:.0f} with {100 * final_crit_chance:.0f} % crit chance')
+
         else:
             self.print(1, f"Unknown action '{command_action}' for spell commands.")
 
@@ -496,7 +565,7 @@ class Manager:
             spell_set = SpellSet()
             spell_set.set_short_name(short_name)
             try:
-                spell_set.set_name(input("Spell set name : ") or short_name)
+                spell_set.set_name(input("Spell set name: ") or short_name)
             except KeyboardInterrupt:
                 self.print(0, '\nCancelled spell set creation.')
                 return
@@ -508,7 +577,7 @@ class Manager:
         elif command_action == 'ls':
             self.print(0, '=== Spell sets\n')
             for spell_set in sorted(self.spell_sets.values(), key=lambda spell_set: spell_set.get_name()):
-                self.print(0, f" - '{spell_set.get_name()}' ({spell_set.get_short_name()}) : {len(spell_set)} spell{'s' if len(spell_set) > 1 else ''}")
+                self.print(0, f" - '{spell_set.get_name()}' ({spell_set.get_short_name()}): {len(spell_set)} spell{'s' if len(spell_set) > 1 else ''}")
 
         elif command_action == 'show':
             if len(args) < 2:
@@ -521,7 +590,7 @@ class Manager:
                 spell_set = self.spell_sets[short_name]
                 printed_string = [f"===== Spell set '{spell_set.get_name()}' ({short_name})"]
 
-                printed_string.append("Spells : ")
+                printed_string.append("Spells: ")
 
                 for spell in spell_set:
                     printed_string.append(f" - {spell.get_name()} ({spell.get_short_name()})")
@@ -654,16 +723,17 @@ class Manager:
                     values = args[index + 1:]
                     for value in values:
                         if not value in self.stats:
-                            self.print(0, f"[WARNING] Unknown additional stats page : '{value}'.")
+                            self.print(0, f"[WARNING] Unknown additional stats page: '{value}'.")
                         else:
                             additional_stats.append(self.stats[value])
                     break # Must be the last argument
                 else:
-                    self.print(0, f"[WARNING] Unknown parameter : '{param}'.")
+                    self.print(0, f"[WARNING] Unknown parameter: '{param}'.")
                     index += 1
         except ValueError:
             self.print(1, "Error while parsing damage command.")
             return
+
         if po is not None:
             min_po = po
             max_po = po
@@ -680,16 +750,16 @@ class Manager:
         elif list_type == 'versa':
             spell_list = spell_set.get_spell_list_versatile(max_used_pa=pa, min_po=min_po, max_po=max_po)
 
-        stats = sum([stats] + additional_stats)
+        total_stats = sum([stats] + additional_stats)
 
-        best_spells, max_damage = get_best_combination(spell_list, stats, pa, resistances)
+        best_spells, max_damage = get_best_combination(spell_list, total_stats, pa, resistances)
 
         best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
 
-        self.print(0, f"Maximum average damages (PA = {pa} ; PO = {min_po} - {max_po} ; type = {list_type}) is : {int(max_damage):.0f}\n")
-        self.print(0, 'Using : ')
+        self.print(0, f"Maximum average damages (PA = {pa} ; PO = {min_po} - {max_po} ; type = {list_type}) is: {int(max_damage):.0f}\n")
+        self.print(0, 'Using: ')
         for spell in best_spells:
-            self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(stats, resistances)):.0f} dmg)")
+            self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(total_stats, resistances)):.0f} dmg)")
 
 
     def execute_command(self, command: str):
@@ -718,4 +788,4 @@ class Manager:
             self._execute_damages_command(args)
             return
 
-        self.print(1, f"Unknown command instruction : '{instr}'.")
+        self.print(1, f"Unknown command instruction: '{instr}'.")

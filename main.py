@@ -16,7 +16,7 @@ def command_loop(manager: Manager):
             try:
                 manager.execute_command(command)
             except Exception as e:
-                print(f"Error while executing command {command} : {e}")
+                print(f"Error while executing command {command}: {e}")
 
         print()
 
