@@ -493,6 +493,7 @@ class Manager:
             stats = self.stats[stats_short_name]
 
             resistances = {characteristic: 0 for characteristic in Characteristics}
+            distance = 'range'
             additional_stats = list()
 
             try:
@@ -516,6 +517,12 @@ class Manager:
                             else:
                                 additional_stats.append(self.stats[value])
                         break # Must be the last argument
+                    elif param == ':r':
+                        distance = 'range'
+                        index += 1
+                    elif param == ':m':
+                        distance = 'melee'
+                        index += 1
                     else:
                         self.print(0, f"[WARNING] Unknown parameter: '{param}'.")
                         index += 1
@@ -524,7 +531,7 @@ class Manager:
                 return
 
             total_stats = sum([stats] + additional_stats)
-            dmg_characs, dmg_total, (average_dmg, average_dmg_crit) = spell.get_detailed_damages(total_stats, resistances)
+            dmg_characs, dmg_total, (average_dmg, average_dmg_crit) = spell.get_detailed_damages(total_stats, resistances, distance)
 
             final_crit_chance = spell.get_crit_chance() + total_stats.get_bonus_crit_chance()
             if final_crit_chance > 1.0:
@@ -532,7 +539,7 @@ class Manager:
 
             average_dmg_final = average_dmg * (1 - final_crit_chance) + average_dmg_crit * final_crit_chance
 
-            self.print(0, f'Damages of the spell {spell.get_name()}:\n')
+            self.print(0, f'Damages of the spell {spell.get_name()} (distance: {distance}):\n')
             self.print(0, 'Individual characteristics:')
             for characteristic in Characteristics:
                 if sum(dmg_characs[characteristic][field] for field in ('min', 'max', 'crit_min', 'crit_max')) > 0:
@@ -676,6 +683,7 @@ class Manager:
         resistances = {characteristic: 0 for characteristic in Characteristics}
         list_type = self.default_params['t']
         additional_stats = list()
+        distance = 'range'
 
         try:
             index = 2
@@ -728,6 +736,12 @@ class Manager:
                         else:
                             additional_stats.append(self.stats[value])
                     break # Must be the last argument
+                elif param == ':r':
+                    distance = 'range'
+                    index += 1
+                elif param == ':m':
+                    distance = 'melee'
+                    index += 1
                 else:
                     self.print(0, f"[WARNING] Unknown parameter: '{param}'.")
                     index += 1
@@ -753,7 +767,7 @@ class Manager:
 
         total_stats = sum([stats] + additional_stats)
 
-        best_spells, max_damage = get_best_combination(spell_list, total_stats, pa, resistances)
+        best_spells, max_damage = get_best_combination(spell_list, total_stats, pa, resistances, distance)
 
         best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
 
