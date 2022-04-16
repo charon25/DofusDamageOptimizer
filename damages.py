@@ -1,12 +1,12 @@
 from stats import Characteristics, Damages, Stats
 
 
-def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, is_melee, resistance: int = 0, is_crit=False, distance='range'):
+def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, is_weapon, resistance: int = 0, is_crit=False, distance='range'):
     if base_damage == 0:
         return 0
 
     power = stats.get_damage(Damages.POWER)
-    if is_melee:
+    if is_weapon:
         power += stats.get_damage(Damages.WEAPON_POWER)
 
     characteristic_multiplier = 1 + (stats.get_characteristic(characteristic) + power) / 100
@@ -16,7 +16,7 @@ def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, i
         flat_damages += stats.get_damage(Damages.CRIT)
 
     final_multiplier = 1.0 + stats.get_damage(Damages.FINAL) / 100
-    if is_melee:
+    if is_weapon:
         final_multiplier += stats.get_damage(Damages.WEAPON) / 100
     else:
         final_multiplier += stats.get_damage(Damages.SPELL) / 100

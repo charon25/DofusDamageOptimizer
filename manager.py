@@ -327,9 +327,9 @@ class Manager:
         if name:
             spell.set_name(name)
 
-        is_melee = input(f'Melee ({spell.is_melee}) (0/1): ')
-        if is_melee:
-            spell.set_melee(distutils.util.strtobool(is_melee))
+        is_weapon = input(f'Weapon ({spell.is_weapon}) (0/1): ')
+        if is_weapon:
+            spell.set_weapon(distutils.util.strtobool(is_weapon))
 
         self.print(0, '\n=== Base damages\n')
         for characteristic in Characteristics:
@@ -428,6 +428,7 @@ class Manager:
                 printed_string.append(f"Uses per target: {spell.get_uses_per_target() if spell.get_uses_per_target() > 0 else '∞'}")
                 printed_string.append(f"Uses per turn: {spell.get_uses_per_turn() if spell.get_uses_per_turn() > 0 else '∞'}")
                 printed_string.append(f'Crit chance: {100 * spell.get_crit_chance():.1f} %')
+                printed_string.append(f'Weapon: {spell.is_weapon}')
 
                 printed_string.append("\n=== Base damages\n")
                 for characteristic in Characteristics:

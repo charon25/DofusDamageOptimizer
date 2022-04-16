@@ -26,9 +26,9 @@ class TestSpell(unittest.TestCase):
     def test_create_from_incomplete_json(self):
         json_missing_all_fields = '{}'
         json_missing_scalar_parameter = '{"base_damages": {}}'
-        json_missing_base_damages = '{"short_name": "sn", "name": "name", "pa": 1, "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true}'
+        json_missing_base_damages = '{"short_name": "sn", "name": "name", "pa": 1, "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_weapon": true}'
         # Double { and } because of .format
-        json_missing_one_characteristic = '{{"pa": 1, "short_name": "sn", "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": true, "base_damages": {0}}}'.format(
+        json_missing_one_characteristic = '{{"pa": 1, "short_name": "sn", "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_weapon": true, "base_damages": {0}}}'.format(
             {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics if characteristic != Characteristics.LUCK}
         ).replace("'", '"')
 
@@ -39,7 +39,7 @@ class TestSpell(unittest.TestCase):
             Spell.from_json_string(json_missing_one_characteristic)
 
     def test_create_from_valid_json(self):
-        valid_json_string = '{{"short_name": "sn", "pa": 1, "po": [1, 5], "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_melee": false, "base_damages": {0}}}'.format(
+        valid_json_string = '{{"short_name": "sn", "pa": 1, "po": [1, 5], "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_weapon": false, "base_damages": {0}}}'.format(
             {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics}
         ).replace("'", '"')
 
@@ -256,11 +256,11 @@ class TestSpell(unittest.TestCase):
 
         self.assertAlmostEqual(damage, 140.0)
 
-    def test_damage_melee(self):
+    def test_damage_weapon(self):
         stats = Stats()
         spell = Spell()
 
-        spell.set_melee(True)
+        spell.set_weapon(True)
         spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
         stats.set_damage(Damages.SPELL, 100)
         stats.set_damage(Damages.WEAPON_POWER, 300)

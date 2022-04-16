@@ -78,9 +78,9 @@ class TestStats(unittest.TestCase):
 
         spell_set = SpellSet()
         spell1 = Spell()
-        spell1.set_name('spell1')
+        spell1.set_short_name('spell1')
         spell2 = Spell()
-        spell2.set_name('spell 2')
+        spell2.set_short_name('spell 2')
 
         spell_set.add_spell(spell1)
         spell_set.add_spell(spell2)

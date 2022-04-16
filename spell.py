@@ -14,7 +14,7 @@ class Spell():
         self.crit_chance = 0.0
         self.uses_per_target = -1
         self.uses_per_turn = -1
-        self.is_melee = False
+        self.is_weapon = False
         self.po = (0, 1024)
         self.name = ''
         self.short_name = ''
@@ -37,12 +37,12 @@ class Spell():
         damages_by_characteristic: Dict[Characteristics, Dict[str, float]] = dict()
 
         for characteristic in Characteristics:
-            min_damage = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, is_melee=self.is_melee, resistance=resistances[characteristic])
-            max_damage = compute_damage(self.base_damages[characteristic]['max'], stats, characteristic, is_melee=self.is_melee, resistance=resistances[characteristic])
+            min_damage = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, is_weapon=self.is_weapon, resistance=resistances[characteristic])
+            max_damage = compute_damage(self.base_damages[characteristic]['max'], stats, characteristic, is_weapon=self.is_weapon, resistance=resistances[characteristic])
             average_damage += (min_damage + max_damage) / 2
 
-            min_damage_crit = compute_damage(self.base_damages[characteristic]['crit_min'], stats, characteristic, is_melee=self.is_melee, resistance=resistances[characteristic], is_crit=True)
-            max_damage_crit = compute_damage(self.base_damages[characteristic]['crit_max'], stats, characteristic, is_melee=self.is_melee, resistance=resistances[characteristic], is_crit=True)
+            min_damage_crit = compute_damage(self.base_damages[characteristic]['crit_min'], stats, characteristic, is_weapon=self.is_weapon, resistance=resistances[characteristic], is_crit=True)
+            max_damage_crit = compute_damage(self.base_damages[characteristic]['crit_max'], stats, characteristic, is_weapon=self.is_weapon, resistance=resistances[characteristic], is_crit=True)
             average_damage_crit += (min_damage_crit + max_damage_crit) / 2
 
             damages_by_characteristic[characteristic] = {
@@ -103,7 +103,7 @@ class Spell():
             'crit_chance': self.crit_chance,
             'uses_per_target': self.uses_per_target,
             'uses_per_turn': self.uses_per_turn,
-            'is_melee': self.is_melee,
+            'is_weapon': self.is_weapon,
             'name': self.name,
             'short_name': self.short_name,
             'po': list(self.po)
@@ -186,11 +186,11 @@ class Spell():
         self.uses_per_turn = uses_per_turn
 
 
-    def set_melee(self, is_melee):
-        if not (isinstance(is_melee, bool) or (isinstance(is_melee, int) and is_melee in [0, 1])):
-            raise TypeError(f"is_melee is not a bool ('{is_melee}' of type '{type(is_melee)}' given instead).")
+    def set_weapon(self, is_weapon):
+        if not (isinstance(is_weapon, bool) or (isinstance(is_weapon, int) and is_weapon in [0, 1])):
+            raise TypeError(f"is_weapon is not a bool ('{is_weapon}' of type '{type(is_weapon)}' given instead).")
 
-        self.is_melee = bool(is_melee)
+        self.is_weapon = bool(is_weapon)
 
 
     def get_min_po(self):
@@ -241,7 +241,7 @@ class Spell():
 
     @classmethod
     def check_json_validity(cls, json_data):
-        for key in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_melee', 'name', 'short_name', 'po'):
+        for key in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_weapon', 'name', 'short_name', 'po'):
             if not key in json_data:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
 
@@ -261,7 +261,7 @@ class Spell():
         spell.set_crit_chance(json_data['crit_chance'])
         spell.set_uses_per_target(json_data['uses_per_target'])
         spell.set_uses_per_turn(json_data['uses_per_turn'])
-        spell.set_melee(json_data['is_melee'])
+        spell.set_weapon(json_data['is_weapon'])
         spell.set_name(json_data['name'])
         spell.set_short_name(json_data['short_name'])
         spell.set_po(min_po=json_data['po'][0], max_po=json_data['po'][1])
