@@ -24,6 +24,8 @@ class Damages(str, Enum):
     SPELL = 6
     WEAPON = 7
     WEAPON_POWER = 10
+    RANGE = 12
+    MELEE = 13
     FINAL = 11
 
 

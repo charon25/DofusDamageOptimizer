@@ -1,7 +1,7 @@
 from stats import Characteristics, Damages, Stats
 
 
-def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, is_melee, resistance: int = 0, is_crit=False):
+def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, is_melee, resistance: int = 0, is_crit=False, distance='range'):
     if base_damage == 0:
         return 0
 
@@ -20,6 +20,11 @@ def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, i
         final_multiplier += stats.get_damage(Damages.WEAPON) / 100
     else:
         final_multiplier += stats.get_damage(Damages.SPELL) / 100
+    
+    if distance == 'range':
+        final_multiplier += stats.get_damage(Damages.RANGE) / 100
+    elif distance == 'melee':
+        final_multiplier += stats.get_damage(Damages.MELEE) / 100
 
     resistance_multiplier = max(0, 1 - resistance / 100) # Can't be negative damages
 
