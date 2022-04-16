@@ -97,9 +97,6 @@ class Stats:
         if not isinstance(value, int):
             raise TypeError(f"Value should be an int ('{value}' of type '{type(value)}' given instead).")
 
-        if value < 0:
-            raise ValueError(f"Value should be non negative ('{value}' given instead).")
-
         self.characteristics[characteristic] = value
 
         if characteristic == Characteristics.STRENGTH:
@@ -118,9 +115,6 @@ class Stats:
 
         if not isinstance(value, int):
             raise TypeError(f"Value should be an int ('{value}' of type '{type(value)}' given instead).")
-
-        if value < 0:
-            raise ValueError(f"Value should be non negative ('{value}' given instead).")
 
         self.damages[damage] = value
 
