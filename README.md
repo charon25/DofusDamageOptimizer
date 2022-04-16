@@ -37,7 +37,7 @@ Every `<name>` parameter in the commands below should not contains spaces and is
  - `sp mod <name>` : modify a spell (prompt the user for all the changes)
  - `sp ls` : list all the currently available spells
  - `sp show <name>` : show more details on the specified spell
- - `sp dmg|d <spell_name> <stats_page_name> [[<param> <value>] ...]` : compute and show the detailed damages of a spell with the specified stats page (the params are the `r` and `s` parameters defined in the Damage-related part)
+ - `sp dmg|d <spell_name> <stats_page_name> [[<param> <value>] ...]` : compute and show the detailed damages of a spell with the specified stats page (the params are the `r`, `s` and distance parameters defined in the Damage-related part)
 
 ### Spell sets-related
 
