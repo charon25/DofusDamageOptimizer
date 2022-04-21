@@ -66,8 +66,15 @@ The possible parameters for every command that requires it are :
 
 ## Examples of damages computation
 
+Setting default parameters :
 ```
->>> dmg base base
+>>> def -s base -pa 11 -pomin 1 -pomax 10 -t mono
+Default parameters successfully set.
+```
+
+Simple damages optimisation (`base` is the name of the spell set) :
+```
+>>> dmg base
 Maximum average damages (PA = 11 ; PO = 1 - 10 ; type = mono) is : 1278
 
 Using :
@@ -76,11 +83,10 @@ Using :
  - Morph (air) (408 dmg)
  - Ouragan (270 dmg)
 ```
-Here, there are both a spell set named `base` and a stats page named `base`.
 
 With parameters :
 ```
->>> dmg base base po 8 t multi
+>>> dmg base -po 8 -t multi
 Maximum average damages (PA = 11 ; PO = 8 - 8 ; type = multi) is : 1287
 
 Using :
@@ -91,7 +97,7 @@ Using :
 
 With an additional stats page :
 ```
->>> dmg base base po 8 t versa s turquoise
+>>> dmg base -po 8 -t versa -s turquoise
 Maximum average damages (PA = 11 ; PO = 8 - 8 ; type = versa) is : 1324
 
 Using :
@@ -102,7 +108,7 @@ Using :
 
 Calculating only one spell damages :
 ```
->>> sp d tison base
+>>> sp d tison
 Damages of the spell Tison:
 
 Individual characteristics:
