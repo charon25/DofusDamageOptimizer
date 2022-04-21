@@ -14,11 +14,7 @@ Every `<name>` parameter in the commands below should not contains spaces and is
 
  - `s` : save everything (automatically done after most actions)
  - `i` : get informations on current state (TODO)
- - `def <param> <value>` : define default options for the damage computation, where `param` and `value` should respect :
-   - `param = pa` and `value > 0`
-   - `param = pomin` and `pomax >= value >= 0`
-   - `param = pomax` and `value >= pomin >= 0`
-   - `param = t` and `value = mono|multi|versa`
+ - `def [[<parameter> <value>] ...]` : define default options for the damage computations (the parameters are described in the "Parameters" section)
  - `h` : help
  - `q` : quit
 
@@ -37,7 +33,7 @@ Every `<name>` parameter in the commands below should not contains spaces and is
  - `sp mod <name>` : modify a spell (prompt the user for all the changes)
  - `sp ls` : list all the currently available spells
  - `sp show <name>` : show more details on the specified spell
- - `sp dmg|d <spell_name> <stats_page_name> [[<param> <value>] ...]` : compute and show the detailed damages of a spell with the specified stats page (the params are the `r`, `s` and distance parameters defined in the Damage-related part)
+ - `sp dmg|d <spell_name> [[<parameter> <value>] ...]` : compute and show the detailed damages of a spell (the parameters are described in the "Parameters" section)
 
 ### Spell sets-related
 
@@ -51,13 +47,22 @@ Every `<name>` parameter in the commands below should not contains spaces and is
 ### Damage-related
 
 The command to get the best combination of spells for given constraints is : 
-`dmg <spell_set_name> <stats_page_name> [[<param> <value>] ...]`
-where the params can be : 
- - Those presented in the "General" section
- - `po <value>` which sets both minimum and maximum PO to the value
- - `r|res <neutral_res> <earth_res> <fire_res> <water_res> <air_res>` which sets ennemy resistances for damages computation
- - `s <add_stats_page1> <add_stats_page2>...` which adds additional stats page to the damages computation (simple addition between the same stats). Must be the **LAST** parameter, as everything following it will be considered as a stats page
- - `:r` or `:m` to specify the distance : `:r` for range damages (default), `:m` for melee damages
+`dmg <spell_set_name> [[<param> <value>] ...]`
+The parameters are described in the "Parameters" section.
+
+### Parameters
+
+The possible parameters for every command that requires it are :
+ - `-s` (or `-stats`) followed by as many stats page short name as wanted : the stats page to use for the computations ;
+ - `-pa` followed by a positive integer : the maximum number of AP (*action point*) to use ;
+ - `-po` followed by a non negative integer : the exact range to the enemy ;
+ - `-pomin` (or `-minpo`) followed by a non negative integer : the minimum range to the enemy ;
+ - `-pomax` (or `-maxpo`) followed by a non negative integer : the maximum range to the enemy (note that maximum should be >= minimum) ;
+ - `-t` (or `-type`) followed by one of `mono`, `multi`, `versa` : indicates if the computation takes into account the number of uses per target ('mono'), the number of uses per turn ('multi') or only one time each spell ('versa') ;
+ - `-r` (or `-res`, `-resistances`) followed by five integers (may be negative) : indicates the resistances of the enemy to each element (in order : NEUTRAL, EARTH, FIRE, WATER, AIR) ;
+ - `-d` (or `-distance`) followed by one of `melee`, `range` : indicates if the damage computations should take into account RANGE or MELEE damages ;
+ - `-v` (or `-vulne`, `-vulnerability`) followed by one integer (may be negative) : indicate the bonus (or reduced) damages dealt because of vulnerability or damage reduction (independant from resistances).
+
 
 ## Examples of damages computation
 
