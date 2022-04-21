@@ -1,7 +1,9 @@
 from typing import List, Tuple
 
+from damages_parameters import DamageParameters
 from spell import Spell
 from stats import Stats
+
 
 def _dp_knapsack(weights: List[int], values: List[int], W):
     N = len(weights)
@@ -29,10 +31,11 @@ def _dp_knapsack(weights: List[int], values: List[int], W):
     return (indexes, T[N][W])
 
 
-def get_best_combination(spell_list: List[Spell], stats: Stats, max_used_pa, resistances=None, distance='range') -> Tuple[List[Spell], int]:
+def get_best_combination(spell_list: List[Spell], stats: Stats, parameters: DamageParameters) -> Tuple[List[Spell], int]:
     weights = [spell.get_pa() for spell in spell_list]
-    values = [int(10000 * spell.get_average_damages(stats, resistances, distance)) for spell in spell_list]
+    # Multiplication by 10 000 to get integers without losing too much accuracy
+    values = [int(10000 * spell.get_average_damages(stats, parameters)) for spell in spell_list]
 
-    indexes, max_damages = _dp_knapsack(weights, values, max_used_pa)
+    indexes, max_damages = _dp_knapsack(weights, values, parameters.pa)
 
     return ([spell_list[index] for index in indexes], max_damages / 10000)

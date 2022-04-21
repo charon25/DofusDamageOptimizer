@@ -4,6 +4,7 @@ import os
 from typing import Any, Callable, Dict, List
 
 from knapsack import get_best_combination
+from damages_parameters import DamageParameters
 from spell import Spell
 from spell_set import SpellSet
 from stats import Characteristics, Damages, Stats
@@ -23,7 +24,7 @@ class Manager:
         self.stats: Dict[str, Stats] = dict()
         self.spells: Dict[str, Spell] = dict()
         self.spell_sets: Dict[str, SpellSet] = dict()
-        self.default_params = dict()
+        self.default_params = DamageParameters()
 
         self._create_dirs()
         self._load_from_file()
@@ -34,12 +35,7 @@ class Manager:
                 os.mkdir(directory)
 
     def _load_default(self):
-        self.default_params = {
-            'pa': 1,
-            'pomin': 0,
-            'pomax': 2048,
-            't': 'mono'
-        }
+        self.default_params = DamageParameters(pa=1, po=[0, 2048], type='mono')
 
     def _load_from_file(self):
         try:
@@ -79,12 +75,7 @@ class Manager:
                     self.print(1, f"Could not load spell set '{spell_set_data['name']}'.")
 
             # DEFAULT PARAMS
-            self.default_params = json_data['default_params']
-            self.default_params['pa'] = int(self.default_params['pa'])
-            self.default_params['pomin'] = int(self.default_params['pomin'])
-            self.default_params['pomax'] = int(self.default_params['pomax'])
-            if not self.default_params['t'] in ('mono', 'multi', 'versa'):
-                raise TypeError
+            self.default_params = DamageParameters.from_string(json_data['default_params'])
 
         except (FileNotFoundError, KeyError, TypeError):
             self.print(1, "'manager.json' file does not exist or is innaccessible, using default load.")
@@ -117,7 +108,7 @@ class Manager:
             'stats': stats_filepaths,
             'spells': spells_filepaths,
             'spell_sets': spell_sets,
-            'default_params': self.default_params
+            'default_params': self.default_params.to_string()
         }
 
         with open('manager.json', 'w', encoding='utf-8') as fo:
@@ -127,63 +118,25 @@ class Manager:
             self.print(0, 'Data successfully saved!')
 
     def _set_default_param(self, args: List[str]):
-        if len(args) < 2:
-            self.print(1, f'Invalid syntax: missing argument{"s" if len(args) < 1 else ""}.')
+        command_string = " ".join(args)
+
+        try:
+            self.default_params = DamageParameters.from_string(command_string, self.default_params)
+        except ValueError as e:
+            self.print(1, str(e))
+            return
+        except Exception:
+            self.print(1, 'Unknown error occured during setting of default parameters.')
             return
 
-        param, value = args[:2]
-        if not param in self.default_params:
-            self.print(1, f"Unknown parameter: '{param}'.")
-            return
-
-        if param == 'pa':
-            try:
-                value = int(value)
-            except ValueError:
-                self.print(1, 'Default value for PA should be an int.')
-                return
-            if value <= 0:
-                self.print(1, 'Default value for PA should be positive.')
-                return
-            self.default_params[param] = value
-            self.print(0, f"Default PA count successfully set to '{value}'.")
-
-        elif param in ('pomin', 'po_min', 'minpo', 'min_po'):
-            try:
-                value = int(value)
-            except ValueError:
-                self.print(1, 'Default value for minimum PO should be an int.')
-                return
-            if value < 0 or value > self.default_params['pomax']:
-                self.print(1, 'Default value for minimum PO should be non-negative and smaller or equal to maximum PO.')
-                return
-            self.default_params[param] = value
-            self.print(0, f"Default minimum PO successfully set to '{value}'.")
-
-        elif param in ('pomax', 'po_max', 'maxpo', 'max_po'):
-            try:
-                value = int(value)
-            except ValueError:
-                self.print(1, 'Default value for maximum PO should be an int.')
-                return
-            if value < 0 or value < self.default_params['pomin']:
-                self.print(1, 'Default value for maximum PO should be non-negative and greater or equal to minimum PO.')
-                return
-            self.default_params[param] = value
-            self.print(0, f"Default maximum PO successfully set to '{value}'.")
-
-        elif param == 't':
-            if not value in ('mono', 'multi', 'versa'):
-                self.print(1, "Type should be one of 'mono', 'multi', 'versa'.")
-                return
-            self.default_params[param] = value
-            self.print(0, f"Default type successfully set to '{value}'.")
+        self.print(0, 'Default parameters successfully set.')
 
     def _print_help(self):
         pass
 
     def _print_infos(self):
-        pass
+        # TODO : redo the printing of params and infos
+        self.print(0, self.default_params.to_string())
 
     def _execute_general_command(self, instr, args: List[str]):
         if instr == 's':
@@ -474,8 +427,8 @@ class Manager:
             else:
                 self.print(1, f"Spell '{short_name}' does not exist.")
         elif command_action in ('dmg', 'd'):
-            if len(args) < 3:
-                self.print(1, 'Missing spell name and/or stats page name.')
+            if len(args) < 2:
+                self.print(1, 'Missing spell name.')
                 return
 
             spell_short_name = args[1]
@@ -485,53 +438,11 @@ class Manager:
 
             spell = self.spells[spell_short_name]
 
-            stats_short_name = args[2]
-            if not stats_short_name in self.stats:
-                self.print(1, f"Stats page '{stats_short_name}' does not exist.")
-                return
-            
-            stats = self.stats[stats_short_name]
+            command = ' '.join(args[2:])
+            damages_parameters = DamageParameters.from_string(command, self.default_params)
 
-            resistances = {characteristic: 0 for characteristic in Characteristics}
-            distance = 'range'
-            additional_stats = list()
-
-            try:
-                index = 3
-                while index < len(args):
-                    param = args[index]
-                    if param in ('r', 'res'):
-                        values = args[index + 1:index + 6] # 5 values
-                        if len(values) < 5:
-                            raise ValueError
-                        index += 6
-                        for k, value in enumerate(values):
-                            # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
-                            characteristic_key = str(k - 1) if k > 0 else '4' 
-                            resistances[Characteristics(characteristic_key)] = int(value)
-                    elif param in ('s', 'st', 'stats'):
-                        values = args[index + 1:]
-                        for value in values:
-                            if not value in self.stats:
-                                self.print(0, f"[WARNING] Unknown additional stats page: '{value}'.")
-                            else:
-                                additional_stats.append(self.stats[value])
-                        break # Must be the last argument
-                    elif param == ':r':
-                        distance = 'range'
-                        index += 1
-                    elif param == ':m':
-                        distance = 'melee'
-                        index += 1
-                    else:
-                        self.print(0, f"[WARNING] Unknown parameter: '{param}'.")
-                        index += 1
-            except ValueError:
-                self.print(1, "Error while parsing the command.")
-                return
-
-            total_stats = sum([stats] + additional_stats)
-            dmg_characs, dmg_total, (average_dmg, average_dmg_crit) = spell.get_detailed_damages(total_stats, resistances, distance)
+            total_stats = damages_parameters.get_total_stats(self.stats)
+            dmg_characs, dmg_total, (average_dmg, average_dmg_crit) = spell.get_detailed_damages(total_stats, damages_parameters)
 
             final_crit_chance = spell.get_crit_chance() + total_stats.get_bonus_crit_chance()
             if final_crit_chance > 1.0:
@@ -539,7 +450,7 @@ class Manager:
 
             average_dmg_final = average_dmg * (1 - final_crit_chance) + average_dmg_crit * final_crit_chance
 
-            self.print(0, f'Damages of the spell {spell.get_name()} (distance: {distance}):\n')
+            self.print(0, f'Damages of the spell {spell.get_name()} (distance: {damages_parameters.distance}):\n')
             self.print(0, 'Individual characteristics:')
             for characteristic in Characteristics:
                 if sum(dmg_characs[characteristic][field] for field in ('min', 'max', 'crit_min', 'crit_max')) > 0:
@@ -662,119 +573,120 @@ class Manager:
 
 
     def _execute_damages_command(self, args: List[str]):
-        if len(args) < 2:
-            self.print(1, 'Missing spell set or stats page.')
+        if len(args) < 1:
+            self.print(1, 'Missing spell set.')
             return
 
         spell_set_short_name = args[0]
-        stats_short_name = args[1]
 
-        if not spell_set_short_name in self.spell_sets or not stats_short_name in self.stats:
-            self.print(1, f"Spell set '{spell_set_short_name}' or stats page '{stats_short_name}' do not exist.")
+        if not spell_set_short_name in self.spell_sets:
+            self.print(1, f"Spell set '{spell_set_short_name}' does not exist.")
             return
 
         spell_set = self.spell_sets[spell_set_short_name]
-        stats = self.stats[stats_short_name]
 
-        pa = self.default_params['pa']
-        min_po = self.default_params['pomin']
-        max_po = self.default_params['pomax']
-        po = None
-        resistances = {characteristic: 0 for characteristic in Characteristics}
-        list_type = self.default_params['t']
-        additional_stats = list()
-        distance = 'range'
-
-        try:
-            index = 2
-            while index < len(args):
-                param = args[index]
-                if param == 'pa':
-                    value = int(args[index + 1])
-                    index += 2
-                    if value <= 0:
-                        raise ValueError
-                    pa = value
-                elif param in ('pomin', 'po_min', 'minpo', 'min_po'):
-                    value = int(args[index + 1])
-                    index += 2
-                    if value < 0:
-                        raise ValueError
-                    min_po = value
-                elif param in ('pomax', 'po_max', 'maxpo', 'max_po'):
-                    value = int(args[index + 1])
-                    index += 2
-                    if value < 0:
-                        raise ValueError
-                    max_po = value
-                elif param == 'po':
-                    value = int(args[index + 1])
-                    index += 2
-                    if value < 0:
-                        raise ValueError
-                    po = value
-                elif param == 't':
-                    value = args[index + 1]
-                    index += 2
-                    if not value in ('mono', 'multi', 'versa'):
-                        raise ValueError
-                    list_type = value
-                elif param in ('r', 'res'):
-                    values = args[index + 1:index + 6] # 5 values
-                    if len(values) < 5:
-                        raise ValueError
-                    index += 6
-                    for k, value in enumerate(values):
-                        # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
-                        characteristic_key = str(k - 1) if k > 0 else '4' 
-                        resistances[Characteristics(characteristic_key)] = int(value)
-                elif param in ('s', 'st', 'stats'):
-                    values = args[index + 1:]
-                    for value in values:
-                        if not value in self.stats:
-                            self.print(0, f"[WARNING] Unknown additional stats page: '{value}'.")
-                        else:
-                            additional_stats.append(self.stats[value])
-                    break # Must be the last argument
-                elif param == ':r':
-                    distance = 'range'
-                    index += 1
-                elif param == ':m':
-                    distance = 'melee'
-                    index += 1
-                else:
-                    self.print(0, f"[WARNING] Unknown parameter: '{param}'.")
-                    index += 1
-        except ValueError:
-            self.print(1, "Error while parsing damage command.")
-            return
-
-        if po is not None:
-            min_po = po
-            max_po = po
-
-        if min_po > max_po:
-            self.print(1, "Error while parsing damage command.")
-            return
+        command = ' '.join(args[1:])
+        damages_parameters = DamageParameters.from_string(command, self.default_params)
 
         spell_list = list()
-        if list_type == 'mono':
-            spell_list = spell_set.get_spell_list_single_target(max_used_pa=pa, min_po=min_po, max_po=max_po)
-        elif list_type == 'multi':
-            spell_list = spell_set.get_spell_list_multiple_targets(max_used_pa=pa, min_po=min_po, max_po=max_po)
-        elif list_type == 'versa':
-            spell_list = spell_set.get_spell_list_versatile(max_used_pa=pa, min_po=min_po, max_po=max_po)
+        if damages_parameters.type == 'mono':
+            spell_list = spell_set.get_spell_list_single_target(damages_parameters)
+        elif damages_parameters.type == 'multi':
+            spell_list = spell_set.get_spell_list_multiple_targets(damages_parameters)
+        elif damages_parameters.type == 'versa':
+            spell_list = spell_set.get_spell_list_versatile(damages_parameters)
 
-        total_stats = sum([stats] + additional_stats)
+        total_stats = damages_parameters.get_total_stats(self.stats)
 
-        best_spells, max_damage = get_best_combination(spell_list, total_stats, pa, resistances, distance)
+        best_spells, max_damage = get_best_combination(spell_list, total_stats, parameters=damages_parameters)
 
         best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
 
-        self.print(0, f"Maximum average damages (PA = {pa} ; PO = {min_po} - {max_po} ; type = {list_type}) is: {int(max_damage):.0f}\n")
+        self.print(0, f"Maximum average damages (PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type}) is: {int(max_damage):.0f}\n")
         self.print(0, 'Using: ')
         for spell in best_spells:
-            self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(total_stats, resistances)):.0f} dmg)")
+            self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(total_stats, damages_parameters)):.0f} dmg)")
+
+        # pa = self.default_params['pa']
+        # min_po = self.default_params['pomin']
+        # max_po = self.default_params['pomax']
+        # po = None
+        # resistances = {characteristic: 0 for characteristic in Characteristics}
+        # list_type = self.default_params['t']
+        # additional_stats = list()
+        # distance = 'range'
+
+        # try:
+        #     index = 2
+        #     while index < len(args):
+        #         param = args[index]
+        #         if param == 'pa':
+        #             value = int(args[index + 1])
+        #             index += 2
+        #             if value <= 0:
+        #                 raise ValueError
+        #             pa = value
+        #         elif param in ('pomin', 'po_min', 'minpo', 'min_po'):
+        #             value = int(args[index + 1])
+        #             index += 2
+        #             if value < 0:
+        #                 raise ValueError
+        #             min_po = value
+        #         elif param in ('pomax', 'po_max', 'maxpo', 'max_po'):
+        #             value = int(args[index + 1])
+        #             index += 2
+        #             if value < 0:
+        #                 raise ValueError
+        #             max_po = value
+        #         elif param == 'po':
+        #             value = int(args[index + 1])
+        #             index += 2
+        #             if value < 0:
+        #                 raise ValueError
+        #             po = value
+        #         elif param == 't':
+        #             value = args[index + 1]
+        #             index += 2
+        #             if not value in ('mono', 'multi', 'versa'):
+        #                 raise ValueError
+        #             list_type = value
+        #         elif param in ('r', 'res'):
+        #             values = args[index + 1:index + 6] # 5 values
+        #             if len(values) < 5:
+        #                 raise ValueError
+        #             index += 6
+        #             for k, value in enumerate(values):
+        #                 # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
+        #                 characteristic_key = str(k - 1) if k > 0 else '4' 
+        #                 resistances[Characteristics(characteristic_key)] = int(value)
+        #         elif param in ('s', 'st', 'stats'):
+        #             values = args[index + 1:]
+        #             for value in values:
+        #                 if not value in self.stats:
+        #                     self.print(0, f"[WARNING] Unknown additional stats page: '{value}'.")
+        #                 else:
+        #                     additional_stats.append(self.stats[value])
+        #             break # Must be the last argument
+        #         elif param == ':r':
+        #             distance = 'range'
+        #             index += 1
+        #         elif param == ':m':
+        #             distance = 'melee'
+        #             index += 1
+        #         else:
+        #             self.print(0, f"[WARNING] Unknown parameter: '{param}'.")
+        #             index += 1
+        # except ValueError:
+        #     self.print(1, "Error while parsing damage command.")
+        #     return
+
+        # if po is not None:
+        #     min_po = po
+        #     max_po = po
+
+        # if min_po > max_po:
+        #     self.print(1, "Error while parsing damage command.")
+        #     return
 
 
     def execute_command(self, command: str):

@@ -1,7 +1,8 @@
+from damages_parameters import DamageParameters
 from stats import Characteristics, Damages, Stats
 
 
-def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, is_weapon, resistance: int = 0, is_crit=False, distance='range'):
+def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, parameters: DamageParameters, is_weapon, is_crit=False):
     if base_damage == 0:
         return 0
 
@@ -21,12 +22,12 @@ def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, i
     else:
         final_multiplier += stats.get_damage(Damages.SPELL) / 100
     
-    if distance == 'range':
+    if parameters.distance == 'range':
         final_multiplier += stats.get_damage(Damages.RANGE) / 100
-    elif distance == 'melee':
+    elif parameters.distance == 'melee':
         final_multiplier += stats.get_damage(Damages.MELEE) / 100
 
-    resistance_multiplier = max(0, 1 - resistance / 100) # Can't be negative damages
+    resistance_multiplier = max(0, 1 - parameters.get_resistances_dict()[characteristic] / 100) # Can't be negative damages
 
     # Game rounds down the damage
     # TODO check if rounding is done between final multiplier and resistance multiplier

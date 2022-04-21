@@ -3,6 +3,7 @@ import os
 import re
 from typing import List
 
+from damages_parameters import DamageParameters
 from spell import Spell
 
 
@@ -24,34 +25,28 @@ class SpellSet:
 
         self.spells.remove(spell)
 
-    def get_spell_list_single_target(self, max_used_pa, min_po=-1, max_po=1024):
+    def get_spell_list_single_target(self, parameters: DamageParameters):
         spell_list: List[Spell] = list()
 
         for spell in self.spells:
-            if spell.can_reach_po(min_po, max_po):
-                uses = spell.get_max_uses_single_target(max_used_pa)
+            if spell.can_reach_po(parameters.get_min_po(), parameters.get_max_po()):
+                uses = spell.get_max_uses_single_target(parameters.pa)
                 spell_list.extend([spell for _ in range(uses)])
 
         return spell_list
 
-    def get_spell_list_multiple_targets(self, max_used_pa, min_po=-1, max_po=1024):
+    def get_spell_list_multiple_targets(self, parameters: DamageParameters):
         spell_list: List[Spell] = list()
 
         for spell in self.spells:
-            if spell.can_reach_po(min_po, max_po):
-                uses = spell.get_max_uses_multiple_targets(max_used_pa)
+            if spell.can_reach_po(parameters.get_min_po(), parameters.get_max_po()):
+                uses = spell.get_max_uses_multiple_targets(parameters.pa)
                 spell_list.extend([spell for _ in range(uses)])
 
         return spell_list
 
-    def get_spell_list_versatile(self, max_used_pa, min_po=-1, max_po=1024):
-        if not isinstance(max_used_pa, int):
-            raise TypeError(f"Max used pa is not an int ('{max_used_pa}' of type '{type(max_used_pa)}' given instead).")
-
-        if max_used_pa < 0:
-            raise ValueError(f"Max used pa should be non negative ('{max_used_pa}' given instead).")
-
-        return [spell for spell in self.spells if spell.get_pa() <= max_used_pa and spell.can_reach_po(min_po, max_po)]
+    def get_spell_list_versatile(self, parameters: DamageParameters):
+        return [spell for spell in self.spells if spell.get_pa() <= parameters.pa and spell.can_reach_po(parameters.get_min_po(), parameters.get_max_po())]
 
 
     def save_only_set_file(self, filepath, spell_filepaths):

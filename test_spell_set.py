@@ -2,6 +2,7 @@ import os
 import shutil
 import unittest
 
+from damages_parameters import DamageParameters
 from spell import Spell
 from spell_set import SpellSet
 
@@ -127,7 +128,7 @@ class TestStats(unittest.TestCase):
         spell_set.add_spell(spell1)
         spell_set.add_spell(spell2)
 
-        spell_list = spell_set.get_spell_list_single_target(10)
+        spell_list = spell_set.get_spell_list_single_target(DamageParameters(pa=10))
 
         self.assertEqual(spell_list.count(spell1), 2)
         self.assertEqual(spell_list.count(spell2), 1)
@@ -145,7 +146,7 @@ class TestStats(unittest.TestCase):
         spell_set.add_spell(spell1)
         spell_set.add_spell(spell2)
 
-        spell_list = spell_set.get_spell_list_multiple_targets(10)
+        spell_list = spell_set.get_spell_list_multiple_targets(DamageParameters(pa=10))
 
         self.assertEqual(spell_list.count(spell1), 2)
         self.assertEqual(spell_list.count(spell2), 1)
@@ -165,7 +166,7 @@ class TestStats(unittest.TestCase):
         spell_set.add_spell(spell1)
         spell_set.add_spell(spell2)
 
-        spell_list = spell_set.get_spell_list_versatile(6)
+        spell_list = spell_set.get_spell_list_versatile(DamageParameters(pa=6))
 
         self.assertEqual(spell_list.count(spell1), 1)
         self.assertTrue(spell2 not in spell_list)
@@ -179,8 +180,8 @@ class TestStats(unittest.TestCase):
 
         spell_set.add_spell(spell1)
 
-        spell_list_too_close = spell_set.get_spell_list_single_target(10, max_po=2)
-        spell_list_too_far = spell_set.get_spell_list_single_target(10, min_po=10)
+        spell_list_too_close = spell_set.get_spell_list_single_target(DamageParameters(pa=10, po=[0, 2]))
+        spell_list_too_far = spell_set.get_spell_list_single_target(DamageParameters(pa=10, po=[10, 2048]))
 
         self.assertEqual(len(spell_list_too_close), 0)
         self.assertEqual(len(spell_list_too_far), 0)

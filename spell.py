@@ -4,6 +4,7 @@ import re
 from typing import Dict
 
 from damages import compute_damage
+from damages_parameters import DamageParameters
 from stats import Characteristics, Stats
 
 
@@ -27,22 +28,19 @@ class Spell():
             self.base_damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
 
 
-    def get_detailed_damages(self, stats: Stats, resistances=None, distance='range'):
-        if resistances is None:
-            resistances = {characteristic: 0 for characteristic in Characteristics}
-
+    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters):
         average_damage = 0.0
         average_damage_crit = 0.0
 
         damages_by_characteristic: Dict[Characteristics, Dict[str, float]] = dict()
 
         for characteristic in Characteristics:
-            min_damage = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, is_weapon=self.is_weapon, resistance=resistances[characteristic], distance=distance)
-            max_damage = compute_damage(self.base_damages[characteristic]['max'], stats, characteristic, is_weapon=self.is_weapon, resistance=resistances[characteristic], distance=distance)
+            min_damage = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, is_weapon=self.is_weapon, parameters=parameters)
+            max_damage = compute_damage(self.base_damages[characteristic]['max'], stats, characteristic, is_weapon=self.is_weapon, parameters=parameters)
             average_damage += (min_damage + max_damage) / 2
 
-            min_damage_crit = compute_damage(self.base_damages[characteristic]['crit_min'], stats, characteristic, is_weapon=self.is_weapon, resistance=resistances[characteristic], is_crit=True, distance=distance)
-            max_damage_crit = compute_damage(self.base_damages[characteristic]['crit_max'], stats, characteristic, is_weapon=self.is_weapon, resistance=resistances[characteristic], is_crit=True, distance=distance)
+            min_damage_crit = compute_damage(self.base_damages[characteristic]['crit_min'], stats, characteristic, is_weapon=self.is_weapon, is_crit=True, parameters=parameters)
+            max_damage_crit = compute_damage(self.base_damages[characteristic]['crit_max'], stats, characteristic, is_weapon=self.is_weapon, is_crit=True, parameters=parameters)
             average_damage_crit += (min_damage_crit + max_damage_crit) / 2
 
             damages_by_characteristic[characteristic] = {
@@ -59,8 +57,8 @@ class Spell():
         return (damages_by_characteristic, damages_total, (average_damage, average_damage_crit))
         
 
-    def get_average_damages(self, stats: Stats, resistances=None, distance='range'):
-        _, _, (average_damage, average_damage_crit) = self.get_detailed_damages(stats, resistances, distance)
+    def get_average_damages(self, stats: Stats, parameters: DamageParameters):
+        _, _, (average_damage, average_damage_crit) = self.get_detailed_damages(stats, parameters)
 
         final_crit_chance = self.crit_chance + stats.bonus_crit_chance
         if final_crit_chance > 1.0:

@@ -1,7 +1,7 @@
 import unittest
 
 from damages_parameters import DamageParameters
-from stats import Stats
+from stats import Characteristics
 
 
 class TestDamagesParameters(unittest.TestCase):
@@ -85,6 +85,19 @@ class TestDamagesParameters(unittest.TestCase):
         damage_parameters = DamageParameters.from_string(string)
 
         self.assertEqual(damage_parameters.to_string(), string)
+
+    def test_get_resistances_dict(self):
+        string = '-r -10 0 10 20 30'
+        
+        damage_parameters = DamageParameters.from_string(string)
+
+        self.assertDictEqual(damage_parameters.get_resistances_dict(), {
+            Characteristics.NEUTRAL: -10,
+            Characteristics.STRENGTH: 0,
+            Characteristics.INTELLIGENCE: 10,
+            Characteristics.LUCK: 20,
+            Characteristics.AGILITY: 30
+        })
 
 if __name__ == '__main__':
     unittest.main()
