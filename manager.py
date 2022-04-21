@@ -439,7 +439,11 @@ class Manager:
             spell = self.spells[spell_short_name]
 
             command = ' '.join(args[2:])
-            damages_parameters = DamageParameters.from_string(command, self.default_params)
+            try:
+                damages_parameters = DamageParameters.from_string(command, self.default_params)
+            except ValueError as e:
+                self.print(1, f'Cannot parse parameters : {str(e)}')
+                return
 
             total_stats = damages_parameters.get_total_stats(self.stats)
             dmg_characs, dmg_total, (average_dmg, average_dmg_crit) = spell.get_detailed_damages(total_stats, damages_parameters)
@@ -586,7 +590,11 @@ class Manager:
         spell_set = self.spell_sets[spell_set_short_name]
 
         command = ' '.join(args[1:])
-        damages_parameters = DamageParameters.from_string(command, self.default_params)
+        try:
+            damages_parameters = DamageParameters.from_string(command, self.default_params)
+        except ValueError as e:
+            self.print(1, f'Cannot parse parameters : {str(e)}')
+            return
 
         spell_list = list()
         if damages_parameters.type == 'mono':

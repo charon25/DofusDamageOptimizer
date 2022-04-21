@@ -59,11 +59,11 @@ class DamageParameters:
 
         for k, argument in enumerate(parameter[1:]):
             if argument_type == int:
-                if re.match("[+-]?\d", argument) is None:
-                    raise ValueError(f"Argument {k + 1} to command '{parameter[0]}' should be an integer ('{argument}' given instead.).")
+                if re.match("^[+-]?\d+$", argument) is None: # Check argument is an integer, maybe preceded by - or +
+                    raise ValueError(f"Argument {k + 1} to command '{parameter[0]}' should be an integer ('{argument}' given instead).")
             elif argument_type is None:
                 if not argument in literals:
-                    raise ValueError(f"Argument {k + 1} to command '{parameter[0]}' should be one of {literals} ('{argument}' given instead.).")
+                    raise ValueError(f"Argument {k + 1} to command '{parameter[0]}' should be one of {literals} ('{argument}' given instead).")
 
     @classmethod
     def from_string(cls, string: str, default_parameters: 'DamageParameters' = None):

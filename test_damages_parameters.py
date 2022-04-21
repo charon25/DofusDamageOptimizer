@@ -22,6 +22,8 @@ class TestDamagesParameters(unittest.TestCase):
             DamageParameters._check_parameter(['-a', 'c'], argument_type=int)
         with self.assertRaises(ValueError):
             DamageParameters._check_parameter(['-a', '0', '1', 'c'], argument_type=int)
+        with self.assertRaises(ValueError):
+            DamageParameters._check_parameter(['-a', '0.1'], argument_type=int)
 
     def test_check_parameters_literals(self):
         DamageParameters._check_parameter(['-a', 'lit1', 'lit2'], literals=['lit1', 'lit2', 'lit3'])

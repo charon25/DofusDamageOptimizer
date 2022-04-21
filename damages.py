@@ -27,8 +27,9 @@ def compute_damage(base_damage, stats: Stats, characteristic: Characteristics, p
     elif parameters.distance == 'melee':
         final_multiplier += stats.get_damage(Damages.MELEE) / 100
 
-    resistance_multiplier = max(0, 1 - parameters.get_resistances_dict()[characteristic] / 100) # Can't be negative damages
+    resistance_multiplier = max(0, 1.0 - parameters.get_resistances_dict()[characteristic] / 100) # Can't be negative damages
 
-    # Game rounds down the damage
-    # TODO check if rounding is done between final multiplier and resistance multiplier
-    return int(int(int(base_damage * characteristic_multiplier + flat_damages) * final_multiplier) * resistance_multiplier)
+    vulnerability_multiplier = max(0, 1.0 + parameters.vulnerability / 100) # Can't be negative damages
+
+    # Game rounds down the damage between each steps
+    return int(int(int(int(base_damage * characteristic_multiplier + flat_damages) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier)
