@@ -69,7 +69,7 @@ class TestDamagesParameters(unittest.TestCase):
         self.assertListEqual(damage_parameters.po, [3, 8])
 
     def test_from_string_all_parameters(self):
-        string = '-s a b c -pa 3 -pomin 1 -maxpo 6 -t multi -r 1 2 3 4 5 -d melee -v 15'
+        string = '-s a b c -pa 3 -pomin 1 -maxpo 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -bdmg 8'
         
         damage_parameters = DamageParameters.from_string(string)
 
@@ -82,7 +82,7 @@ class TestDamagesParameters(unittest.TestCase):
         self.assertEqual(damage_parameters.vulnerability, 15)
 
     def test_to_string(self):
-        string = '-s a b c -pa 3 -pomin 1 -pomax 6 -t multi -r 1 2 3 4 5 -d melee -v 15'
+        string = '-s a b c -pa 3 -pomin 1 -pomax 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -bdmg 8'
         
         damage_parameters = DamageParameters.from_string(string)
 

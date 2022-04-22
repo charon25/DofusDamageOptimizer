@@ -13,6 +13,7 @@ class DamageParameters:
     resistances: List[int] = field(default_factory=lambda: [0, 0, 0, 0, 0])
     distance: Literal['melee', 'range'] = 'range'
     vulnerability: int = 0
+    base_damages: int = 0
 
 
     def get_min_po(self):
@@ -34,7 +35,7 @@ class DamageParameters:
 
 
     def to_string(self):
-        return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability}'
+        return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -bdmg {self.base_damages}'
 
 
     def _assert_correct_parameters(self):
@@ -129,6 +130,10 @@ class DamageParameters:
             elif command in ('-v', '-vulne', '-vulnerability'):
                 cls._check_parameter(parameter, 1, argument_type=int)
                 damage_parameters.vulnerability = int(parameter[1])
+
+            elif command in ('-bdmg', '-bdamages', '-base-damages'):
+                cls._check_parameter(parameter, 1, argument_type=int)
+                damage_parameters.base_damages = int(parameter[1])
 
         damage_parameters._assert_correct_parameters()
 

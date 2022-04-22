@@ -61,7 +61,8 @@ The possible parameters for every command that requires it are :
  - `-t` (or `-type`) followed by one of `mono`, `multi`, `versa` : indicates if the computation takes into account the number of uses per target ('mono'), the number of uses per turn ('multi') or only one time each spell ('versa') ;
  - `-r` (or `-res`, `-resistances`) followed by five integers (may be negative) : indicates the resistances of the enemy to each element (in order : NEUTRAL, EARTH, FIRE, WATER, AIR) ;
  - `-d` (or `-distance`) followed by one of `melee`, `range` : indicates if the damage computations should take into account RANGE or MELEE damages ;
- - `-v` (or `-vulne`, `-vulnerability`) followed by one integer (may be negative) : indicate the bonus (or reduced) damages dealt because of vulnerability or damage reduction (independant from resistances).
+ - `-v` (or `-vulne`, `-vulnerability`) followed by one integer (may be negative) : indicate the bonus (or reduced) damages dealt because of vulnerability or damage reduction (independant from resistances) ;
+ - `-bdmg` (or `-bdamages`, `-base-damages`) followed by one integer (may be negative) : bonus (or malus) base damages of the spell.
 
 
 ## Examples of damages computation
