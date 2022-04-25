@@ -145,7 +145,7 @@ class Manager:
 
 
     def _print_infos(self):
-        # TODO : redo the printing of params and infos
+        # TODO: redo the printing of params and infos
         self.print(0, self._get_default_parameters().to_string())
 
 
@@ -204,11 +204,47 @@ class Manager:
                 current_parameters = DamageParameters.from_string(command, current_parameters)
                 self.parameters[self.default_parameters] = current_parameters
             except ValueError as e:
-                self.print(1, f'Cannot parse parameters : {str(e)}')
+                self.print(1, f'Cannot parse parameters: {str(e)}')
                 return
 
             self.save(False)
             self.print(0, f"Current parameters updated successfully.")
+
+        elif command_action == 'ls':
+            self.print(0, '=== Parameters set\n')
+            for parameters_name, parameters in sorted(self.parameters.items(), key=lambda item: item[0]):
+                self.print(0, f" - Set '{parameters.full_name}' ({parameters_name})")
+
+        elif command_action == 'show':
+            if len(args) < 2:
+                parameters_name = self.default_parameters
+            else:
+                parameters_name = args[1]
+
+                if not parameters_name in self.parameters:
+                    self.print(1, f"Parameters '{parameters_name}' do not exist.")
+                    return
+
+            parameters = self.parameters[parameters_name]
+            self.print(0, f"===== Page '{parameters.full_name}' ({parameters_name})")
+            self.print(0, f"PA: {parameters.pa}")
+            self.print(0, f"PO: {parameters.get_min_po()} - {parameters.get_max_po()}")
+            self.print(0, f"Type: {parameters.type}")
+            self.print(0, f"Distance: {parameters.distance}")
+            if parameters.base_damages > 0:
+                self.print(0, f"Base damages increase: {parameters.base_damages}")
+
+            self.print(0, f"\nResistances:")
+            for k in range(5):
+                characteristic = Characteristics(str(k - 1) if k > 0 else '4')
+                self.print(0, f" - {characteristic.name}: {parameters.resistances[k]} %")
+
+            if len(parameters.stats) > 0:
+                self.print(0, f"\nStats page{'s' if len(parameters.stats) > 1 else ''}:")
+                for stats_short_name in parameters.stats:
+                    if stats_short_name in self.stats:
+                        self.print(0, f" - '{self.stats[stats_short_name].get_name()}' ({stats_short_name})")
+
 
         else:
             self.print(1, f"Unknown action '{command_action}' for parameters commands.")
@@ -276,7 +312,7 @@ class Manager:
         elif command_action == 'ls':
             self.print(0, '=== Stats pages\n')
             for stats in sorted(self.stats.values(), key=lambda stat: stat.get_name()):
-                self.print(0, f"Page '{stats.get_name()}' ({stats.get_short_name()})")
+                self.print(0, f" - Page '{stats.get_name()}' ({stats.get_short_name()})")
 
         elif command_action == 'show':
             if len(args) < 2:
@@ -508,7 +544,7 @@ class Manager:
             try:
                 damages_parameters = DamageParameters.from_string(command, self._get_default_parameters())
             except ValueError as e:
-                self.print(1, f'Cannot parse parameters : {str(e)}')
+                self.print(1, f'Cannot parse parameters: {str(e)}')
                 return
 
             total_stats = damages_parameters.get_total_stats(self.stats)
@@ -520,7 +556,7 @@ class Manager:
 
             average_dmg_final = average_dmg * (1 - final_crit_chance) + average_dmg_crit * final_crit_chance
 
-            self.print(0, f'Damages of the spell {spell.get_name()} (distance: {damages_parameters.distance}):\n')
+            self.print(0, f"Damages of the spell {spell.get_name()} (parameters set : '{self.default_parameters}' ; distance: {damages_parameters.distance}):\n")
             self.print(0, 'Individual characteristics:')
             for characteristic in Characteristics:
                 if sum(dmg_characs[characteristic][field] for field in ('min', 'max', 'crit_min', 'crit_max')) > 0:
@@ -660,7 +696,7 @@ class Manager:
         try:
             damages_parameters = DamageParameters.from_string(command, self._get_default_parameters())
         except ValueError as e:
-            self.print(1, f'Cannot parse parameters : {str(e)}')
+            self.print(1, f'Cannot parse parameters: {str(e)}')
             return
 
         spell_list = list()
@@ -677,7 +713,7 @@ class Manager:
 
         best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
 
-        self.print(0, f"Maximum average damages (PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type}) is: {int(max_damage):.0f}\n")
+        self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type}) is: {int(max_damage):.0f}\n")
         self.print(0, 'Using: ')
         for spell in best_spells:
             self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(total_stats, damages_parameters)):.0f} dmg)")

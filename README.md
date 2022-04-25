@@ -6,6 +6,14 @@ It can handle multiple stats pages, spells and spell sets, as well as multiple c
 
 It runs on a Python 3 console (developed on 3.9.10, probably work for older versions) and does not require any external package. So to run it, just use `python main.py` in the python scripts folder.
 
+## General principle
+
+This optimizer works by creating spells, stats page, spell sets and parameters set and then picking the desired one to determine the best possible combination of spells to maximize the damages dealt.
+
+A spell contains informations about its damages, number of uses and AP cost, a stats page contains every useful stats needed to compute damages, a spell set is (as suggested by the name) a collection of spells and a parameters set contains informations about the computation like maximum number of AP to use, resistances of the enemy or its distance.
+
+Every computation need to use a spell set and a parameters set (which eventually contains stats pages).
+
 ## Commands
 
 Every `<name>` parameter in the commands below should not contains spaces and is unique for each type of commands.
@@ -24,6 +32,8 @@ Every `param` can be replaced with only `p`.
  - `param new <name>` : create a new parameters set, based on the current one
  - `param change <name>` : change the current parameters set to the specified one
  - `param [[<parameter> <value>] ...]` : update the current parameters set with the specified parameters (the parameters are described in the "Parameters" section)
+ - `param ls` : list all the currently available parameters set
+ - `param show [name]` : show more details on the specified parameters set (if none is supplied, use the currently selected one)
 
 ### Stats-related
 

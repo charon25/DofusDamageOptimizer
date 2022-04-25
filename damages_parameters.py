@@ -6,6 +6,7 @@ from stats import Stats, Characteristics
 
 @dataclass
 class DamageParameters:
+    full_name: str = ''
     stats: List[str] = field(default_factory=lambda: [])
     pa: int = 1
     po: List[int] = field(default_factory=lambda: [0, 2048])
@@ -35,7 +36,7 @@ class DamageParameters:
 
 
     def to_string(self):
-        return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -bdmg {self.base_damages}'
+        return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -bdmg {self.base_damages} -name {self.full_name}'
 
 
     def _assert_correct_parameters(self):
@@ -70,7 +71,7 @@ class DamageParameters:
         if default_parameters is None:
             default_parameters = DamageParameters()
 
-        string = string.strip().lower()
+        string = string.strip()
         string = re.sub(r'-+', '-', string) # Replace repeating substring of - into only one
 
         if string == '':
@@ -84,8 +85,8 @@ class DamageParameters:
         parameters: List[List[str]] = list()
 
         for argument in arguments:
-            if re.match(r'^-[^\d]', argument) is not None: # Starts with a - but is not a negative number
-                parameters.append([argument])
+            if re.match(r'^-[^\d]', argument.lower()) is not None: # Starts with a - but is not a negative number
+                parameters.append([argument.lower()])
             else:
                 parameters[-1].append(argument)
 
@@ -94,7 +95,7 @@ class DamageParameters:
         for parameter in parameters:
             command = parameter[0]
             if command in ('-s', '-stats'):
-                damage_parameters.stats = [argument for argument in parameter[1:]] # Copy the list to avoid reference issues
+                damage_parameters.stats = [argument for argument in parameter[1:] if argument != ''] # Copy the list to avoid reference issues
 
             elif command == '-pa':
                 cls._check_parameter(parameter, 1, argument_type=int)
@@ -133,6 +134,9 @@ class DamageParameters:
             elif command in ('-bdmg', '-bdamages', '-base-damages'):
                 cls._check_parameter(parameter, 1, argument_type=int)
                 damage_parameters.base_damages = int(parameter[1])
+
+            elif command in ('-name',):
+                damage_parameters.full_name = ' '.join(parameter[1:])
 
         damage_parameters._assert_correct_parameters()
 
