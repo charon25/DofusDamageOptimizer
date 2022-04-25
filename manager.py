@@ -11,20 +11,22 @@ from stats import Characteristics, Damages, Stats
 
 
 class Manager:
-    GENERAL_INSTRUCTIONS = ('s', 'def', 'h', 'q', 'i')
-    STATS_INSTRUCTION = 'st'
-    SPELL_INSTRUCTION = 'sp'
-    SPELL_SET_INSTRUCTION = 'ss'
-    DAMAGES_INSTRUCTION = 'dmg'
+    GENERAL_INSTRUCTIONS = ('s', 'h', 'q', 'i')
+    PARAMETERS_INSTRUCTION = ('p', 'param')
+    STATS_INSTRUCTION = ('st',)
+    SPELL_INSTRUCTION = ('sp',)
+    SPELL_SET_INSTRUCTION = ('ss',)
+    DAMAGES_INSTRUCTION = ('dmg',)
 
     DIRECTORIES = ('stats', 'spells')
 
     def __init__(self, print_method: Callable[[int, str], Any]) -> None:
-        self.print = print_method
+        self.print: Callable[[int, str], Any] = print_method
         self.stats: Dict[str, Stats] = dict()
         self.spells: Dict[str, Spell] = dict()
         self.spell_sets: Dict[str, SpellSet] = dict()
-        self.default_params = DamageParameters()
+        self.parameters: Dict[str, DamageParameters] = dict()
+        self.default_parameters: str = ''
 
         self._create_dirs()
         self._load_from_file()
@@ -34,10 +36,21 @@ class Manager:
             if not os.path.isdir(directory):
                 os.mkdir(directory)
 
+
+    def _get_default_parameters(self):
+        if self.default_parameters in self.parameters:
+            return self.parameters[self.default_parameters]
+
+        return self.parameters['__default__']
+
+
     def _load_default(self):
-        self.default_params = DamageParameters(pa=1, po=[0, 2048], type='mono')
+        self.parameters['__default__'] = DamageParameters(pa=1, po=[0, 2048], type='mono')
+        self.default_parameters = '__default__'
 
     def _load_from_file(self):
+        self._load_default()
+
         try:
             with open('manager.json', 'r', encoding='utf-8') as fi:
                 json_data = json.load(fi)
@@ -75,11 +88,16 @@ class Manager:
                     self.print(1, f"Could not load spell set '{spell_set_data['name']}'.")
 
             # DEFAULT PARAMS
-            self.default_params = DamageParameters.from_string(json_data['default_params'])
+            for parameters_name in json_data['parameters']:
+                try:
+                    self.parameters[parameters_name] = DamageParameters.from_string(json_data['parameters'][parameters_name])
+                except ValueError:
+                    self.print(1, f"Could not load parameters '{parameters_name}'.")
+
+            self.default_parameters = json_data['default_parameters']
 
         except (FileNotFoundError, KeyError, TypeError):
-            self.print(1, "'manager.json' file does not exist or is innaccessible, using default load.")
-            self._load_default()
+            self.print(1, "'manager.json' file does not exist or is innaccessible, using default load only.")
             return
 
 
@@ -104,11 +122,16 @@ class Manager:
                 'short_name': spell_set.get_short_name()
             })
 
+        string_parameters = dict()
+        for parameters_name in self.parameters:
+            string_parameters[parameters_name] = self.parameters[parameters_name].to_string()
+
         json_valid_data = {
             'stats': stats_filepaths,
             'spells': spells_filepaths,
             'spell_sets': spell_sets,
-            'default_params': self.default_params.to_string()
+            'parameters': string_parameters,
+            'default_parameters': self.default_parameters
         }
 
         with open('manager.json', 'w', encoding='utf-8') as fo:
@@ -117,36 +140,78 @@ class Manager:
         if print_message:
             self.print(0, 'Data successfully saved!')
 
-    def _set_default_param(self, args: List[str]):
-        command_string = " ".join(args)
-
-        try:
-            self.default_params = DamageParameters.from_string(command_string, self.default_params)
-        except ValueError as e:
-            self.print(1, str(e))
-            return
-        except Exception:
-            self.print(1, 'Unknown error occured during setting of default parameters.')
-            return
-
-        self.print(0, 'Default parameters successfully set.')
-
     def _print_help(self):
         pass
 
+
     def _print_infos(self):
         # TODO : redo the printing of params and infos
-        self.print(0, self.default_params.to_string())
+        self.print(0, self._get_default_parameters().to_string())
+
 
     def _execute_general_command(self, instr, args: List[str]):
         if instr == 's':
             self.save()
-        elif instr == 'def':
-            self._set_default_param(args)
         elif instr == 'h':
             self._print_help()
         elif instr == 'i':
             self._print_infos()
+
+
+    def _execute_parameters_command(self, instr, args: List[str]):
+        if len(args) == 0:
+            self.print(1, 'Missing action in the command.')
+            return
+
+        command_action = args[0]
+
+        if command_action == 'new':
+            if len(args) < 2:
+                self.print(1, 'Missing parameters name.')
+                return
+
+            parameters_name = args[1]
+
+            if parameters_name in self.parameters:
+                self.print(1, f"Parameters '{parameters_name}' already exist.")
+                return
+
+            self.parameters[parameters_name] = DamageParameters.from_other(self._get_default_parameters())
+            self.save(False)
+            self.print(0, f"Parameters '{parameters_name}' successfully created from current ones.")
+
+        elif command_action == 'change':
+            if len(args) < 2:
+                self.print(1, 'Missing parameters name.')
+                return
+
+            parameters_name = args[1]
+
+            if not parameters_name in self.parameters:
+                self.print(1, f"Parameters '{parameters_name}' do not exist.")
+                return
+
+            self.default_parameters = parameters_name
+            self.save(False)
+            self.print(0, f"Current parameters changed to '{parameters_name}' successfully.")
+
+        elif command_action.startswith('-'):
+            command = ' '.join(args)
+
+            current_parameters = self._get_default_parameters()
+
+            try:
+                current_parameters = DamageParameters.from_string(command, current_parameters)
+                self.parameters[self.default_parameters] = current_parameters
+            except ValueError as e:
+                self.print(1, f'Cannot parse parameters : {str(e)}')
+                return
+
+            self.save(False)
+            self.print(0, f"Current parameters updated successfully.")
+
+        else:
+            self.print(1, f"Unknown action '{command_action}' for parameters commands.")
 
 
     def _create_stats(self, stats: Stats = None) -> Stats:
@@ -181,7 +246,7 @@ class Manager:
 
     def _execute_stats_command(self, args: List[str]):
         if len(args) == 0:
-            self.print(1, 'Action missing in the command.')
+            self.print(1, 'Missing action in the command.')
             return
 
         command_action = args[0]
@@ -333,7 +398,7 @@ class Manager:
 
     def _execute_spell_command(self, args: List[str]):
         if len(args) == 0:
-            self.print(1, 'Action missing in the command.')
+            self.print(1, 'Missing action in the command.')
             return
 
         command_action = args[0]
@@ -426,6 +491,7 @@ class Manager:
                 self.print(0, f"Spell '{short_name}' successfully deleted!")
             else:
                 self.print(1, f"Spell '{short_name}' does not exist.")
+
         elif command_action in ('dmg', 'd'):
             if len(args) < 2:
                 self.print(1, 'Missing spell name.')
@@ -440,7 +506,7 @@ class Manager:
 
             command = ' '.join(args[2:])
             try:
-                damages_parameters = DamageParameters.from_string(command, self.default_params)
+                damages_parameters = DamageParameters.from_string(command, self._get_default_parameters())
             except ValueError as e:
                 self.print(1, f'Cannot parse parameters : {str(e)}')
                 return
@@ -469,7 +535,7 @@ class Manager:
 
     def _execute_spell_set_command(self, args: List[str]):
         if len(args) == 0:
-            self.print(1, 'Action missing in the command.')
+            self.print(1, 'Missing action in the command.')
             return
 
         command_action = args[0]
@@ -547,6 +613,7 @@ class Manager:
                 spell = self.spells[spell_short_name]
                 if not spell in spell_set:
                     spell_set.add_spell(spell)
+                    self.save(False)
                     self.print(0, f"Spell '{spell_short_name}' successfully added to spell set '{spell_set_short_name}'!")
                 else:
                     self.print(1, f"Spell '{spell_short_name}' already in spell set '{spell_set_short_name}'!")
@@ -591,7 +658,7 @@ class Manager:
 
         command = ' '.join(args[1:])
         try:
-            damages_parameters = DamageParameters.from_string(command, self.default_params)
+            damages_parameters = DamageParameters.from_string(command, self._get_default_parameters())
         except ValueError as e:
             self.print(1, f'Cannot parse parameters : {str(e)}')
             return
@@ -615,88 +682,6 @@ class Manager:
         for spell in best_spells:
             self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(total_stats, damages_parameters)):.0f} dmg)")
 
-        # pa = self.default_params['pa']
-        # min_po = self.default_params['pomin']
-        # max_po = self.default_params['pomax']
-        # po = None
-        # resistances = {characteristic: 0 for characteristic in Characteristics}
-        # list_type = self.default_params['t']
-        # additional_stats = list()
-        # distance = 'range'
-
-        # try:
-        #     index = 2
-        #     while index < len(args):
-        #         param = args[index]
-        #         if param == 'pa':
-        #             value = int(args[index + 1])
-        #             index += 2
-        #             if value <= 0:
-        #                 raise ValueError
-        #             pa = value
-        #         elif param in ('pomin', 'po_min', 'minpo', 'min_po'):
-        #             value = int(args[index + 1])
-        #             index += 2
-        #             if value < 0:
-        #                 raise ValueError
-        #             min_po = value
-        #         elif param in ('pomax', 'po_max', 'maxpo', 'max_po'):
-        #             value = int(args[index + 1])
-        #             index += 2
-        #             if value < 0:
-        #                 raise ValueError
-        #             max_po = value
-        #         elif param == 'po':
-        #             value = int(args[index + 1])
-        #             index += 2
-        #             if value < 0:
-        #                 raise ValueError
-        #             po = value
-        #         elif param == 't':
-        #             value = args[index + 1]
-        #             index += 2
-        #             if not value in ('mono', 'multi', 'versa'):
-        #                 raise ValueError
-        #             list_type = value
-        #         elif param in ('r', 'res'):
-        #             values = args[index + 1:index + 6] # 5 values
-        #             if len(values) < 5:
-        #                 raise ValueError
-        #             index += 6
-        #             for k, value in enumerate(values):
-        #                 # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
-        #                 characteristic_key = str(k - 1) if k > 0 else '4' 
-        #                 resistances[Characteristics(characteristic_key)] = int(value)
-        #         elif param in ('s', 'st', 'stats'):
-        #             values = args[index + 1:]
-        #             for value in values:
-        #                 if not value in self.stats:
-        #                     self.print(0, f"[WARNING] Unknown additional stats page: '{value}'.")
-        #                 else:
-        #                     additional_stats.append(self.stats[value])
-        #             break # Must be the last argument
-        #         elif param == ':r':
-        #             distance = 'range'
-        #             index += 1
-        #         elif param == ':m':
-        #             distance = 'melee'
-        #             index += 1
-        #         else:
-        #             self.print(0, f"[WARNING] Unknown parameter: '{param}'.")
-        #             index += 1
-        # except ValueError:
-        #     self.print(1, "Error while parsing damage command.")
-        #     return
-
-        # if po is not None:
-        #     min_po = po
-        #     max_po = po
-
-        # if min_po > max_po:
-        #     self.print(1, "Error while parsing damage command.")
-        #     return
-
-
     def execute_command(self, command: str):
         if command == '':
             raise ValueError('Command should be non empty.')
@@ -707,19 +692,23 @@ class Manager:
             self._execute_general_command(instr, args)
             return
 
-        elif instr == Manager.STATS_INSTRUCTION:
+        elif instr in Manager.PARAMETERS_INSTRUCTION:
+            self._execute_parameters_command(instr, args)
+            return
+
+        elif instr in Manager.STATS_INSTRUCTION:
             self._execute_stats_command(args)
             return
 
-        elif instr == Manager.SPELL_INSTRUCTION:
+        elif instr in Manager.SPELL_INSTRUCTION:
             self._execute_spell_command(args)
             return
 
-        elif instr == Manager.SPELL_SET_INSTRUCTION:
+        elif instr in Manager.SPELL_SET_INSTRUCTION:
             self._execute_spell_set_command(args)
             return
 
-        elif instr == Manager.DAMAGES_INSTRUCTION:
+        elif instr in Manager.DAMAGES_INSTRUCTION:
             self._execute_damages_command(args)
             return
 

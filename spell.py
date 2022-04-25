@@ -53,9 +53,9 @@ class Spell():
         damages_total: Dict[str, float] = dict()
         for field in ('min', 'max', 'crit_min', 'crit_max'):
             damages_total[field] = sum(damages_by_characteristic[characteristic][field] for characteristic in damages_by_characteristic)
-        
+
         return (damages_by_characteristic, damages_total, (average_damage, average_damage_crit))
-        
+
 
     def get_average_damages(self, stats: Stats, parameters: DamageParameters):
         _, _, (average_damage, average_damage_crit) = self.get_detailed_damages(stats, parameters)

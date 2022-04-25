@@ -18,7 +18,7 @@ class DamageParameters:
 
     def get_min_po(self):
         return self.po[0]
-    
+
     def get_max_po(self):
         return self.po[1]
 
@@ -30,7 +30,7 @@ class DamageParameters:
         for stats_short_name in self.stats:
             if not stats_short_name in self.stats:
                 raise KeyError(f"Stats page '{stats_short_name}' does not exist.")
-        
+
         return sum(stats[stats_short_name] for stats_short_name in stats)
 
 
@@ -45,7 +45,6 @@ class DamageParameters:
             raise ValueError(f"Minimum PO should be non negative ({self.get_min_po()} given instead).")
         if self.get_min_po() > self.get_max_po():
             raise ValueError(f"Minimum PO should be less than or equal to maximum PO ({self.get_min_po()} and {self.get_max_po()} given instead).")
-
 
     @classmethod
     def _check_parameter(cls, parameter: List[str], count: int = -1, argument_type=None, literals: List[str]=None):
@@ -138,3 +137,7 @@ class DamageParameters:
         damage_parameters._assert_correct_parameters()
 
         return damage_parameters
+
+    @classmethod
+    def from_other(cls, default_parameters: 'DamageParameters'):
+        return replace(default_parameters)

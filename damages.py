@@ -7,7 +7,7 @@ def compute_damage(base_damages, stats: Stats, characteristic: Characteristics, 
     # Same thing if the parameters base_damages are very negative and cancel the base damages
     if base_damages <= 0 or base_damages + parameters.base_damages <= 0:
         return 0
-        
+
     base_damages = base_damages + parameters.base_damages
 
     power = stats.get_damage(Damages.POWER)
@@ -25,7 +25,7 @@ def compute_damage(base_damages, stats: Stats, characteristic: Characteristics, 
         final_multiplier += stats.get_damage(Damages.WEAPON) / 100
     else:
         final_multiplier += stats.get_damage(Damages.SPELL) / 100
-    
+
     if parameters.distance == 'range':
         final_multiplier += stats.get_damage(Damages.RANGE) / 100
     elif parameters.distance == 'melee':

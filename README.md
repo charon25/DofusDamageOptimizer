@@ -14,9 +14,16 @@ Every `<name>` parameter in the commands below should not contains spaces and is
 
  - `s` : save everything (automatically done after most actions)
  - `i` : get informations on current state (TODO)
- - `def [[<parameter> <value>] ...]` : define default options for the damage computations (the parameters are described in the "Parameters" section)
  - `h` : help
  - `q` : quit
+
+### Parameters-related
+
+Every `param` can be replaced with only `p`.
+
+ - `param new <name>` : create a new parameters set, based on the current one
+ - `param change <name>` : change the current parameters set to the specified one
+ - `param [[<parameter> <value>] ...]` : update the current parameters set with the specified parameters (the parameters are described in the "Parameters" section)
 
 ### Stats-related
 
@@ -46,11 +53,11 @@ Every `<name>` parameter in the commands below should not contains spaces and is
 
 ### Damage-related
 
-The command to get the best combination of spells for given constraints is : 
+The command to get the best combination of spells for given constraints is :
 `dmg <spell_set_name> [[<param> <value>] ...]`
 The parameters are described in the "Parameters" section.
 
-### Parameters
+## Parameters
 
 The possible parameters for every command that requires it are :
  - `-s` (or `-stats`) followed by as many stats page short name as wanted : the stats page to use for the computations ;

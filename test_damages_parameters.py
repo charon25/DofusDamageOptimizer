@@ -5,7 +5,7 @@ from stats import Characteristics
 
 
 class TestDamagesParameters(unittest.TestCase):
-    
+
     def test_check_parameters_count(self):
         DamageParameters._check_parameter(['-a', '1'], count=1)
         DamageParameters._check_parameter(['-a'], count=0)
@@ -70,7 +70,7 @@ class TestDamagesParameters(unittest.TestCase):
 
     def test_from_string_all_parameters(self):
         string = '-s a b c -pa 3 -pomin 1 -maxpo 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -bdmg 8'
-        
+
         damage_parameters = DamageParameters.from_string(string)
 
         self.assertListEqual(damage_parameters.stats, ['a', 'b', 'c'])
@@ -83,14 +83,14 @@ class TestDamagesParameters(unittest.TestCase):
 
     def test_to_string(self):
         string = '-s a b c -pa 3 -pomin 1 -pomax 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -bdmg 8'
-        
+
         damage_parameters = DamageParameters.from_string(string)
 
         self.assertEqual(damage_parameters.to_string(), string)
 
     def test_get_resistances_dict(self):
         string = '-r -10 0 10 20 30'
-        
+
         damage_parameters = DamageParameters.from_string(string)
 
         self.assertDictEqual(damage_parameters.get_resistances_dict(), {
