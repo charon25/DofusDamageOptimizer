@@ -143,5 +143,5 @@ class DamageParameters:
         return damage_parameters
 
     @classmethod
-    def from_other(cls, default_parameters: 'DamageParameters'):
+    def from_existing(cls, default_parameters: 'DamageParameters'):
         return replace(default_parameters)

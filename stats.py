@@ -157,6 +157,24 @@ class Stats:
 
 
     @classmethod
+    def from_existing(cls, other_stats: 'Stats'):
+        # This function does not use the getter and setter to minimize the execution time
+        stats = Stats()
+
+        for characteristic in Characteristics:
+            stats.characteristics[characteristic] = other_stats.characteristics[characteristic]
+
+        for damage in Damages:
+            stats.damages[damage] = other_stats.damages[damage]
+
+        stats.bonus_crit_chance = other_stats.bonus_crit_chance
+        stats.name = other_stats.name
+        stats.short_name = other_stats.short_name
+
+        return stats
+
+
+    @classmethod
     def check_json_validity(cls, json_data):
         for key in ('characteristics', 'damages', 'name', 'bonus_crit_chance', 'short_name'):
             if not key in json_data:

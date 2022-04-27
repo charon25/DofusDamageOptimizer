@@ -29,6 +29,7 @@ class Manager:
         self.default_parameters: str = ''
 
         self._create_dirs()
+        self._load_default()
         self._load_from_file()
 
     def _create_dirs(self):
@@ -49,8 +50,6 @@ class Manager:
         self.default_parameters = '__default__'
 
     def _load_from_file(self):
-        self._load_default()
-
         try:
             with open('manager.json', 'r', encoding='utf-8') as fi:
                 json_data = json.load(fi)
@@ -176,7 +175,7 @@ class Manager:
                 self.print(1, f"Parameters '{parameters_name}' already exist.")
                 return
 
-            self.parameters[parameters_name] = DamageParameters.from_other(self._get_default_parameters())
+            self.parameters[parameters_name] = DamageParameters.from_existing(self._get_default_parameters())
             self.save(False)
             self.print(0, f"Parameters '{parameters_name}' successfully created from current ones.")
 

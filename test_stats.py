@@ -1,4 +1,6 @@
+from copy import copy, deepcopy
 import os
+import time
 import unittest
 
 from stats import Damages, Characteristics, Stats
@@ -84,9 +86,6 @@ class TestStats(unittest.TestCase):
         with self.assertRaises(TypeError):
             stats.set_characteristic("string", 0)
             stats.set_characteristic(Characteristics.LUCK, "string")
-
-        with self.assertRaises(ValueError):
-            stats.set_characteristic(Characteristics.AGILITY, -100)
 
     def test_neutral_strength_equality(self):
         stats = Stats()
@@ -174,6 +173,32 @@ class TestStats(unittest.TestCase):
         with self.assertRaises(TypeError):
             stats2 = stats1 + 1
             stats2 = stats1 + "string"
+
+    def test_performance_deep_copy(self):
+        stats = Stats()
+
+        stats.set_characteristic(Characteristics.AGILITY, 779)
+        stats.set_characteristic(Characteristics.LUCK, 86)
+        stats.set_characteristic(Characteristics.STRENGTH, 101)
+        stats.set_characteristic(Characteristics.INTELLIGENCE, 81)
+
+        stats.set_damage(Damages.POWER, 121)
+        stats.set_damage(Damages.BASIC, 17)
+        stats.set_damage(Damages.NEUTRAL, 29)
+        stats.set_damage(Damages.EARTH, 31)
+        stats.set_damage(Damages.FIRE, 7)
+        stats.set_damage(Damages.WATER, 7)
+        stats.set_damage(Damages.AIR, 49)
+        stats.set_damage(Damages.SPELL, 7)
+
+        N = 10000
+
+        t0 = time.perf_counter_ns()
+        for _ in range(N):
+            stats_copied = Stats.from_existing(stats)
+        t1 = time.perf_counter_ns()
+
+        print(f"\n{N} repetitions : {1e-6 * (t1 - t0):.1f} ms total ({1e-3 * (t1 - t0) / N:.1f} µs / copy)")
 
 
 if __name__ == '__main__':
