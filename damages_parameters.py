@@ -4,6 +4,7 @@ from typing import Dict, List, Literal, Union
 
 from stats import Stats, Characteristics
 
+
 @dataclass
 class DamageParameters:
     full_name: str = ''
@@ -14,8 +15,8 @@ class DamageParameters:
     resistances: List[int] = field(default_factory=lambda: [0, 0, 0, 0, 0])
     distance: Literal['melee', 'range'] = 'range'
     vulnerability: int = 0
-    base_damages: int = 0
-
+    base_damages: List[int] = field(default_factory=lambda: [0, 0, 0, 0, 0])
+    
 
     def get_min_po(self):
         return self.po[0]
@@ -27,6 +28,10 @@ class DamageParameters:
         # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
         return {Characteristics(str(k - 1) if k > 0 else '4'): self.resistances[k] for k in range(5)}
 
+    def get_base_damages_dict(self):
+        # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
+        return {Characteristics(str(k - 1) if k > 0 else '4'): self.base_damages[k] for k in range(5)}
+
     def get_total_stats(self, stats: Dict[str, Stats]):
         for stats_short_name in self.stats:
             if not stats_short_name in self.stats:
@@ -34,25 +39,30 @@ class DamageParameters:
 
         return sum(stats[stats_short_name] for stats_short_name in stats)
 
+    def add_base_damages(self, base_damages: Dict[Characteristics, int]):
+        for k, characteristic in enumerate(Characteristics):
+            self.base_damages[k + 1 if k < 4 else 0] += base_damages[characteristic]
+
 
     def __add__(self, other: Union['DamageParameters', int]):
         """Perform an addition of the 'addable' type : vulnerability and base damages."""
 
         if isinstance(other, int):  # Useful when doing stats + sum([]) - No matter the integer, return the stats
             return DamageParameters.from_existing(self)
-        elif not isinstance(other, Stats):
+        elif not isinstance(other, DamageParameters):
             raise TypeError(f"unsupported operand type(s) for +: 'DamageParameters' and '{type(other)}'.")
 
         result = DamageParameters.from_existing(self)
 
-        result.base_damages += other.base_damages
-        result.vulnerability += other.base_damages
+        result.vulnerability += other.vulnerability
+        for k in range(5):
+            result.base_damages[k] += other.base_damages[k]
 
         return result
 
 
     def to_string(self):
-        return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -bdmg {self.base_damages} -name {self.full_name}'
+        return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -name {self.full_name} -bdmg {" ".join(map(str, self.base_damages))}'
 
 
     def _assert_correct_parameters(self):
@@ -148,8 +158,8 @@ class DamageParameters:
                 damage_parameters.vulnerability = int(parameter[1])
 
             elif command in ('-bdmg', '-bdamages', '-base-damages'):
-                cls._check_parameter(parameter, 1, argument_type=int)
-                damage_parameters.base_damages = int(parameter[1])
+                cls._check_parameter(parameter, 5, argument_type=int)
+                damage_parameters.base_damages = [int(parameter[i]) for i in range(1, 5 + 1)]
 
             elif command in ('-name',):
                 damage_parameters.full_name = ' '.join(parameter[1:])

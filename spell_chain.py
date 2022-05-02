@@ -1,6 +1,4 @@
-
-
-from typing import List
+from typing import Dict, List, Set
 
 from damages_parameters import DamageParameters
 from spell import Spell
@@ -41,16 +39,18 @@ class SpellChains:
 
     def _get_detailed_damages_of_permutation(self, permutation: List[int], stats: Stats, parameters: DamageParameters) -> None:
         spells = [self.spells[index] for index in permutation] # Convert the list of indices into a list of spells
+
         current_stats = Stats.from_existing(stats)
         current_parameters = DamageParameters.from_existing(parameters)
-        stats_buff = {'__all__': []}
-        parameters_buff = {'__all__': []}
-        current_states = []
+        stats_buff: Dict[str, Stats] = {'__all__': []}
+        parameters_buff: Dict[str, Stats] = {'__all__': []}
+        current_states: Set[str] = {}
+
         for spell in spells:
             spell_stats = current_stats + sum(stats_buff['__all__']) + sum(stats_buff.get(spell.short_name, []))
             spell_parameters = current_parameters + sum(parameters_buff['all']) + sum(parameters_buff.get(spell.short_name, []))
 
-            _, damages, _ = spell.get_detailed_damages_with_states(spell_stats, spell_parameters, current_states)
+            _, damages, _ = spell.get_damages_and_buffs_with_states(spell_stats, spell_parameters, current_states)
 
 
     # Résultats pour chaque permutation ou pour la meilleure ?? TODO

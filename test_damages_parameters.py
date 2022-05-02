@@ -69,7 +69,7 @@ class TestDamagesParameters(unittest.TestCase):
         self.assertListEqual(damage_parameters.po, [3, 8])
 
     def test_from_string_all_parameters(self):
-        string = '-s a b c -pa 3 -pomin 1 -maxpo 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -bdmg 8'
+        string = '-s a b c -pa 3 -pomin 1 -maxpo 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -bdmg 1 2 3 4 5'
 
         damage_parameters = DamageParameters.from_string(string)
 
@@ -82,7 +82,7 @@ class TestDamagesParameters(unittest.TestCase):
         self.assertEqual(damage_parameters.vulnerability, 15)
 
     def test_to_string(self):
-        string = '-s a b c -pa 3 -pomin 1 -pomax 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -bdmg 8'
+        string = '-s a b c -pa 3 -pomin 1 -pomax 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -name nom -bdmg 1 2 3 4 5'
 
         damage_parameters = DamageParameters.from_string(string)
 
@@ -101,27 +101,53 @@ class TestDamagesParameters(unittest.TestCase):
             Characteristics.AGILITY: 30
         })
 
+    def test_get_base_damages_dict(self):
+        string = '-bdmg -10 0 10 20 30'
+
+        damage_parameters = DamageParameters.from_string(string)
+
+        self.assertDictEqual(damage_parameters.get_base_damages_dict(), {
+            Characteristics.NEUTRAL: -10,
+            Characteristics.STRENGTH: 0,
+            Characteristics.INTELLIGENCE: 10,
+            Characteristics.LUCK: 20,
+            Characteristics.AGILITY: 30
+        })
+
+    def test_add_base_damages(self):
+        string = '-bdmg 5 1 2 3 4'
+
+        damage_parameters = DamageParameters.from_string(string)
+        base_damages = {characteristic: 10 * (k + 1) for k, characteristic in enumerate(Characteristics)}
+
+        damage_parameters.add_base_damages(base_damages)
+
+        self.assertListEqual(damage_parameters.base_damages, [55, 11, 22, 33, 44])
+
     def test_addition_other(self):
-        string1 = '-v 15 -bdmg 8'
-        string2 = '-v 30 -bdmg 4'
+        string1 = '-v 15'
+        string2 = '-v 30'
 
         damage_parameters1 = DamageParameters.from_string(string1)
+        damage_parameters1.base_damages = [1, 2, 3, 4, 5]
         damage_parameters2 = DamageParameters.from_string(string2)
+        damage_parameters2.base_damages = [10, 20, 30, 40, 50]
 
         damage_parameters3 = damage_parameters1 + damage_parameters2
 
         self.assertEqual(damage_parameters3.vulnerability, 15 + 30)
-        self.assertEqual(damage_parameters3.base_damages, 8 + 4)
+        self.assertListEqual(damage_parameters3.base_damages, [11, 22, 33, 44, 55])
 
     def test_addition_int(self):
-        string1 = '-v 15 -bdmg 8'
+        string1 = '-v 15'
 
         damage_parameters1 = DamageParameters.from_string(string1)
+        damage_parameters1.base_damages = [1, 2, 3, 4, 5]
 
-        damage_parameters3 = damage_parameters1 + 10
+        damage_parameters2 = damage_parameters1 + 10
 
-        self.assertEqual(damage_parameters3.vulnerability, 15)
-        self.assertEqual(damage_parameters3.base_damages, 8)
+        self.assertEqual(damage_parameters2.vulnerability, 15)
+        self.assertListEqual(damage_parameters2.base_damages, [1, 2, 3, 4, 5])
 
 if __name__ == '__main__':
     unittest.main()

@@ -230,8 +230,11 @@ class Manager:
             self.print(0, f"PO: {parameters.get_min_po()} - {parameters.get_max_po()}")
             self.print(0, f"Type: {parameters.type}")
             self.print(0, f"Distance: {parameters.distance}")
-            if parameters.base_damages > 0:
-                self.print(0, f"Base damages increase: {parameters.base_damages}")
+
+            self.print(0, f"\nBase damages increase:")
+            for characteristic in Characteristics:
+                if parameters.base_damages[characteristic] > 0:
+                    self.print(0, f" - {characteristic.name}: {parameters.base_damages[characteristic]}")
 
             self.print(0, f"\nResistances:")
             for k in range(5):

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field, replace
 import json
 import os
 import re
-from typing import Dict, List, Tuple
+from typing import Dict, List, Set, Tuple
 
 from damages import compute_damage
 from damages_parameters import DamageParameters
@@ -14,7 +14,15 @@ class SpellOutput:
     damages: Dict[str, int] = field(default_factory=lambda: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
     stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
     parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
-    states: List[str] = field(default_factory=lambda: [])
+    states: Set[str] = field(default_factory=lambda: {})
+
+    def update_stats(self, new_stats: Dict[str, Stats]):
+        for name in new_stats:
+            self.stats[name] += new_stats[name]
+
+    def update_parameters(self, new_parameters: Dict[str, DamageParameters]):
+        for name in new_parameters:
+            self.parameters[name] += new_parameters[name]
 
 
 @dataclass
@@ -41,15 +49,52 @@ class SpellParameters:
             return min(max_used_pa // self.pa, self.uses_per_turn)
 
 
+class SpellBuff:
+    def __init__(self) -> None:
+        self.trigger_states: Set[str] = set()
+        self.base_damages: Dict[Characteristics, int] = {characteristic: 0 for characteristic in Characteristics}
+        self.stats: Dict[str, Stats] = {'__all__': Stats()}
+        self.damage_parameters: Dict[str, DamageParameters] = {'__all__': DamageParameters()}
+        self.new_output_states: Set[str] = set()
+        self.removed_output_states: Set[str] = set() # Must be a subset of self.trigger_states
+        self.has_stats = False
+        self.has_parameters = False
+
+    def add_trigger_state(self, state: str):
+        self.trigger_states.add(state)
+
+    def set_base_damages(self, characteristic: Characteristics, base_damages: int):
+        self.base_damages[characteristic] = base_damages
+
+    def add_stats(self, stats: Stats, spell: str = '__all__'):
+        self.has_stats = True
+        self.stats[spell] = self.stats.get(spell, Stats()) + stats
+
+    def add_damage_parameters(self, damage_parameters: DamageParameters, spell: str = '__all__'):
+        self.has_parameters = True
+        self.damage_parameters[spell] = self.damage_parameters.get(spell, DamageParameters()) + damage_parameters
+
+    def add_new_output_state(self, state: str):
+        self.new_output_states.add(state)
+
+    def add_removed_output_state(self, state: str):
+        self.removed_output_states.add(state)
+
+    def trigger(self, states: Set[str]) -> bool:
+        return self.trigger_states == states
+
+
 class Spell():
     def __init__(self, from_scratch=True) -> None:
         self.parameters = SpellParameters()
+        self.buffs: List[SpellBuff] = list()
         self.name = ''
         self.short_name = ''
 
         if from_scratch:
             for characteristic in Characteristics:
                 self.parameters.base_damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
+
 
     def get_detailed_damages(self, stats: Stats, parameters: DamageParameters):
         average_damage = 0.0
@@ -90,11 +135,33 @@ class Spell():
         return (1 - final_crit_chance) * average_damage + final_crit_chance * average_damage_crit
 
 
-    def get_damages_and_buffs_with_states(self, stats: Stats, parameters: DamageParameters, states: List[str]) -> SpellOutput:
-        # Générer les buffs de ce sort liés aux états
-        # Retirer les états utilisés et ajoutés les nouveaux
+    def get_damages_and_buffs_with_states(self, stats: Stats, damage_parameters: DamageParameters, states: Set[str]) -> SpellOutput:
+        # Générer les buffs de ce sort liés aux états ok
+        # Retirer les états utilisés et ajoutés les nouveaux ok
         # Générer les buffs pour les sorts suivants
-        
+
+        output = SpellOutput()
+
+        computation_parameters = DamageParameters.from_existing(damage_parameters)
+        computation_stats = Stats.from_existing(stats)
+        output.states.update(states)
+
+        for buff in self.buffs:
+            if buff.trigger(states):
+                computation_parameters.add_base_damages(buff.base_damages)
+
+                if buff.has_stats:
+                    output.update_stats(buff.stats)
+
+                if buff.has_parameters:
+                    output.update_parameters(buff.damage_parameters)
+
+                output.states -= buff.removed_output_states
+                output.states.update(buff.new_output_states)
+
+        _, damages, _ = self.get_detailed_damages(computation_stats, computation_parameters)
+        output.damages = damages
+
         return None
 
 
@@ -211,7 +278,7 @@ class Spell():
 
 
     def set_weapon(self, is_weapon):
-        if not (isinstance(is_weapon, bool) or (isinstance(is_weapon, int) and is_weapon in [0, 1])):
+        if not (isinstance(is_weapon, bool) or (isinstance(is_weapon, int) and is_weapon in (0, 1))):
             raise TypeError(f"is_weapon is not a bool ('{is_weapon}' of type '{type(is_weapon)}' given instead).")
 
         self.parameters.is_weapon = bool(is_weapon)
