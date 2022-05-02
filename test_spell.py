@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from damages_parameters import DamageParameters
+from damage_parameters import DamageParameters
 from spell import Spell
 from stats import Characteristics, Damages, Stats
 

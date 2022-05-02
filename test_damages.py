@@ -1,7 +1,7 @@
 import unittest
 
 from damages import compute_damage
-from damages_parameters import DamageParameters
+from damage_parameters import DamageParameters
 from stats import Damages, Characteristics, Stats
 
 

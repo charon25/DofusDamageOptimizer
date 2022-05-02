@@ -1,4 +1,4 @@
-from damages_parameters import DamageParameters
+from damage_parameters import DamageParameters
 from stats import Characteristics, Damages, Stats
 
 

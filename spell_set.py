@@ -3,7 +3,7 @@ import os
 import re
 from typing import List
 
-from damages_parameters import DamageParameters
+from damage_parameters import DamageParameters
 from spell import Spell
 
 

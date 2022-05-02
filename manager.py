@@ -4,7 +4,7 @@ import os
 from typing import Any, Callable, Dict, List
 
 from knapsack import get_best_combination
-from damages_parameters import DamageParameters
+from damage_parameters import DamageParameters
 from spell import Spell
 from spell_set import SpellSet
 from stats import Characteristics, Damages, Stats

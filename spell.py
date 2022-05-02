@@ -5,7 +5,7 @@ import re
 from typing import Dict, List, Set, Tuple
 
 from damages import compute_damage
-from damages_parameters import DamageParameters
+from damage_parameters import DamageParameters
 from stats import Characteristics, Stats
 
 
@@ -14,7 +14,7 @@ class SpellOutput:
     damages: Dict[str, int] = field(default_factory=lambda: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
     stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
     parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
-    states: Set[str] = field(default_factory=lambda: {})
+    states: Set[str] = field(default_factory=lambda: set())
 
     def update_stats(self, new_stats: Dict[str, Stats]):
         for name in new_stats:
@@ -48,17 +48,19 @@ class SpellParameters:
         else:
             return min(max_used_pa // self.pa, self.uses_per_turn)
 
-
+@dataclass
 class SpellBuff:
-    def __init__(self) -> None:
-        self.trigger_states: Set[str] = set()
-        self.base_damages: Dict[Characteristics, int] = {characteristic: 0 for characteristic in Characteristics}
-        self.stats: Dict[str, Stats] = {'__all__': Stats()}
-        self.damage_parameters: Dict[str, DamageParameters] = {'__all__': DamageParameters()}
-        self.new_output_states: Set[str] = set()
-        self.removed_output_states: Set[str] = set() # Must be a subset of self.trigger_states
-        self.has_stats = False
-        self.has_parameters = False
+    trigger_states: Set[str] = field(default_factory=lambda: set())
+    base_damages: Dict[Characteristics, int] = field(default_factory=lambda: {characteristic: 0 for characteristic in Characteristics})
+    stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
+    damage_parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
+
+    new_output_states: Set[str] = field(default_factory=lambda: set())
+    removed_output_states: Set[str] = field(default_factory=lambda: set())
+
+    has_stats: bool = False
+    has_parameters: bool = False
+
 
     def add_trigger_state(self, state: str):
         self.trigger_states.add(state)
@@ -81,7 +83,7 @@ class SpellBuff:
         self.removed_output_states.add(state)
 
     def trigger(self, states: Set[str]) -> bool:
-        return self.trigger_states == states
+        return states.issuperset(self.trigger_states)
 
 
 class Spell():
@@ -162,7 +164,7 @@ class Spell():
         _, damages, _ = self.get_detailed_damages(computation_stats, computation_parameters)
         output.damages = damages
 
-        return None
+        return output
 
 
     def get_max_uses_single_target(self, max_used_pa):
@@ -202,6 +204,10 @@ class Spell():
 
         with open(filepath, 'w', encoding='utf-8') as fo:
             json.dump(json_valid_data, fo)
+
+    def add_buff(self, buff: SpellBuff):
+        # TODO : checks to do ?
+        self.buffs.append(buff)
 
 
     def get_pa(self):

@@ -1,6 +1,6 @@
 from typing import Dict, List, Set
 
-from damages_parameters import DamageParameters
+from damage_parameters import DamageParameters
 from spell import Spell
 from stats import Stats
 
@@ -37,20 +37,32 @@ class SpellChains:
         return all_permutations_list
 
 
-    def _get_detailed_damages_of_permutation(self, permutation: List[int], stats: Stats, parameters: DamageParameters) -> None:
+    def _get_detailed_damages_of_permutation(self, permutation: List[int], stats: Stats, parameters: DamageParameters, test=False) -> Dict[str, int]:
         spells = [self.spells[index] for index in permutation] # Convert the list of indices into a list of spells
 
-        current_stats = Stats.from_existing(stats)
-        current_parameters = DamageParameters.from_existing(parameters)
-        stats_buff: Dict[str, Stats] = {'__all__': []}
-        parameters_buff: Dict[str, Stats] = {'__all__': []}
-        current_states: Set[str] = {}
+        stats_buff: Dict[str, Stats] = {'__all__': Stats()}
+        parameters_buff: Dict[str, DamageParameters] = {'__all__': DamageParameters()}
+        current_states: Set[str] = set() # TODO : vérifier les 50 de puissance donnés par les états hupper
+        damages = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
 
-        for spell in spells:
-            spell_stats = current_stats + sum(stats_buff['__all__']) + sum(stats_buff.get(spell.short_name, []))
-            spell_parameters = current_parameters + sum(parameters_buff['all']) + sum(parameters_buff.get(spell.short_name, []))
+        for k, spell in enumerate(spells):
+            spell_stats = stats + stats_buff['__all__'] + stats_buff.get(spell.short_name, Stats())
+            spell_parameters = parameters + parameters_buff['__all__'] + parameters_buff.get(spell.short_name, DamageParameters())
 
-            _, damages, _ = spell.get_damages_and_buffs_with_states(spell_stats, spell_parameters, current_states)
+            spell_output = spell.get_damages_and_buffs_with_states(spell_stats, spell_parameters, current_states)
+
+            current_states = spell_output.states
+
+            for name in spell_output.stats:
+                stats_buff[name] = stats_buff.get(name, Stats()) + spell_output.stats[name]
+
+            for name in spell_output.parameters:
+                parameters_buff[name] = parameters_buff.get(name, DamageParameters()) + spell_output.parameters[name]
+
+            for field in damages:
+                damages[field] += spell_output.damages[field]
+        
+        return damages
 
 
     # Résultats pour chaque permutation ou pour la meilleure ?? TODO

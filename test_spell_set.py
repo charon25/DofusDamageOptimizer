@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 
-from damages_parameters import DamageParameters
+from damage_parameters import DamageParameters
 from spell import Spell
 from spell_set import SpellSet
 
