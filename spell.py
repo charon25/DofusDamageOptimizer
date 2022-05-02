@@ -1,32 +1,55 @@
+from dataclasses import dataclass, field, replace
 import json
 import os
 import re
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from damages import compute_damage
 from damages_parameters import DamageParameters
 from stats import Characteristics, Stats
 
 
+@dataclass
+class SpellOutput:
+    damages: Dict[str, int] = field(default_factory=lambda: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
+    stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
+    parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
+    states: List[str] = field(default_factory=lambda: [])
+
+
+@dataclass
+class SpellParameters:
+    base_damages: Dict[Characteristics, Dict[str, int]] = field(default_factory=lambda: {})
+    pa: int = 1
+    crit_chance: float = 0.0
+    uses_per_target: int = -1
+    uses_per_turn: int = -1
+    is_weapon: bool = False
+    po: Tuple[int, int] = field(default_factory=lambda: (0, 1024))
+
+
+    def get_max_uses_single_target(self, max_used_pa: int) -> int:
+        if self.uses_per_target == -1:
+            return max_used_pa // self.pa
+        else:
+            return min(max_used_pa // self.pa, self.uses_per_target)
+
+    def get_max_uses_multiple_targets(self, max_used_pa: int) -> int:
+        if self.uses_per_turn == -1:
+            return max_used_pa // self.pa
+        else:
+            return min(max_used_pa // self.pa, self.uses_per_turn)
+
+
 class Spell():
     def __init__(self, from_scratch=True) -> None:
-        self.base_damages: Dict[Characteristics, Dict] = dict()
-        self.pa = 1
-        self.crit_chance = 0.0
-        self.uses_per_target = -1
-        self.uses_per_turn = -1
-        self.is_weapon = False
-        self.po = (0, 1024)
+        self.parameters = SpellParameters()
         self.name = ''
         self.short_name = ''
 
         if from_scratch:
-            self._fill_empty_dict()
-
-    def _fill_empty_dict(self):
-        for characteristic in Characteristics:
-            self.base_damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
-
+            for characteristic in Characteristics:
+                self.parameters.base_damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
 
     def get_detailed_damages(self, stats: Stats, parameters: DamageParameters):
         average_damage = 0.0
@@ -35,12 +58,12 @@ class Spell():
         damages_by_characteristic: Dict[Characteristics, Dict[str, float]] = dict()
 
         for characteristic in Characteristics:
-            min_damage = compute_damage(self.base_damages[characteristic]['min'], stats, characteristic, is_weapon=self.is_weapon, parameters=parameters)
-            max_damage = compute_damage(self.base_damages[characteristic]['max'], stats, characteristic, is_weapon=self.is_weapon, parameters=parameters)
+            min_damage = compute_damage(self.parameters.base_damages[characteristic]['min'], stats, characteristic, is_weapon=self.parameters.is_weapon, parameters=parameters)
+            max_damage = compute_damage(self.parameters.base_damages[characteristic]['max'], stats, characteristic, is_weapon=self.parameters.is_weapon, parameters=parameters)
             average_damage += (min_damage + max_damage) / 2
 
-            min_damage_crit = compute_damage(self.base_damages[characteristic]['crit_min'], stats, characteristic, is_weapon=self.is_weapon, is_crit=True, parameters=parameters)
-            max_damage_crit = compute_damage(self.base_damages[characteristic]['crit_max'], stats, characteristic, is_weapon=self.is_weapon, is_crit=True, parameters=parameters)
+            min_damage_crit = compute_damage(self.parameters.base_damages[characteristic]['crit_min'], stats, characteristic, is_weapon=self.parameters.is_weapon, is_crit=True, parameters=parameters)
+            max_damage_crit = compute_damage(self.parameters.base_damages[characteristic]['crit_max'], stats, characteristic, is_weapon=self.parameters.is_weapon, is_crit=True, parameters=parameters)
             average_damage_crit += (min_damage_crit + max_damage_crit) / 2
 
             damages_by_characteristic[characteristic] = {
@@ -60,15 +83,19 @@ class Spell():
     def get_average_damages(self, stats: Stats, parameters: DamageParameters):
         _, _, (average_damage, average_damage_crit) = self.get_detailed_damages(stats, parameters)
 
-        final_crit_chance = self.crit_chance + stats.bonus_crit_chance
+        final_crit_chance = self.parameters.crit_chance + stats.bonus_crit_chance
         if final_crit_chance > 1.0:
             final_crit_chance = 1.0
 
         return (1 - final_crit_chance) * average_damage + final_crit_chance * average_damage_crit
 
 
-    def get_detailed_damages_with_states(self, stats: Stats, parameters: DamageParameters, states: List[str]):
-        pass
+    def get_damages_and_buffs_with_states(self, stats: Stats, parameters: DamageParameters, states: List[str]) -> SpellOutput:
+        # Générer les buffs de ce sort liés aux états
+        # Retirer les états utilisés et ajoutés les nouveaux
+        # Générer les buffs pour les sorts suivants
+        
+        return None
 
 
     def get_max_uses_single_target(self, max_used_pa):
@@ -78,10 +105,7 @@ class Spell():
         if max_used_pa < 0:
             raise ValueError(f"Max used pa should be non negative ('{max_used_pa}' given instead).")
 
-        if self.uses_per_target == -1:
-            return max_used_pa // self.pa
-        else:
-            return min(max_used_pa // self.pa, self.uses_per_target)
+        return self.parameters.get_max_uses_single_target(max_used_pa)
 
     def get_max_uses_multiple_targets(self, max_used_pa):
         if not isinstance(max_used_pa, int):
@@ -90,25 +114,23 @@ class Spell():
         if max_used_pa < 0:
             raise ValueError(f"Max used pa should be non negative ('{max_used_pa}' given instead).")
 
-        if self.uses_per_turn == -1:
-            return max_used_pa // self.pa
-        else:
-            return min(max_used_pa // self.pa, self.uses_per_turn)
+        return self.parameters.get_max_uses_multiple_targets(max_used_pa)
+
 
     def can_reach_po(self, min_po, max_po):
         return not (self.get_min_po() > max_po or self.get_max_po() < min_po)
 
     def save_to_file(self, filepath):
         json_valid_data = {
-            'base_damages': self.base_damages,
-            'pa': self.pa,
-            'crit_chance': self.crit_chance,
-            'uses_per_target': self.uses_per_target,
-            'uses_per_turn': self.uses_per_turn,
-            'is_weapon': self.is_weapon,
+            'base_damages': self.parameters.base_damages,
+            'pa': self.parameters.pa,
+            'crit_chance': self.parameters.crit_chance,
+            'uses_per_target': self.parameters.uses_per_target,
+            'uses_per_turn': self.parameters.uses_per_turn,
+            'is_weapon': self.parameters.is_weapon,
             'name': self.name,
             'short_name': self.short_name,
-            'po': list(self.po)
+            'po': list(self.parameters.po)
         }
 
         with open(filepath, 'w', encoding='utf-8') as fo:
@@ -116,7 +138,7 @@ class Spell():
 
 
     def get_pa(self):
-        return self.pa
+        return self.parameters.pa
 
     def set_pa(self, pa):
         if not isinstance(pa, int):
@@ -124,14 +146,14 @@ class Spell():
         if pa <= 0:
             raise ValueError(f"PA count should be a positive int ('{pa}' given instead).")
 
-        self.pa = pa
+        self.parameters.pa = pa
 
 
     def get_base_damages(self, characteristic):
         if not isinstance(characteristic, Characteristics):
             raise TypeError(f"'{characteristic} is not a valid characteristic.")
 
-        return self.base_damages[characteristic]
+        return self.parameters.base_damages[characteristic]
 
     def set_base_damages(self, characteristic, base_damages):
         if not isinstance(characteristic, Characteristics):
@@ -148,11 +170,11 @@ class Spell():
             if base_damages[field] < 0:
                 raise ValueError(f"Field '{field}' should be non negative ('{base_damages[field]}' given instead).")
 
-        self.base_damages[characteristic] = base_damages
+        self.parameters.base_damages[characteristic] = base_damages
 
 
     def get_crit_chance(self):
-        return self.crit_chance
+        return self.parameters.crit_chance
 
     def set_crit_chance(self, crit_chance):
         if not (isinstance(crit_chance, float) or isinstance(crit_chance, int)):
@@ -161,11 +183,11 @@ class Spell():
         if not (0.0 <= crit_chance <= 1.0):
             raise ValueError(f"Crit chance should be between 0 and 1 inclusive ('{crit_chance}' given instead).")
 
-        self.crit_chance = float(crit_chance)
+        self.parameters.crit_chance = float(crit_chance)
 
 
     def get_uses_per_target(self):
-        return self.uses_per_target
+        return self.parameters.uses_per_target
 
     def set_uses_per_target(self, uses_per_target):
         if not isinstance(uses_per_target, int):
@@ -173,11 +195,11 @@ class Spell():
         if uses_per_target == 0 or uses_per_target < -1:
             raise ValueError(f"Uses per target should be -1 or a positive int ('{uses_per_target}' given instead).")
 
-        self.uses_per_target = uses_per_target
+        self.parameters.uses_per_target = uses_per_target
 
 
     def get_uses_per_turn(self):
-        return self.uses_per_turn
+        return self.parameters.uses_per_turn
 
     def set_uses_per_turn(self, uses_per_turn):
         if not isinstance(uses_per_turn, int):
@@ -185,21 +207,21 @@ class Spell():
         if uses_per_turn == 0 or uses_per_turn < -1:
             raise ValueError(f"Uses per turn should be -1 or a positive int ('{uses_per_turn}' given instead).")
 
-        self.uses_per_turn = uses_per_turn
+        self.parameters.uses_per_turn = uses_per_turn
 
 
     def set_weapon(self, is_weapon):
         if not (isinstance(is_weapon, bool) or (isinstance(is_weapon, int) and is_weapon in [0, 1])):
             raise TypeError(f"is_weapon is not a bool ('{is_weapon}' of type '{type(is_weapon)}' given instead).")
 
-        self.is_weapon = bool(is_weapon)
+        self.parameters.is_weapon = bool(is_weapon)
 
 
     def get_min_po(self):
-        return self.po[0]
+        return self.parameters.po[0]
 
     def get_max_po(self):
-        return self.po[1]
+        return self.parameters.po[1]
 
     def set_po(self, min_po=None, max_po=None):
         if min_po is None:
@@ -214,7 +236,7 @@ class Spell():
         if min_po < 0 or max_po < 0 or max_po < min_po:
             raise ValueError(f"Minimum PO and maximum PO should be non negative and minimum should be <= than maximum ('{min_po}' and '{max_po}' given instead).")
 
-        self.po = (min_po, max_po)
+        self.parameters.po = (min_po, max_po)
 
 
     def get_name(self):
