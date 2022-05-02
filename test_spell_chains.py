@@ -4,14 +4,14 @@ import unittest
 
 from damages_parameters import DamageParameters
 from spell import Spell
-from spell_chain import SpellChain
+from spell_chain import SpellChains
 from spell_set import SpellSet
 
 
 class TestStats(unittest.TestCase):
 
     def test_get_sub_permutation_two_spells(self):
-        chain = SpellChain()
+        chain = SpellChains()
 
         spell1 = Spell()
         spell1.set_pa(3)
@@ -36,7 +36,7 @@ class TestStats(unittest.TestCase):
         })
 
     def test_get_sub_permutation_one_spell_multiple_times(self):
-        chain = SpellChain()
+        chain = SpellChains()
 
         spell1 = Spell()
         spell1.set_pa(2)
@@ -64,7 +64,7 @@ class TestStats(unittest.TestCase):
         })
 
     def test_get_sub_permutation_one_spell_too_much_pa(self):
-        chain = SpellChain()
+        chain = SpellChains()
 
         spell1 = Spell()
         spell1.set_pa(3)
@@ -86,7 +86,7 @@ class TestStats(unittest.TestCase):
         })
 
     def test_get_sub_permutation_multiple_spells(self):
-        chain = SpellChain()
+        chain = SpellChains()
 
         spell1 = Spell()
         spell1.set_pa(3)

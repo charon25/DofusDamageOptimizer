@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field, replace
 import re
-from typing import Dict, List, Literal
+from typing import Dict, List, Literal, Union
 
 from stats import Stats, Characteristics
 
@@ -33,6 +33,22 @@ class DamageParameters:
                 raise KeyError(f"Stats page '{stats_short_name}' does not exist.")
 
         return sum(stats[stats_short_name] for stats_short_name in stats)
+
+
+    def __add__(self, other: Union['DamageParameters', int]):
+        """Perform an addition of the 'addable' type : vulnerability and base damages."""
+
+        if isinstance(other, int):  # Useful when doing stats + sum([]) - No matter the integer, return the stats
+            return DamageParameters.from_existing(self)
+        elif not isinstance(other, Stats):
+            raise TypeError(f"unsupported operand type(s) for +: 'DamageParameters' and '{type(other)}'.")
+
+        result = DamageParameters.from_existing(self)
+
+        result.base_damages += other.base_damages
+        result.vulnerability += other.base_damages
+
+        return result
 
 
     def to_string(self):

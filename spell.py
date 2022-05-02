@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from typing import Dict
+from typing import Dict, List
 
 from damages import compute_damage
 from damages_parameters import DamageParameters
@@ -65,6 +65,10 @@ class Spell():
             final_crit_chance = 1.0
 
         return (1 - final_crit_chance) * average_damage + final_crit_chance * average_damage_crit
+
+
+    def get_detailed_damages_with_states(self, stats: Stats, parameters: DamageParameters, states: List[str]):
+        pass
 
 
     def get_max_uses_single_target(self, max_used_pa):

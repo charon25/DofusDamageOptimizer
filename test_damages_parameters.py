@@ -101,5 +101,27 @@ class TestDamagesParameters(unittest.TestCase):
             Characteristics.AGILITY: 30
         })
 
+    def test_addition_other(self):
+        string1 = '-v 15 -bdmg 8'
+        string2 = '-v 30 -bdmg 4'
+
+        damage_parameters1 = DamageParameters.from_string(string1)
+        damage_parameters2 = DamageParameters.from_string(string2)
+
+        damage_parameters3 = damage_parameters1 + damage_parameters2
+
+        self.assertEqual(damage_parameters3.vulnerability, 15 + 30)
+        self.assertEqual(damage_parameters3.base_damages, 8 + 4)
+
+    def test_addition_int(self):
+        string1 = '-v 15 -bdmg 8'
+
+        damage_parameters1 = DamageParameters.from_string(string1)
+
+        damage_parameters3 = damage_parameters1 + 10
+
+        self.assertEqual(damage_parameters3.vulnerability, 15)
+        self.assertEqual(damage_parameters3.base_damages, 8)
+
 if __name__ == '__main__':
     unittest.main()

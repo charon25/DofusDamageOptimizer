@@ -7,7 +7,7 @@ from spell import Spell
 from stats import Stats
 
 
-class SpellChain:
+class SpellChains:
     def __init__(self) -> None:
         self.spells: List[Spell] = list()
 
@@ -38,16 +38,24 @@ class SpellChain:
 
         return all_permutations_list
 
+
+    def _get_detailed_damages_of_permutation(self, permutation: List[int], stats: Stats, parameters: DamageParameters) -> None:
+        spells = [self.spells[index] for index in permutation] # Convert the list of indices into a list of spells
+        current_stats = Stats.from_existing(stats)
+        current_parameters = DamageParameters.from_existing(parameters)
+        stats_buff = {'__all__': []}
+        parameters_buff = {'__all__': []}
+        current_states = []
+        for spell in spells:
+            spell_stats = current_stats + sum(stats_buff['__all__']) + sum(stats_buff.get(spell.short_name, []))
+            spell_parameters = current_parameters + sum(parameters_buff['all']) + sum(parameters_buff.get(spell.short_name, []))
+
+            _, damages, _ = spell.get_detailed_damages_with_states(spell_stats, spell_parameters, current_states)
+
+
     # Résultats pour chaque permutation ou pour la meilleure ?? TODO
     def get_detailed_damages(self, stats: Stats, parameters: DamageParameters):
         permutations = self._get_permutations(parameters)
 
         for permutation in permutations:
-            spells = [self.spells[index] for index in permutation] # Convert the list of indices into a list of spells
-            current_stats = Stats.from_existing(stats)
-            current_parameters = DamageParameters.from_existing(parameters)
-            stats_buff = {'__all__': []}
-            parameters_buff = {'__all__': []}
-            current_states = []
-            for spell in spells:
-                pass
+            self._get_detailed_damages_of_permutation(permutation, stats, parameters)

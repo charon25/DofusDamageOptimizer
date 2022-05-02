@@ -60,7 +60,9 @@ class Stats:
 
 
     def __add__(self, other: 'Stats'):
-        if not isinstance(other, Stats):
+        if isinstance(other, int):  # Useful when doing stats + sum([]) - No matter the integer, return the stats
+            return Stats.from_existing(self)
+        elif not isinstance(other, Stats):
             raise TypeError(f"unsupported operand type(s) for +: 'Stats' and '{type(other)}'.")
 
         result = Stats()
@@ -158,7 +160,7 @@ class Stats:
 
     @classmethod
     def from_existing(cls, other_stats: 'Stats'):
-        # This function does not use the getter and setter to minimize the execution time
+        # This function does not use the getters and setters to minimize the execution time
         stats = Stats()
 
         for characteristic in Characteristics:
