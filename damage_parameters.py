@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 import re
 from typing import Dict, List, Literal, Union
 
@@ -73,6 +73,11 @@ class DamageParameters:
         if self.get_min_po() > self.get_max_po():
             raise ValueError(f"Minimum PO should be less than or equal to maximum PO ({self.get_min_po()} and {self.get_max_po()} given instead).")
 
+
+    def copy(self):
+        return DamageParameters.from_existing(self)
+
+
     @classmethod
     def _check_parameter(cls, parameter: List[str], count: int = -1, argument_type=None, literals: List[str]=None):
         if count > 0: # If count if < 0, it means no constraints
@@ -102,7 +107,7 @@ class DamageParameters:
 
         if string == '':
             # No command, so just return the default parameters
-            return replace(default_parameters)
+            return default_parameters.copy()
 
         if not string.startswith('-'):
             raise ValueError(f"Incorrect string to be parsed as parameters : does not start with a command ('{string}').")
@@ -116,7 +121,7 @@ class DamageParameters:
             else:
                 parameters[-1].append(argument)
 
-        damage_parameters = replace(default_parameters)
+        damage_parameters = default_parameters.copy()
 
         for parameter in parameters:
             command = parameter[0]
