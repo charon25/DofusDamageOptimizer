@@ -108,7 +108,7 @@ class TestSpellChain(unittest.TestCase):
         parameters = DamageParameters(pa=8)
 
         permutations = chain._get_permutations(parameters)
-        
+
         self.assertEqual(len(permutations), 35)
 
 
@@ -363,7 +363,7 @@ class TestSpellChain(unittest.TestCase):
         chain.add_spell(spell3)
 
         damages = chain.get_detailed_damages(stats, parameters)
-        
+
         self.assertAlmostEqual(list(damages.values())[0][0], (1111 + 1222) / 2)
         self.assertTupleEqual(list(damages.keys())[0], ('s3', 's1', 's2'))
 
@@ -441,7 +441,7 @@ class TestSpellChain(unittest.TestCase):
         chain.add_spell(spell3)
 
         damages = chain.get_detailed_damages(stats, parameters)
-        
+
         self.assertAlmostEqual(list(damages.values())[0][0], (1111 + 1222) / 2)
         self.assertTupleEqual(list(damages.keys())[0], ('s3', 's1', 's2'))
 

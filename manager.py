@@ -1,11 +1,12 @@
 import distutils.util
 import json
 import os
+import re
 from typing import Any, Callable, Dict, List
 
 from knapsack import get_best_combination
 from damage_parameters import DamageParameters
-from spell import Spell
+from spell import Spell, SpellBuff, SpellParameters
 from spell_set import SpellSet
 from stats import Characteristics, Damages, Stats
 
@@ -252,13 +253,14 @@ class Manager:
             self.print(1, f"Unknown action '{command_action}' for parameters commands.")
 
 
-    def _create_stats(self, stats: Stats = None) -> Stats:
+    def _create_stats(self, stats: Stats = None, no_name: bool = False) -> Stats:
         if stats is None:
             stats = Stats()
 
-        name = input(f'Stats page name {f"({stats.get_name()}) " if stats.get_name() != "" else ""}: ')
-        if name:
-            stats.set_name(name)
+        if not no_name:
+            name = input(f'Stats page name{f"({stats.get_name()})" if stats.get_name() != "" else ""}: ')
+            if name:
+                stats.set_name(name)
 
         self.print(0, '\n=== Characteristics\n')
         for characteristic in Characteristics:
@@ -266,12 +268,18 @@ class Manager:
                 continue
 
             characteristic_value = input(f'{characteristic.name} ({stats.get_characteristic(characteristic)}): ')
+            if characteristic_value == '/':
+                break
+
             if characteristic_value:
                 stats.set_characteristic(characteristic, int(characteristic_value))
 
         self.print(0, '\n=== Damages\n')
         for damage in Damages:
             damage_value = input(f'{damage.name} ({stats.get_damage(damage)}): ')
+            if damage_value == '/':
+                break
+
             if damage_value:
                 stats.set_damage(damage, int(damage_value))
 
@@ -375,15 +383,103 @@ class Manager:
         else:
             self.print(1, f"Unknown action '{command_action}' for stats commands.")
 
+
+    def _create_buff(self, buff: SpellBuff = None) -> SpellBuff:
+        if buff is None:
+            buff = SpellBuff()
+
+        is_huppermage_states = input(f'Is Huppermage states ({buff.is_huppermage_states}) (0/1)? ')
+        if is_huppermage_states:
+            buff.is_huppermage_states = distutils.util.strtobool(is_huppermage_states)
+            new_output_states_txt = f'({", ".join(sorted(buff.new_output_states))}' if buff.new_output_states else ''
+            huppermage_states = input(f"Huppermage states without the 'h:' prefix{new_output_states_txt}: ")
+            for huppermage_state in huppermage_states.split(' '):
+                # Add the prefix 'h:' is front of every state if not already there
+                huppermage_state = f'h:{huppermage_state}' if not huppermage_state.startswith('h:') else huppermage_state
+                if re.match(r'h:\d?[aefw]', huppermage_state):
+                    buff.add_removed_output_state(huppermage_state)
+                else:
+                    self.print(0, f"[WARNING] The state '{huppermage_state[2:]}' is not a valid Huppermage state (should be one of 'a', 'e', 'f', 'w').")
+
+            # Huppermage states buff have no other effects
+            return buff
+
+        trigger_states_txt = f'({", ".join(sorted(buff.trigger_states))}' if buff.trigger_states else ''
+        trigger_states = input(f'Trigger states{trigger_states_txt}: ')
+        if trigger_states:
+            buff.add_trigger_states(set(trigger_states.split(' ')))
+
+        new_output_states_txt = f'({", ".join(sorted(buff.new_output_states))}' if buff.new_output_states else ''
+        new_output_states = input(f'New states to add if triggered{new_output_states_txt}: ')
+        if new_output_states:
+            buff.add_new_output_states(set(new_output_states.split(' ')))
+
+        removed_output_states_txt = f'({", ".join(sorted(buff.removed_output_states))}' if buff.removed_output_states else ''
+        removed_output_states = input(f'States to remove if triggered{removed_output_states_txt}: ')
+        if removed_output_states:
+            buff.add_removed_output_states(set(removed_output_states.split(' ')))
+
+        self.print(0, '\n=== Base damage increase if triggered\n')
+        for characteristic in Characteristics:
+            value = input(f'{characteristic.name} ({buff.base_damages[characteristic]}): ')
+            if value == '/':
+                break
+
+            if value:
+                buff.set_base_damages(characteristic, int(value))
+
+        self.print(0, '\n=== Stats pages to add to next spells when triggered')
+        while True:
+            if buff.has_stats:
+                self.print(0, '\n=== Stats page(s) currently existing :')
+                for spell in buff.stats:
+                    stats_page_string = buff.stats[spell].to_compact_string(indentation='  ')
+                    if stats_page_string:
+                        self.print(0, ' - For every next spells' if spell == "__all__" else f" - For spell '{spell}'")
+                        self.print(0, stats_page_string)
+
+            spell = input(f"\nSpell name (or '__all__') to add another stats page to (ENTER to skip)? ")
+            if spell:
+                try:
+                    buff.add_stats(self._create_stats(buff.stats.get(spell, None), no_name=True), spell)
+                except KeyboardInterrupt:
+                    self.print(0, f"\n\nCancelled page creation for spell '{spell}'.")
+            else:
+                break
+
+        self.print(0, '\n=== Damages parameters to add to next spells when triggered')
+        while True:
+            if buff.has_parameters:
+                self.print(0, '\n=== Damages parameters currently existing :')
+                for spell in buff.damage_parameters:
+                    damage_parameters_string = buff.damage_parameters[spell].to_compact_string()
+                    self.print(0, ' - For every next spells' if spell == "__all__" else f" - For spell '{spell}'")
+                    self.print(0, f'  -> {damage_parameters_string}')
+
+            spell = input(f"\nSpell name (or '__all__') to add damage parameters to (ENTER to skip)? ")
+            if spell:
+                try:
+                    damage_parameters_command = input('Damage parameters string: ')
+                    d = DamageParameters.from_string(damage_parameters_command)
+                    print(d.resistances)
+                    buff.add_damage_parameters(d, spell)
+                except KeyboardInterrupt:
+                    self.print(0, f"\n\nCancelled damage parameters addition for spell '{spell}'.")
+            else:
+                break
+
+        return buff
+
+
     def _create_spell(self, spell: Spell = None) -> Spell:
         if spell is None:
             spell = Spell()
 
-        name = input(f'Spell name {f"({spell.get_name()}) " if spell.get_name() != "" else ""}: ')
+        name = input(f'Spell name{f" ({spell.get_name()})" if spell.get_name() != "" else ""}: ')
         if name:
             spell.set_name(name)
 
-        is_weapon = input(f'Weapon ({spell.is_weapon}) (0/1): ')
+        is_weapon = input(f'Weapon ({spell.parameters.is_weapon}) (0/1): ')
         if is_weapon:
             spell.set_weapon(distutils.util.strtobool(is_weapon))
 
@@ -484,7 +580,7 @@ class Manager:
                 printed_string.append(f"Uses per target: {spell.get_uses_per_target() if spell.get_uses_per_target() > 0 else '∞'}")
                 printed_string.append(f"Uses per turn: {spell.get_uses_per_turn() if spell.get_uses_per_turn() > 0 else '∞'}")
                 printed_string.append(f'Crit chance: {100 * spell.get_crit_chance():.1f} %')
-                printed_string.append(f'Weapon: {spell.is_weapon}')
+                printed_string.append(f'Weapon: {spell.parameters.is_weapon}')
 
                 printed_string.append("\n=== Base damages\n")
                 for characteristic in Characteristics:

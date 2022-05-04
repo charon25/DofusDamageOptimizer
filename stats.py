@@ -3,6 +3,7 @@ import json
 import os
 import re
 from typing import Dict
+from uuid import uuid1
 
 
 class Characteristics(str, Enum):
@@ -54,6 +55,32 @@ class Stats:
             'name': self.name,
             'short_name': self.short_name
         }
+
+    def to_compact_string(self, indentation: str = ''):
+        output_lines = []
+        characteristic_lines = []
+        for characteristic in Characteristics:
+            if characteristic == Characteristics.NEUTRAL:
+                continue
+            if self.get_characteristic(characteristic) != 0:
+                characteristic_lines.append(f'{indentation * 2}{characteristic.name}: {self.get_characteristic(characteristic)}')
+        if characteristic_lines:
+            output_lines.append(f'{indentation}-> Characteristics')
+            output_lines.extend(characteristic_lines)
+
+        damage_lines = []
+        for damage in Damages:
+            if self.get_damage(damage) != 0:
+                damage_lines.append(f'{indentation * 2}{damage.name}: {self.get_damage(damage)}')
+        if damage_lines:
+            output_lines.append(f'{indentation}-> Damages')
+            output_lines.extend(damage_lines)
+
+        if self.bonus_crit_chance > 0.0:
+            output_lines.append(f'{indentation}-> Bonus crit chance: {100 * self.bonus_crit_chance:.0f} %')
+
+        return '\n'.join(output_lines) if output_lines else None
+
 
     def save_to_file(self, filepath):
         json_valid_data = self.to_dict()
@@ -142,6 +169,9 @@ class Stats:
         return self.name
 
     def set_name(self, name):
+        if name == '':
+            name = 'Unnamed stats'
+
         self.name = str(name)
 
 
@@ -152,6 +182,9 @@ class Stats:
         return re.sub(r'\W', '_', self.short_name)
 
     def set_short_name(self, short_name):
+        if short_name == '':
+            short_name = str(uuid1())
+
         self.short_name = str(short_name)
 
 

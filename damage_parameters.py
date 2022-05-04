@@ -16,7 +16,7 @@ class DamageParameters:
     distance: Literal['melee', 'range'] = 'range'
     vulnerability: int = 0
     base_damages: List[int] = field(default_factory=lambda: [0, 0, 0, 0, 0])
-    
+
 
     def get_min_po(self):
         return self.po[0]
@@ -57,12 +57,16 @@ class DamageParameters:
         result.vulnerability += other.vulnerability
         for k in range(5):
             result.base_damages[k] += other.base_damages[k]
+            result.resistances[k] += other.resistances[k]
 
         return result
 
 
     def to_string(self):
         return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -name {self.full_name} -bdmg {" ".join(map(str, self.base_damages))}'
+
+    def to_compact_string(self):
+        return f'-r {" ".join(map(str, self.resistances))} -v {self.vulnerability} -bdmg {" ".join(map(str, self.base_damages))}'
 
 
     def _assert_correct_parameters(self):

@@ -67,6 +67,9 @@ class SpellBuff:
     def add_trigger_state(self, state: str):
         self.trigger_states.add(state)
 
+    def add_trigger_states(self, states: Set[str]):
+        self.trigger_states.update(states)
+
     def set_base_damages(self, characteristic: Characteristics, base_damages: int):
         self.base_damages[characteristic] = base_damages
 
@@ -81,8 +84,14 @@ class SpellBuff:
     def add_new_output_state(self, state: str):
         self.new_output_states.add(state)
 
+    def add_new_output_states(self, states: Set[str]):
+        self.new_output_states.update(states)
+
     def add_removed_output_state(self, state: str):
         self.removed_output_states.add(state)
+
+    def add_removed_output_states(self, states: Set[str]):
+        self.removed_output_states.update(states)
 
     def trigger(self, states: Set[str]) -> bool:
         return states.issuperset(self.trigger_states)
@@ -386,8 +395,8 @@ class Spell():
         return self.name
 
     def set_name(self, name):
-        if len(str(name)) == 0:
-            raise ValueError('Name cannot be an empty string.')
+        if name == '':
+            name = 'Unnamed spell'
 
         self.name = str(name)
 
