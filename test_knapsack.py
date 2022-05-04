@@ -3,7 +3,7 @@ import unittest
 from knapsack import _dp_knapsack
 
 
-class TestDamages(unittest.TestCase):
+class TestKnapsack(unittest.TestCase):
 
     def test_empty_knapsack(self):
         weights = list()

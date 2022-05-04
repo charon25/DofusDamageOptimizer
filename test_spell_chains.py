@@ -9,7 +9,7 @@ from spell_set import SpellSet
 from stats import Characteristics, Damages, Stats
 
 
-class TestStats(unittest.TestCase):
+class TestSpellChain(unittest.TestCase):
 
     def test_get_sub_permutation_two_spells(self):
         chain = SpellChains()
@@ -313,10 +313,9 @@ class TestStats(unittest.TestCase):
         chain.add_spell(spell1)
         chain.add_spell(spell2)
 
-        damages, _ = chain._get_detailed_damages_of_permutation([0, 1], stats, parameters, True)
+        damages, _ = chain._get_detailed_damages_of_permutation([0, 1], stats, parameters)
 
         self.assertDictEqual(damages, {'min': 2 * (1 + 10) + 2 * (3 * 10), 'max':  2 * (2 + 10) + 2 * (3 * 10), 'crit_min':  2 * (3 + 10) + 2 * (3 * 10), 'crit_max':  2 * (4 + 10) + 2 * (3 * 10)})
-
 
 
     def test_detailed_damages_all_permutations_with_buffs_no_stats_no_parameters__states(self):
@@ -368,6 +367,349 @@ class TestStats(unittest.TestCase):
         self.assertAlmostEqual(list(damages.values())[0][0], (1111 + 1222) / 2)
         self.assertTupleEqual(list(damages.keys())[0], ('s3', 's1', 's2'))
 
+    def test_huppermage_states_simple(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        buff_spell1 = SpellBuff()
+        buff_spell1.is_huppermage_states = True
+        buff_spell1.add_new_output_state('h:w')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        buff_spell2 = SpellBuff()
+        buff_spell2.is_huppermage_states = True
+        buff_spell2.add_new_output_state('h:a')
+        spell2.add_buff(buff_spell2)
+
+        spell3 = Spell()
+        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+
+        stats = Stats()
+        parameters = DamageParameters()
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+        chain.add_spell(spell3)
+
+        damages, _ = chain._get_detailed_damages_of_permutation([0, 1, 2], stats, parameters)
+
+        self.assertDictEqual(damages, {'min': 161, 'max': 322, 'crit_min': 483, 'crit_max': 644})
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_pa(2)
+        spell1.set_short_name('s1')
+
+        buff_spell1 = SpellBuff()
+        buff_spell1.add_new_output_state('fire')
+        buff_spell1.add_new_output_state('water')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_pa(2)
+        spell2.set_short_name('s2')
+
+        buff_spell2 = SpellBuff()
+        buff_spell2.add_trigger_state('fire')
+        buff_spell2.add_trigger_state('water')
+        buff_spell2.add_removed_output_state('fire')
+        buff_spell2.set_base_damages(Characteristics.AGILITY, 1000)
+        spell2.add_buff(buff_spell2)
+
+        spell3 = Spell()
+        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_pa(2)
+        spell3.set_short_name('s3')
+
+        buff_spell3 = SpellBuff()
+        buff_spell3.add_trigger_state('fire')
+        buff_spell3.add_removed_output_state('fire')
+        buff_spell3.set_base_damages(Characteristics.AGILITY, 1000)
+        spell3.add_buff(buff_spell3)
+
+        stats = Stats()
+        parameters = DamageParameters()
+        parameters.pa = 6
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+        chain.add_spell(spell3)
+
+        damages = chain.get_detailed_damages(stats, parameters)
+        
+        self.assertAlmostEqual(list(damages.values())[0][0], (1111 + 1222) / 2)
+        self.assertTupleEqual(list(damages.keys())[0], ('s3', 's1', 's2'))
+
+    def test_huppermage_states_same_state(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        buff_spell1 = SpellBuff()
+        buff_spell1.is_huppermage_states = True
+        buff_spell1.add_new_output_state('h:w')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        buff_spell2 = SpellBuff()
+        buff_spell2.is_huppermage_states = True
+        buff_spell2.add_new_output_state('h:w')
+        spell2.add_buff(buff_spell2)
+
+        spell3 = Spell()
+        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+
+        stats = Stats()
+        parameters = DamageParameters()
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+        chain.add_spell(spell3)
+
+        damages, _ = chain._get_detailed_damages_of_permutation([0, 1, 2], stats, parameters)
+
+        self.assertDictEqual(damages, {'min': 111, 'max': 222, 'crit_min': 333, 'crit_max': 444})
+
+    def test_huppermage_states_earth_fire(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        buff_spell1 = SpellBuff()
+        buff_spell1.is_huppermage_states = True
+        buff_spell1.add_new_output_state('h:e')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        buff_spell2 = SpellBuff()
+        buff_spell2.is_huppermage_states = True
+        buff_spell2.add_new_output_state('h:f')
+        spell2.add_buff(buff_spell2)
+
+        spell3 = Spell()
+        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+
+        stats = Stats()
+        parameters = DamageParameters()
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+        chain.add_spell(spell3)
+
+        damages, _ = chain._get_detailed_damages_of_permutation([0, 1, 2], stats, parameters)
+
+        self.assertDictEqual(damages, {'min': int(11 + 150 * 1.15), 'max': int(22 + 300 * 1.15), 'crit_min': int(33 + 450 * 1.15), 'crit_max': int(44 + 600 * 1.15)})
+
+    def test_huppermage_states_earth_fire_reversed_order(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        buff_spell1 = SpellBuff()
+        buff_spell1.is_huppermage_states = True
+        buff_spell1.add_new_output_state('h:f')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        buff_spell2 = SpellBuff()
+        buff_spell2.is_huppermage_states = True
+        buff_spell2.add_new_output_state('h:e')
+        spell2.add_buff(buff_spell2)
+
+        spell3 = Spell()
+        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+
+        stats = Stats()
+        parameters = DamageParameters()
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+        chain.add_spell(spell3)
+
+        damages, _ = chain._get_detailed_damages_of_permutation([0, 1, 2], stats, parameters)
+
+        self.assertDictEqual(damages, {'min': int(11 + 150 * 1.15), 'max': int(22 + 300 * 1.15), 'crit_min': int(33 + 450 * 1.15), 'crit_max': int(44 + 600 * 1.15)})
+
+    def test_huppermage_states_same_combination_twice(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        buff_spell1 = SpellBuff()
+        buff_spell1.is_huppermage_states = True
+        buff_spell1.add_new_output_state('h:a')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        buff_spell2 = SpellBuff()
+        buff_spell2.is_huppermage_states = True
+        buff_spell2.add_new_output_state('h:f')
+        spell2.add_buff(buff_spell2)
+
+        spell3 = Spell()
+        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        buff_spell3 = SpellBuff()
+        buff_spell3.is_huppermage_states = True
+        buff_spell3.add_new_output_state('h:f')
+        spell3.add_buff(buff_spell1)
+
+        spell4 = Spell()
+        spell4.set_base_damages(Characteristics.AGILITY, {'min': 1000, 'max': 2000, 'crit_min': 3000, 'crit_max': 4000})
+        buff_spell4 = SpellBuff()
+        buff_spell4.is_huppermage_states = True
+        buff_spell4.add_new_output_state('h:a')
+        spell4.add_buff(buff_spell4)
+
+        spell5 = Spell()
+        spell5.set_base_damages(Characteristics.AGILITY, {'min': 10000, 'max': 20000, 'crit_min': 30000, 'crit_max': 40000})
+
+        stats = Stats()
+        parameters = DamageParameters()
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+        chain.add_spell(spell3)
+        chain.add_spell(spell4)
+        chain.add_spell(spell5)
+
+        damages, _ = chain._get_detailed_damages_of_permutation([0, 1, 2, 3, 4], stats, parameters)
+
+        self.assertDictEqual(damages, {'min': 16661, 'max': 33322, 'crit_min': 49983, 'crit_max': 66644})
+
+    def test_huppermage_states_one_spell_two_states(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        buff_spell1 = SpellBuff()
+        buff_spell1.is_huppermage_states = True
+        buff_spell1.add_new_output_state('h:1w')
+        buff_spell1.add_new_output_state('h:2e')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+
+        stats = Stats()
+        parameters = DamageParameters()
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+
+        damages, _ = chain._get_detailed_damages_of_permutation([0, 1], stats, parameters)
+
+        self.assertDictEqual(damages, {'min': 16, 'max': 32, 'crit_min': 48, 'crit_max': 64})
+
+    def test_huppermage_states_one_spell_two_states_earth_fire(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        buff_spell1 = SpellBuff()
+        buff_spell1.is_huppermage_states = True
+        buff_spell1.add_new_output_state('h:e')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        buff_spell2 = SpellBuff()
+        buff_spell2.is_huppermage_states = True
+        buff_spell2.add_new_output_state('h:1f')
+        buff_spell2.add_new_output_state('h:2a')
+        spell2.add_buff(buff_spell2)
+
+        spell3 = Spell()
+        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+
+        stats = Stats()
+        parameters = DamageParameters()
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+        chain.add_spell(spell3)
+
+        damages, _ = chain._get_detailed_damages_of_permutation([0, 1, 2], stats, parameters)
+
+        self.assertDictEqual(damages, {'min': int(11 + 150 * 1.15), 'max': int(22 + 300 * 1.15), 'crit_min': int(33 + 450 * 1.15), 'crit_max': int(44 + 600 * 1.15)})
+
+    def test_huppermage_states_one_spell_two_states_earth_fire_in_wrong_order(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        buff_spell1 = SpellBuff()
+        buff_spell1.is_huppermage_states = True
+        buff_spell1.add_new_output_state('h:e')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        buff_spell2 = SpellBuff()
+        buff_spell2.is_huppermage_states = True
+        buff_spell2.add_new_output_state('h:1a')
+        buff_spell2.add_new_output_state('h:2f')
+        spell2.add_buff(buff_spell2)
+
+        spell3 = Spell()
+        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+
+        stats = Stats()
+        parameters = DamageParameters()
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+        chain.add_spell(spell3)
+
+        damages, _ = chain._get_detailed_damages_of_permutation([0, 1, 2], stats, parameters)
+
+        self.assertDictEqual(damages, {'min': 161, 'max': 322, 'crit_min': 483, 'crit_max': 644})
+
+    def test_huppermage_states_best_combination(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_base_damages(Characteristics.AGILITY, {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
+        buff_spell1 = SpellBuff()
+        buff_spell1.is_huppermage_states = True
+        buff_spell1.add_new_output_state('h:e')
+        spell1.add_buff(buff_spell1)
+        spell1.set_pa(1)
+        spell1.set_short_name('s1')
+
+        spell2 = Spell()
+        spell2.set_base_damages(Characteristics.AGILITY, {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
+        buff_spell2 = SpellBuff()
+        buff_spell2.is_huppermage_states = True
+        buff_spell2.add_new_output_state('h:f')
+        spell2.add_buff(buff_spell2)
+        spell2.set_pa(1)
+        spell2.set_short_name('s2')
+
+        spell3 = Spell()
+        spell3.set_base_damages(Characteristics.AGILITY, {'min': 40, 'max': 40, 'crit_min': 40, 'crit_max': 40})
+        spell3.set_pa(1)
+        spell3.set_short_name('s3')
+
+        stats = Stats()
+        parameters = DamageParameters.from_string('-pa 3')
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+        chain.add_spell(spell3)
+
+        damages = chain.get_detailed_damages(stats, parameters)
+
+        self.assertAlmostEqual(list(damages.values())[0][0], 69.0)
+        self.assertTupleEqual(list(damages.keys())[0], ('s2', 's1', 's3'))
 
 if __name__ == '__main__':
     unittest.main()

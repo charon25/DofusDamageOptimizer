@@ -119,9 +119,6 @@ class TestStats(unittest.TestCase):
         stats.set_name(42)
         self.assertEqual(stats.get_name(), "42")
 
-        with self.assertRaises(ValueError):
-            stats.set_name('')
-
     def test_set_short_name(self):
         stats = Stats()
 
@@ -130,9 +127,6 @@ class TestStats(unittest.TestCase):
 
         stats.set_short_name(42)
         self.assertEqual(stats.get_short_name(), "42")
-
-        with self.assertRaises(ValueError):
-            stats.set_short_name('')
 
 
     def test_valid_simple_addition(self):

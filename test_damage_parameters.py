@@ -4,7 +4,7 @@ from damage_parameters import DamageParameters
 from stats import Characteristics
 
 
-class TestDamagesParameters(unittest.TestCase):
+class TestDamageParameters(unittest.TestCase):
 
     def test_check_parameters_count(self):
         DamageParameters._check_parameter(['-a', '1'], count=1)

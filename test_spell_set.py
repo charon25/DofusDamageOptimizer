@@ -7,7 +7,7 @@ from spell import Spell
 from spell_set import SpellSet
 
 
-class TestStats(unittest.TestCase):
+class TestSpellSet(unittest.TestCase):
 
     def test_create_empty(self):
         stats = SpellSet()

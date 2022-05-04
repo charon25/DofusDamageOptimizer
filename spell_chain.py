@@ -37,7 +37,7 @@ class SpellChains:
         return all_permutations_list
 
 
-    def _get_detailed_damages_of_permutation(self, permutation: List[int], stats: Stats, parameters: DamageParameters, test=False) -> Tuple[Dict[str, int], float]:
+    def _get_detailed_damages_of_permutation(self, permutation: List[int], stats: Stats, parameters: DamageParameters) -> Tuple[Dict[str, int], float]:
         spells = [self.spells[index] for index in permutation] # Convert the list of indices into a list of spells
 
         stats_buff: Dict[str, Stats] = {'__all__': Stats()}

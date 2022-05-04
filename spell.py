@@ -6,7 +6,7 @@ from typing import Dict, List, Set, Tuple
 
 from damages import compute_damage
 from damage_parameters import DamageParameters
-from stats import Characteristics, Stats
+from stats import Characteristics, Damages, Stats
 
 
 @dataclass
@@ -60,6 +60,8 @@ class SpellBuff:
 
     has_stats: bool = False
     has_parameters: bool = False
+
+    is_huppermage_states: bool = False
 
 
     def add_trigger_state(self, state: str):
@@ -150,16 +152,38 @@ class Spell():
 
         for buff in self.buffs:
             if buff.trigger(states):
-                computation_parameters.add_base_damages(buff.base_damages)
+                if buff.is_huppermage_states:
+                    # Huppermage state is one of 'h:a', 'h:e', 'h:f', 'h:w' (respectively air, earth, fire and water)
+                    for huppermage_state in sorted(buff.new_output_states):  # sorted() returns a list
+                        huppermage_state = f'h:{huppermage_state[-1]}'  # State is of the form r"h:\w" or r"h:\d\w" but the eventual digit is not kept
+                        current_huppermage_state = next((state for state in output.states if state.startswith('h:')), None)
+                        if current_huppermage_state is None:
+                            output.states.add(huppermage_state)
+                        elif current_huppermage_state != huppermage_state: # If element has already been applied, do nothing
+                            output.states -= {current_huppermage_state,}
+                            # Concatenate the letter after the 'h:' in alphabetical order
+                            if current_huppermage_state < huppermage_state:
+                                combined = f'H:{current_huppermage_state[-1]}{huppermage_state[-1]}'
+                            else:
+                                combined = f'H:{huppermage_state[-1]}{current_huppermage_state[-1]}'
+                            # If the combination has not been seen yet, add 50 power.
+                            # If it is a fire/earth combination, also add 15% vulnerability
+                            if not combined in output.states:
+                                output.states.add(combined)
+                                output.stats['__all__'].damages[Damages.POWER] += 50
+                                if combined == 'H:ef':
+                                    output.parameters['__all__'].vulnerability += 15
+                else:
+                    computation_parameters.add_base_damages(buff.base_damages)
 
-                if buff.has_stats:
-                    output.update_stats(buff.stats)
+                    if buff.has_stats:
+                        output.update_stats(buff.stats)
 
-                if buff.has_parameters:
-                    output.update_parameters(buff.damage_parameters)
+                    if buff.has_parameters:
+                        output.update_parameters(buff.damage_parameters)
 
-                output.states -= buff.removed_output_states
-                output.states.update(buff.new_output_states)
+                    output.states -= buff.removed_output_states
+                    output.states.update(buff.new_output_states)
 
         _, damages, _ = self.get_detailed_damages(computation_stats, computation_parameters)
         output.damages = damages
