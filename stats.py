@@ -46,14 +46,17 @@ class Stats:
         for damage in Damages:
             self.damages[damage] = 0
 
-    def save_to_file(self, filepath):
-        json_valid_data = {
+    def to_dict(self):
+        return {
             'characteristics': self.characteristics,
             'damages': self.damages,
             'bonus_crit_chance': self.bonus_crit_chance,
             'name': self.name,
             'short_name': self.short_name
         }
+
+    def save_to_file(self, filepath):
+        json_valid_data = self.to_dict()
 
         with open(filepath, 'w', encoding='utf-8') as fo:
             json.dump(json_valid_data, fo)
@@ -219,3 +222,7 @@ class Stats:
             json_string = fi.read()
 
         return Stats.from_json_string(json_string)
+
+    @classmethod
+    def from_dict(cls, data):
+        return Stats.from_json_string(json.dumps(data))

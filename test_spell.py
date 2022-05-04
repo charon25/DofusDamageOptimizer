@@ -40,7 +40,7 @@ class TestSpell(unittest.TestCase):
             Spell.from_json_string(json_missing_one_characteristic)
 
     def test_create_from_valid_json(self):
-        valid_json_string = '{{"short_name": "sn", "pa": 1, "po": [1, 5], "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_weapon": false, "base_damages": {0}}}'.format(
+        valid_json_string = '{{"buffs": [], "short_name": "sn", "pa": 1, "po": [1, 5], "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_weapon": false, "base_damages": {0}}}'.format(
             {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics}
         ).replace("'", '"')
 
@@ -373,6 +373,18 @@ class TestSpell(unittest.TestCase):
         })
         self.assertAlmostEqual(average_damage, (105 + 150) / 2)
         self.assertAlmostEqual(average_damage_crit, (240 + 320) / 2)
+
+    def test_create_from_file_with_buff(self):
+        filepath = 'test_files\\test_spell_with_buff.json'
+        # Check if the file still exists and is accessible
+        assert os.path.isfile(filepath) and os.access(filepath, os.R_OK)
+        spell = Spell.from_file(filepath)
+
+        self.assertEqual(spell.get_name(), 'test spell')
+        self.assertEqual(len(spell.buffs), 1)
+        self.assertSetEqual(spell.buffs[0].trigger_states, {'trigger1', 'trigger2'})
+        self.assertEqual(spell.buffs[0].stats['__all__'].get_characteristic(Characteristics.STRENGTH), 100)
+        self.assertEqual(spell.buffs[0].damage_parameters['__all__'].vulnerability, 30)
 
 
 if __name__ == '__main__':

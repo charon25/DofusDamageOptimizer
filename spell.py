@@ -87,6 +87,47 @@ class SpellBuff:
     def trigger(self, states: Set[str]) -> bool:
         return states.issuperset(self.trigger_states)
 
+    def to_dict(self) -> Dict:
+        return {
+            'trigger_states': list(self.trigger_states),
+            'base_damages': self.base_damages,
+            'stats': {spell: stats.to_dict() for spell, stats in self.stats.items()},
+            'damage_parameters': {spell: damage_parameters.to_string() for spell, damage_parameters in self.damage_parameters.items()},
+            'new_output_states': list(self.new_output_states),
+            'removed_output_states': list(self.removed_output_states),
+            'is_huppermage_states': self.is_huppermage_states
+        }
+
+    @classmethod
+    def from_dict(cls, data) -> 'SpellBuff':
+        for field in ('trigger_states', 'base_damages', 'stats', 'damage_parameters', 'new_output_states', 'removed_output_states', 'is_huppermage_states'):
+            if not field in data:
+                raise KeyError(f"JSON string does not contain a '{field}' field (SpellBuff.from_dict).")
+
+        spell_buff = SpellBuff()
+
+        for state in data['trigger_states']:
+            spell_buff.add_trigger_state(state)
+
+        for characteristic in Characteristics:
+            spell_buff.set_base_damages(characteristic, data['base_damages'][characteristic])
+
+        for spell in data['stats']:
+            spell_buff.add_stats(Stats.from_dict(data['stats'][spell]), spell=spell)
+
+        for spell in data['damage_parameters']:
+            spell_buff.add_damage_parameters(DamageParameters.from_string(data['damage_parameters'][spell]), spell=spell)
+
+        for state in data['new_output_states']:
+            spell_buff.add_new_output_state(state)
+
+        for state in data['removed_output_states']:
+            spell_buff.add_removed_output_state(state)
+
+        spell_buff.is_huppermage_states = data['is_huppermage_states']
+
+        return spell_buff
+
 
 class Spell():
     def __init__(self, from_scratch=True) -> None:
@@ -213,8 +254,9 @@ class Spell():
     def can_reach_po(self, min_po, max_po):
         return not (self.get_min_po() > max_po or self.get_max_po() < min_po)
 
-    def save_to_file(self, filepath):
-        json_valid_data = {
+
+    def to_dict(self):
+        return {
             'base_damages': self.parameters.base_damages,
             'pa': self.parameters.pa,
             'crit_chance': self.parameters.crit_chance,
@@ -223,8 +265,12 @@ class Spell():
             'is_weapon': self.parameters.is_weapon,
             'name': self.name,
             'short_name': self.short_name,
-            'po': list(self.parameters.po)
+            'po': list(self.parameters.po),
+            'buffs': [buff.to_dict() for buff in self.buffs]
         }
+
+    def save_to_file(self, filepath):
+        json_valid_data = self.to_dict()
 
         with open(filepath, 'w', encoding='utf-8') as fo:
             json.dump(json_valid_data, fo)
@@ -246,13 +292,13 @@ class Spell():
         self.parameters.pa = pa
 
 
-    def get_base_damages(self, characteristic):
+    def get_base_damages(self, characteristic: Characteristics):
         if not isinstance(characteristic, Characteristics):
             raise TypeError(f"'{characteristic} is not a valid characteristic.")
 
         return self.parameters.base_damages[characteristic]
 
-    def set_base_damages(self, characteristic, base_damages):
+    def set_base_damages(self, characteristic: Characteristics, base_damages: Dict[str, int]):
         if not isinstance(characteristic, Characteristics):
             raise TypeError(f"'{characteristic} is not a valid characteristic.")
 
@@ -362,9 +408,9 @@ class Spell():
 
     @classmethod
     def check_json_validity(cls, json_data):
-        for key in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_weapon', 'name', 'short_name', 'po'):
-            if not key in json_data:
-                raise KeyError(f"JSON string does not contain a '{key}' key.")
+        for field in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_weapon', 'name', 'short_name', 'po', 'buffs'):
+            if not field in json_data:
+                raise KeyError(f"JSON string does not contain a '{field}' field (Spell.check_json_validity).")
 
         for characteristic in Characteristics:
             if not characteristic in json_data['base_damages']:
@@ -386,6 +432,8 @@ class Spell():
         spell.set_name(json_data['name'])
         spell.set_short_name(json_data['short_name'])
         spell.set_po(min_po=json_data['po'][0], max_po=json_data['po'][1])
+        for buff in json_data['buffs']:
+            spell.add_buff(SpellBuff.from_dict(buff))
 
         return spell
 
