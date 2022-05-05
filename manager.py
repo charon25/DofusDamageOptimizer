@@ -391,33 +391,52 @@ class Manager:
         is_huppermage_states = input(f'Is Huppermage states ({buff.is_huppermage_states}) (0/1)? ')
         if is_huppermage_states:
             buff.is_huppermage_states = distutils.util.strtobool(is_huppermage_states)
-            new_output_states_txt = f'({", ".join(sorted(buff.new_output_states))}' if buff.new_output_states else ''
+
+        if buff.is_huppermage_states:
+            new_output_states_txt = f' ({", ".join(sorted(buff.new_output_states))})' if buff.new_output_states else ''
             huppermage_states = input(f"Huppermage states without the 'h:' prefix{new_output_states_txt}: ")
             for huppermage_state in huppermage_states.split(' '):
+                # If the state starts with a minus sign, it needs to be deleted
+                if huppermage_state.startswith('-'):
+                    buff.remove_new_output_state(f'h:{huppermage_state[1:]}')
+                    continue
                 # Add the prefix 'h:' is front of every state if not already there
                 huppermage_state = f'h:{huppermage_state}' if not huppermage_state.startswith('h:') else huppermage_state
                 if re.match(r'h:\d?[aefw]', huppermage_state):
-                    buff.add_removed_output_state(huppermage_state)
+                    buff.add_new_output_state(huppermage_state)
                 else:
                     self.print(0, f"[WARNING] The state '{huppermage_state[2:]}' is not a valid Huppermage state (should be one of 'a', 'e', 'f', 'w').")
 
             # Huppermage states buff have no other effects
             return buff
 
-        trigger_states_txt = f'({", ".join(sorted(buff.trigger_states))}' if buff.trigger_states else ''
+        trigger_states_txt = f' ({", ".join(sorted(buff.trigger_states))})' if buff.trigger_states else ''
         trigger_states = input(f'Trigger states{trigger_states_txt}: ')
         if trigger_states:
-            buff.add_trigger_states(set(trigger_states.split(' ')))
+            for state in trigger_states.split(' '):
+                if state.startswith('-'):
+                    buff.remove_trigger_state(state[1:])
+                else:
+                    buff.add_trigger_state(state)
 
-        new_output_states_txt = f'({", ".join(sorted(buff.new_output_states))}' if buff.new_output_states else ''
+        new_output_states_txt = f' ({", ".join(sorted(buff.new_output_states))})' if buff.new_output_states else ''
         new_output_states = input(f'New states to add if triggered{new_output_states_txt}: ')
         if new_output_states:
+            for state in new_output_states.split(' '):
+                if state.startswith('-'):
+                    buff.remove_new_output_state(state[1:])
+                else:
+                    buff.add_new_output_state(state)
             buff.add_new_output_states(set(new_output_states.split(' ')))
 
-        removed_output_states_txt = f'({", ".join(sorted(buff.removed_output_states))}' if buff.removed_output_states else ''
+        removed_output_states_txt = f' ({", ".join(sorted(buff.removed_output_states))})' if buff.removed_output_states else ''
         removed_output_states = input(f'States to remove if triggered{removed_output_states_txt}: ')
         if removed_output_states:
-            buff.add_removed_output_states(set(removed_output_states.split(' ')))
+            for state in removed_output_states.split(' '):
+                if state.startswith('-'):
+                    buff.remove_removed_output_state(state[1:])
+                else:
+                    buff.add_removed_output_state(state)
 
         self.print(0, '\n=== Base damage increase if triggered\n')
         for characteristic in Characteristics:
@@ -527,6 +546,40 @@ class Manager:
 
         spell.set_po(min_po=min_po, max_po=max_po)
 
+        while True:
+            self.print(0, '\n=== Buffs')
+            buff_command_string = "\n'new' to create a buff or ENTER to skip: "
+            if spell.buffs:
+                buff_command_string = "\nBuff index to update, 'new' to create another one, 'del <index>' to delete an existing one (ENTER to skip): "
+                self.print(0, 'Already present: ')
+                for index, buff in enumerate(spell.buffs):
+                    self.print(0, f' {index + 1}. {buff.to_compact_string()}')
+
+            buff_command = input(buff_command_string).lower()
+            if buff_command == 'new':
+                try:
+                    spell.add_buff(self._create_buff())
+                except KeyboardInterrupt:
+                    self.print(0, '\nCancelled buff creation.')
+            elif buff_command.isnumeric():
+                try:
+                    index = int(buff_command) - 1
+                    spell.buffs[index] = self._create_buff(spell.buffs[index])
+                except KeyboardInterrupt:
+                    self.print(0, '\nCancelled buff creation.')
+                except (ValueError, IndexError):
+                    self.print(0, '[WARNING] Wrong buff index.')
+            elif re.match(r'del \d+', buff_command):
+                try:
+                    delete_index = int(buff_command.split(' ')[1]) - 1
+                    del spell.buffs[delete_index]
+                except (ValueError, IndexError):
+                    self.print(0, '[WARNING] Wrong buff index.')
+            elif buff_command in ('', 'q'):
+                break
+            else:
+                self.print(0, '[WARNING] Wrong command.')
+
         return spell
 
 
@@ -605,7 +658,7 @@ class Manager:
             if short_name in self.spells:
                 try:
                     self.spells[short_name] = self._create_spell(self.spells[short_name])
-                except:
+                except KeyboardInterrupt:
                     self.print(0, '\nCancelled spell modification.')
                     return
 

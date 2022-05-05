@@ -70,6 +70,9 @@ class SpellBuff:
     def add_trigger_states(self, states: Set[str]):
         self.trigger_states.update(states)
 
+    def remove_trigger_state(self, state: str):
+        self.trigger_states -= {state,}
+
     def set_base_damages(self, characteristic: Characteristics, base_damages: int):
         self.base_damages[characteristic] = base_damages
 
@@ -87,14 +90,28 @@ class SpellBuff:
     def add_new_output_states(self, states: Set[str]):
         self.new_output_states.update(states)
 
+    def remove_new_output_state(self, state: str):
+        self.new_output_states -= {state,}
+
     def add_removed_output_state(self, state: str):
         self.removed_output_states.add(state)
 
     def add_removed_output_states(self, states: Set[str]):
         self.removed_output_states.update(states)
 
+    def remove_removed_output_state(self, state: str):
+        self.removed_output_states -= {state,}
+
     def trigger(self, states: Set[str]) -> bool:
         return states.issuperset(self.trigger_states)
+
+
+    def to_compact_string(self):
+        if self.is_huppermage_states:
+            return f'Huppermage states : ({", ".join(sorted(self.new_output_states))})'
+        else:
+            return f'({", ".join(sorted(self.trigger_states))}) -> ({", ".join(sorted((self.trigger_states - self.removed_output_states) | self.new_output_states))}){"(Stats buff)" if self.has_stats else ""}{"(Parameters buff)" if self.has_parameters else ""}'
+
 
     def to_dict(self) -> Dict:
         return {
@@ -104,12 +121,14 @@ class SpellBuff:
             'damage_parameters': {spell: damage_parameters.to_string() for spell, damage_parameters in self.damage_parameters.items()},
             'new_output_states': list(self.new_output_states),
             'removed_output_states': list(self.removed_output_states),
-            'is_huppermage_states': self.is_huppermage_states
+            'is_huppermage_states': self.is_huppermage_states,
+            'has_stats': self.has_stats,
+            'has_parameters': self.has_parameters
         }
 
     @classmethod
     def from_dict(cls, data) -> 'SpellBuff':
-        for field in ('trigger_states', 'base_damages', 'stats', 'damage_parameters', 'new_output_states', 'removed_output_states', 'is_huppermage_states'):
+        for field in ('trigger_states', 'base_damages', 'stats', 'damage_parameters', 'new_output_states', 'removed_output_states', 'is_huppermage_states', 'has_stats', 'has_parameters'):
             if not field in data:
                 raise KeyError(f"JSON string does not contain a '{field}' field (SpellBuff.from_dict).")
 
@@ -134,6 +153,8 @@ class SpellBuff:
             spell_buff.add_removed_output_state(state)
 
         spell_buff.is_huppermage_states = data['is_huppermage_states']
+        spell_buff.has_stats = data['has_stats']
+        spell_buff.has_parameters = data['has_parameters']
 
         return spell_buff
 
