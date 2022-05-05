@@ -12,6 +12,8 @@ This optimizer works by creating spells, stats page, spell sets and parameters s
 
 A spell contains informations about its damages, number of uses and AP cost, a stats page contains every useful stats needed to compute damages, a spell set is (as suggested by the name) a collection of spells and a parameters set contains informations about the computation like maximum number of AP to use, resistances of the enemy or its distance.
 
+A spell also contains "buffs", which are events triggered in certain conditions that can affect the spells coming next in the computation. They are used when spells interact each other, or when one increase damages of the following.
+
 Every computation need to use a spell set and a parameters set (which eventually contains stats pages).
 
 ## Commands
@@ -68,6 +70,10 @@ The command to get the best combination of spells for given constraints is :
 `dmg <spell_set_name> [[<param> <value>] ...]`
 The parameters are described in the "Parameters" section.
 
+There is also the command :
+`dmgs <spell_set_name> [[<param> <value>] ...]`
+to use the simple computation which does not use the interactions between spells.
+
 ## Parameters
 
 The possible parameters for every command that requires it are :
@@ -84,6 +90,8 @@ The possible parameters for every command that requires it are :
 
 
 ## Examples of damages computation
+
+**All the following is currently outdated**
 
 Setting default parameters :
 ```

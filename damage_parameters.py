@@ -34,10 +34,10 @@ class DamageParameters:
 
     def get_total_stats(self, stats: Dict[str, Stats]):
         for stats_short_name in self.stats:
-            if not stats_short_name in self.stats:
+            if not stats_short_name in stats:
                 raise KeyError(f"Stats page '{stats_short_name}' does not exist.")
 
-        return sum(stats[stats_short_name] for stats_short_name in stats)
+        return sum(stats[stats_short_name] for stats_short_name in self.stats)
 
     def add_base_damages(self, base_damages: Dict[Characteristics, int]):
         for k, characteristic in enumerate(Characteristics):

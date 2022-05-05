@@ -340,8 +340,6 @@ class Spell():
                 raise KeyError(f"Field '{field}' missing in base_damages.")
             if not isinstance(base_damages[field], int):
                 raise TypeError(f"Field '{field}' is not an int ('{base_damages[field]}' of type '{type(base_damages[field])}' given instead).")
-            if base_damages[field] < 0:
-                raise ValueError(f"Field '{field}' should be non negative ('{base_damages[field]}' given instead).")
 
         self.parameters.base_damages[characteristic] = base_damages
 

@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List
 from knapsack import get_best_combination
 from damage_parameters import DamageParameters
 from spell import Spell, SpellBuff, SpellParameters
+from spell_chain import SpellChains
 from spell_set import SpellSet
 from stats import Characteristics, Damages, Stats
 
@@ -17,7 +18,7 @@ class Manager:
     STATS_INSTRUCTION = ('st',)
     SPELL_INSTRUCTION = ('sp',)
     SPELL_SET_INSTRUCTION = ('ss',)
-    DAMAGES_INSTRUCTION = ('dmg',)
+    DAMAGES_INSTRUCTION = ('dmg', 'dmgs')
 
     DIRECTORIES = ('stats', 'spells')
 
@@ -65,11 +66,11 @@ class Manager:
 
             # SPELLS
             for spells_filepath in json_data['spells']:
-                try:
+                # try:
                     spell = Spell.from_file(spells_filepath)
                     self.spells[spell.get_short_name()] = spell
-                except (FileNotFoundError, KeyError, TypeError, ValueError):
-                    self.print(1, f"Could not open or read spell '{spells_filepath}'.")
+                # except (FileNotFoundError, KeyError, TypeError, ValueError):
+                #     self.print(1, f"Could not open or read spell '{spells_filepath}'.")
 
             # SPELL SETS
             for spell_set_data in json_data['spell_sets']:
@@ -213,7 +214,7 @@ class Manager:
         elif command_action == 'ls':
             self.print(0, '=== Parameters set\n')
             for parameters_name, parameters in sorted(self.parameters.items(), key=lambda item: item[0]):
-                self.print(0, f" - Set '{parameters.full_name}' ({parameters_name})")
+                self.print(0, f" - Set '{parameters.full_name}' ({parameters_name}){f' [selected]' if parameters_name == self.default_parameters else ''}")
 
         elif command_action == 'show':
             if len(args) < 2:
@@ -232,10 +233,11 @@ class Manager:
             self.print(0, f"Type: {parameters.type}")
             self.print(0, f"Distance: {parameters.distance}")
 
-            self.print(0, f"\nBase damages increase:")
+            self.print(0, f"\nBase damage increase:")
+            parameters_base_damages = parameters.get_base_damages_dict()
             for characteristic in Characteristics:
-                if parameters.base_damages[characteristic] > 0:
-                    self.print(0, f" - {characteristic.name}: {parameters.base_damages[characteristic]}")
+                if parameters_base_damages[characteristic] > 0:
+                    self.print(0, f" - {characteristic.name}: {parameters_base_damages[characteristic]}")
 
             self.print(0, f"\nResistances:")
             for k in range(5):
@@ -390,11 +392,14 @@ class Manager:
 
         is_huppermage_states = input(f'Is Huppermage states ({buff.is_huppermage_states}) (0/1)? ')
         if is_huppermage_states:
-            buff.is_huppermage_states = distutils.util.strtobool(is_huppermage_states)
+            try:
+                buff.is_huppermage_states = distutils.util.strtobool(is_huppermage_states)
+            except ValueError: # if the valeur cannot be converted to a boolean, do as if nothing was input
+                pass
 
         if buff.is_huppermage_states:
             new_output_states_txt = f' ({", ".join(sorted(buff.new_output_states))})' if buff.new_output_states else ''
-            huppermage_states = input(f"Huppermage states without the 'h:' prefix{new_output_states_txt}: ")
+            huppermage_states = input(f"\nHuppermage states without the 'h:' prefix{new_output_states_txt}: ")
             for huppermage_state in huppermage_states.split(' '):
                 # If the state starts with a minus sign, it needs to be deleted
                 if huppermage_state.startswith('-'):
@@ -411,7 +416,7 @@ class Manager:
             return buff
 
         trigger_states_txt = f' ({", ".join(sorted(buff.trigger_states))})' if buff.trigger_states else ''
-        trigger_states = input(f'Trigger states{trigger_states_txt}: ')
+        trigger_states = input(f'\nTrigger states{trigger_states_txt}: ')
         if trigger_states:
             for state in trigger_states.split(' '):
                 if state.startswith('-'):
@@ -500,7 +505,10 @@ class Manager:
 
         is_weapon = input(f'Weapon ({spell.parameters.is_weapon}) (0/1): ')
         if is_weapon:
-            spell.set_weapon(distutils.util.strtobool(is_weapon))
+            try:
+                spell.set_weapon(distutils.util.strtobool(is_weapon))
+            except ValueError: # if the valeur cannot be converted to a boolean, do as if nothing was input
+                pass
 
         self.print(0, '\n=== Base damages\n')
         for characteristic in Characteristics:
@@ -551,7 +559,7 @@ class Manager:
             buff_command_string = "\n'new' to create a buff or ENTER to skip: "
             if spell.buffs:
                 buff_command_string = "\nBuff index to update, 'new' to create another one, 'del <index>' to delete an existing one (ENTER to skip): "
-                self.print(0, 'Already present: ')
+                self.print(0, 'Already created: ')
                 for index, buff in enumerate(spell.buffs):
                     self.print(0, f' {index + 1}. {buff.to_compact_string()}')
 
@@ -880,7 +888,7 @@ class Manager:
             self.print(1, f"Unknown action '{command_action}' for spell commands.")
 
 
-    def _execute_damages_command(self, args: List[str]):
+    def _execute_damages_command(self, args: List[str], simple: bool = False):
         if len(args) < 1:
             self.print(1, 'Missing spell set.')
             return
@@ -910,14 +918,25 @@ class Manager:
 
         total_stats = damages_parameters.get_total_stats(self.stats)
 
-        best_spells, max_damage = get_best_combination(spell_list, total_stats, parameters=damages_parameters)
+        if simple:
+            best_spells, max_damage = get_best_combination(spell_list, total_stats, parameters=damages_parameters)
 
-        best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
+            best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
 
-        self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type}) is: {int(max_damage):.0f}\n")
-        self.print(0, 'Using: ')
-        for spell in best_spells:
-            self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(total_stats, damages_parameters)):.0f} dmg)")
+            self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type}) is: {int(max_damage):.0f}\n")
+            self.print(0, 'Using: ')
+            for spell in best_spells:
+                self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(total_stats, damages_parameters)):.0f} dmg)")
+        else:
+            spell_chain = SpellChains()
+            for spell in spell_list:
+                spell_chain.add_spell(spell)
+
+            damages = spell_chain.get_detailed_damages(total_stats, damages_parameters)
+
+            for c in damages:
+                print(c, damages[c])
+
 
     def execute_command(self, command: str):
         if command == '':
@@ -946,7 +965,7 @@ class Manager:
             return
 
         elif instr in Manager.DAMAGES_INSTRUCTION:
-            self._execute_damages_command(args)
+            self._execute_damages_command(args, simple=(instr=='dmgs'))
             return
 
         self.print(1, f"Unknown command instruction: '{instr}'.")

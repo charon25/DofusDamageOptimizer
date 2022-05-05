@@ -69,10 +69,9 @@ class SpellChains:
             average_damages += (1 - final_crit_chance) * (spell_output.damages['min'] + spell_output.damages['max']) / 2
             average_damages += final_crit_chance * (spell_output.damages['crit_min'] + spell_output.damages['crit_max']) / 2
 
-        return (damages, average_damages)
+        return (damages, round(average_damages, 4))
 
 
-    # Résultats pour chaque permutation ou pour la meilleure ?? TODO
     def get_detailed_damages(self, stats: Stats, parameters: DamageParameters):
         permutations = self._get_permutations(parameters)
         damages = dict()
