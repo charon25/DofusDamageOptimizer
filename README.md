@@ -50,6 +50,7 @@ Every `param` can be replaced with only `p`.
  - `sp mod <name>` : modify a spell (prompt the user for all the changes)
  - `sp ls` : list all the currently available spells
  - `sp show <name>` : show more details on the specified spell
+ - `sp buffs <name>` : show every buff of the specified spell in details
  - `sp dmg|d <spell_name> [[<parameter> <value>] ...]` : compute and show the detailed damages of a spell (the parameters are described in the "Parameters" section)
 
 ### Spell sets-related

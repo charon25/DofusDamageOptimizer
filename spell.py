@@ -106,11 +106,11 @@ class SpellBuff:
         return states.issuperset(self.trigger_states)
 
 
-    def to_compact_string(self):
+    def to_compact_string(self, only_states=False):
         if self.is_huppermage_states:
             return f'Huppermage states : ({", ".join(sorted(self.new_output_states))})'
         else:
-            return f'({", ".join(sorted(self.trigger_states))}) -> ({", ".join(sorted((self.trigger_states - self.removed_output_states) | self.new_output_states))}){"(Stats buff)" if self.has_stats else ""}{"(Parameters buff)" if self.has_parameters else ""}'
+            return f'({", ".join(sorted(self.trigger_states))}) -> ({", ".join(sorted((self.trigger_states - self.removed_output_states) | self.new_output_states))}){"(Stats buff)" if self.has_stats and not only_states else ""}{"(Parameters buff)" if self.has_parameters and not only_states else ""}'
 
 
     def to_dict(self) -> Dict:

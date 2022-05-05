@@ -454,7 +454,7 @@ class Manager:
                 for spell in buff.stats:
                     stats_page_string = buff.stats[spell].to_compact_string(indentation='  ')
                     if stats_page_string:
-                        self.print(0, ' - For every next spells' if spell == "__all__" else f" - For spell '{spell}'")
+                        self.print(0, ' - For all next spells' if spell == "__all__" else f" - For spell '{spell}'")
                         self.print(0, stats_page_string)
 
             spell = input(f"\nSpell name (or '__all__') to add another stats page to (ENTER to skip)? ")
@@ -472,7 +472,7 @@ class Manager:
                 self.print(0, '\n=== Damages parameters currently existing :')
                 for spell in buff.damage_parameters:
                     damage_parameters_string = buff.damage_parameters[spell].to_compact_string()
-                    self.print(0, ' - For every next spells' if spell == "__all__" else f" - For spell '{spell}'")
+                    self.print(0, ' - For all next spells' if spell == "__all__" else f" - For spell '{spell}'")
                     self.print(0, f'  -> {damage_parameters_string}')
 
             spell = input(f"\nSpell name (or '__all__') to add damage parameters to (ENTER to skip)? ")
@@ -643,10 +643,60 @@ class Manager:
 
                     printed_string.append(f" {characteristic.name}: {base_damages['min']} - {base_damages['max']} ({base_damages['crit_min']} - {base_damages['crit_max']})")
 
+                if spell.buffs:
+                    printed_string.append("\n=== Buffs\n")
+                    for buff in spell.buffs:
+                        printed_string.append(f' {buff.to_compact_string()}')
+
                 self.print(0, '\n'.join(printed_string))
             else:
                 self.print(1, f"Spell '{short_name}' does not exist.")
 
+        elif command_action == 'buffs':
+            if len(args) < 2:
+                self.print(1, 'Missing spell short name.')
+                return
+
+            short_name = args[1]
+
+            if short_name in self.spells:
+                spell = self.spells[short_name]
+                if len(spell.buffs) > 0:
+                    printed_string = [f"===== Buffs of spell '{spell.get_name()}' ({short_name})"]
+                    for index, buff in enumerate(spell.buffs):
+                        printed_string.append(f'=== Buff {index + 1}')
+                        if buff.is_huppermage_states:
+                            printed_string.append(f'{buff.to_compact_string(only_states=True)}\n')
+                            continue
+
+                        printed_string.append(f'States: {buff.to_compact_string(only_states=True)}\n')
+
+                        if any(value != 0 for value in buff.base_damages.values()):
+                            printed_string.append('Base damages:')
+                            for characteristic in Characteristics:
+                                if buff.base_damages[characteristic] > 0:
+                                    printed_string.append(f' {characteristic.name}: {buff.base_damages[characteristic]}')
+                            printed_string.append('')
+
+                        if buff.has_stats:
+                            for affected_spell in buff.stats:
+                                printed_string.append('Stats :')
+                                stats_page_string = buff.stats[affected_spell].to_compact_string(indentation=' ')
+                                if stats_page_string:
+                                    printed_string.append('->For all next spells' if affected_spell == "__all__" else f"->For spell '{affected_spell}'")
+                                    printed_string.append(stats_page_string)
+                            printed_string.append('')
+
+                        if buff.has_parameters:
+                            for affected_spell in buff.damage_parameters:
+                                printed_string.append('Damage parameters :')
+                                damage_parameters_string = buff.damage_parameters[affected_spell].to_compact_string()
+                                if damage_parameters_string:
+                                    printed_string.append('->For all next spells' if affected_spell == "__all__" else f"->For spell '{affected_spell}'")
+                                    printed_string.append(f' {damage_parameters_string}')
+                            printed_string.append('')
+
+                self.print(0, '\n'.join(printed_string))
 
         elif command_action == 'mod':
             if len(args) < 2:
