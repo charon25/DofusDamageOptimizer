@@ -155,9 +155,6 @@ class TestSpell(unittest.TestCase):
         spell.set_short_name(42)
         self.assertEqual(spell.get_short_name(), "42")
 
-        with self.assertRaises(ValueError):
-            spell.set_short_name('')
-
     def test_set_po(self):
         spell = Spell()
 
