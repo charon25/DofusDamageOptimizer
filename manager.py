@@ -485,7 +485,6 @@ class Manager:
                 try:
                     damage_parameters_command = input('Damage parameters string: ')
                     d = DamageParameters.from_string(damage_parameters_command)
-                    print(d.resistances)
                     buff.add_damage_parameters(d, spell)
                 except KeyboardInterrupt:
                     self.print(0, f"\n\nCancelled damage parameters addition for spell '{spell}'.")
@@ -757,23 +756,23 @@ class Manager:
                 return
 
             total_stats = damages_parameters.get_total_stats(self.stats)
-            dmg_characs, dmg_total, (average_dmg, average_dmg_crit) = spell.get_detailed_damages(total_stats, damages_parameters)
+            spell_output = spell.get_damages_and_buffs_with_states_single(total_stats, damages_parameters)
 
             final_crit_chance = spell.get_crit_chance() + total_stats.get_bonus_crit_chance()
             if final_crit_chance > 1.0:
                 final_crit_chance = 1.0
 
-            average_dmg_final = average_dmg * (1 - final_crit_chance) + average_dmg_crit * final_crit_chance
+            average_dmg_final = spell_output.average_damage * (1 - final_crit_chance) + spell_output.average_damage_crit * final_crit_chance
 
-            self.print(0, f"Damages of the spell {spell.get_name()} (parameters set : '{self.default_parameters}' ; distance: {damages_parameters.distance}):\n")
+            self.print(0, f"Damages of the spell '{spell.get_name()}' (parameters set : '{self.default_parameters}' ; distance: {damages_parameters.distance} ; initial states: ({','.join(sorted(damages_parameters.starting_states))})):\n")
             self.print(0, 'Individual characteristics:')
             for characteristic in Characteristics:
-                if sum(dmg_characs[characteristic][field] for field in ('min', 'max', 'crit_min', 'crit_max')) > 0:
-                    self.print(0, f' - {characteristic.name}: {dmg_characs[characteristic]["min"]} - {dmg_characs[characteristic]["max"]} ({dmg_characs[characteristic]["crit_min"]} - {dmg_characs[characteristic]["crit_max"]})')
+                if sum(spell_output.damages_by_characteristic[characteristic][field] for field in ('min', 'max', 'crit_min', 'crit_max')) > 0:
+                    self.print(0, f' - {characteristic.name}: {spell_output.damages_by_characteristic[characteristic]["min"]} - {spell_output.damages_by_characteristic[characteristic]["max"]} ({spell_output.damages_by_characteristic[characteristic]["crit_min"]} - {spell_output.damages_by_characteristic[characteristic]["crit_max"]})')
 
             self.print(0, '')
-            self.print(0, f'Total damages:   {dmg_total["min"]} - {dmg_total["max"]} ({dmg_total["crit_min"]} - {dmg_total["crit_max"]})')
-            self.print(0, f'Average damages: {average_dmg:.0f} ({average_dmg_crit:.0f}) => {average_dmg_final:.0f} with {100 * final_crit_chance:.0f} % crit chance')
+            self.print(0, f'Total damages:   {spell_output.damages["min"]} - {spell_output.damages["max"]} ({spell_output.damages["crit_min"]} - {spell_output.damages["crit_max"]})')
+            self.print(0, f'Average damages: {spell_output.average_damage:.0f} ({spell_output.average_damage_crit:.0f}) => {average_dmg_final:.0f} with {100 * final_crit_chance:.0f} % crit chance')
 
         else:
             self.print(1, f"Unknown action '{command_action}' for spell commands.")

@@ -11,10 +11,13 @@ from stats import Characteristics, Damages, Stats
 
 @dataclass
 class SpellOutput:
+    damages_by_characteristic: Dict[Characteristics, Dict[str, int]] = field(default_factory=lambda: {characteristic: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics})
     damages: Dict[str, int] = field(default_factory=lambda: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
     stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
     parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
     states: Set[str] = field(default_factory=lambda: set())
+    average_damage: float = 0.0
+    average_damage_crit: float = 0.0
 
     def update_stats(self, new_stats: Dict[str, Stats]):
         for name in new_stats:
@@ -23,6 +26,15 @@ class SpellOutput:
     def update_parameters(self, new_parameters: Dict[str, DamageParameters]):
         for name in new_parameters:
             self.parameters[name] += new_parameters[name]
+
+    def update_damages_from_existing(self, other: 'SpellOutput'):
+        for field in ('min', 'max', 'crit_min', 'crit_max'):
+            for characteristic in Characteristics:
+                self.damages_by_characteristic[characteristic][field] = other.damages_by_characteristic[characteristic][field]
+            self.damages[field] = other.damages[field]
+
+        self.average_damage = other.average_damage
+        self.average_damage_crit = other.average_damage_crit
 
 
 @dataclass
@@ -172,42 +184,41 @@ class Spell():
 
 
     def get_detailed_damages(self, stats: Stats, parameters: DamageParameters):
-        average_damage = 0.0
-        average_damage_crit = 0.0
-
-        damages_by_characteristic: Dict[Characteristics, Dict[str, float]] = dict()
+        spell_output = SpellOutput()
 
         for characteristic in Characteristics:
             min_damage = compute_damage(self.parameters.base_damages[characteristic]['min'], stats, characteristic, is_weapon=self.parameters.is_weapon, parameters=parameters)
             max_damage = compute_damage(self.parameters.base_damages[characteristic]['max'], stats, characteristic, is_weapon=self.parameters.is_weapon, parameters=parameters)
-            average_damage += (min_damage + max_damage) / 2
+            spell_output.average_damage += (min_damage + max_damage) / 2
 
             min_damage_crit = compute_damage(self.parameters.base_damages[characteristic]['crit_min'], stats, characteristic, is_weapon=self.parameters.is_weapon, is_crit=True, parameters=parameters)
             max_damage_crit = compute_damage(self.parameters.base_damages[characteristic]['crit_max'], stats, characteristic, is_weapon=self.parameters.is_weapon, is_crit=True, parameters=parameters)
-            average_damage_crit += (min_damage_crit + max_damage_crit) / 2
+            spell_output.average_damage_crit += (min_damage_crit + max_damage_crit) / 2
 
-            damages_by_characteristic[characteristic] = {
+            spell_output.damages_by_characteristic[characteristic] = {
                 'min': min_damage,
                 'max': max_damage,
                 'crit_min': min_damage_crit,
                 'crit_max': max_damage_crit
             }
-
-        damages_total: Dict[str, float] = dict()
         for field in ('min', 'max', 'crit_min', 'crit_max'):
-            damages_total[field] = sum(damages_by_characteristic[characteristic][field] for characteristic in damages_by_characteristic)
+            spell_output.damages[field] = sum(spell_output.damages_by_characteristic[characteristic][field] for characteristic in spell_output.damages_by_characteristic)
 
-        return (damages_by_characteristic, damages_total, (average_damage, average_damage_crit))
+        return spell_output
 
 
     def get_average_damages(self, stats: Stats, parameters: DamageParameters):
-        _, _, (average_damage, average_damage_crit) = self.get_detailed_damages(stats, parameters)
+        spell_output = self.get_detailed_damages(stats, parameters)
 
         final_crit_chance = self.parameters.crit_chance + stats.bonus_crit_chance
         if final_crit_chance > 1.0:
             final_crit_chance = 1.0
 
-        return (1 - final_crit_chance) * average_damage + final_crit_chance * average_damage_crit
+        return (1 - final_crit_chance) * spell_output.average_damage + final_crit_chance * spell_output.average_damage_crit
+
+
+    def get_damages_and_buffs_with_states_single(self, stats: Stats, damage_parameters: DamageParameters) -> SpellOutput:
+        return self.get_damages_and_buffs_with_states(stats, damage_parameters, damage_parameters.starting_states)
 
 
     def get_damages_and_buffs_with_states(self, stats: Stats, damage_parameters: DamageParameters, states: Set[str]) -> SpellOutput:
@@ -256,8 +267,8 @@ class Spell():
                     output.states -= buff.removed_output_states
                     output.states.update(buff.new_output_states)
 
-        _, damages, _ = self.get_detailed_damages(computation_stats, computation_parameters)
-        output.damages = damages
+        simple_output = self.get_detailed_damages(computation_stats, computation_parameters)
+        output.update_damages_from_existing(simple_output)
 
         return output
 

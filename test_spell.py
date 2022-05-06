@@ -78,9 +78,6 @@ class TestSpell(unittest.TestCase):
         with self.assertRaises(KeyError):
             spell.set_base_damages(Characteristics.LUCK, {})
 
-        with self.assertRaises(ValueError):
-            spell.set_base_damages(Characteristics.AGILITY, {'min': -10, 'max': 20, 'crit_min': 12, 'crit_max': 22})
-
     def test_set_pa(self):
         spell = Spell()
 
@@ -326,23 +323,23 @@ class TestSpell(unittest.TestCase):
         spell.set_base_damages(Characteristics.LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
         stats.set_characteristic(Characteristics.LUCK, 100)
         stats.set_damage(Damages.CRIT, 10)
-        damages_by_characteristic, damages_total, (average_damage, average_damage_crit) = spell.get_detailed_damages(stats, parameters)
+        spell_output = spell.get_detailed_damages(stats, parameters)
 
-        self.assertDictEqual(damages_by_characteristic, {
+        self.assertDictEqual(spell_output.damages_by_characteristic, {
             Characteristics.STRENGTH: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
             Characteristics.INTELLIGENCE: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
             Characteristics.LUCK: {'min': 20, 'max': 40, 'crit_min': 110, 'crit_max': 150},
             Characteristics.AGILITY: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
             Characteristics.NEUTRAL: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
         })
-        self.assertDictEqual(damages_total, {
+        self.assertDictEqual(spell_output.damages, {
             'min': 20,
             'max': 40,
             'crit_min': 110,
             'crit_max': 150
         })
-        self.assertAlmostEqual(average_damage, 30)
-        self.assertAlmostEqual(average_damage_crit, 130)
+        self.assertAlmostEqual(spell_output.average_damage, 30)
+        self.assertAlmostEqual(spell_output.average_damage_crit, 130)
 
     def test_detailed_damages_multiline(self):
         stats = Stats()
@@ -356,23 +353,23 @@ class TestSpell(unittest.TestCase):
         stats.set_characteristic(Characteristics.INTELLIGENCE, 200)
         stats.set_damage(Damages.CRIT, 10)
         stats.set_damage(Damages.FIRE, 20)
-        damages_by_characteristic, damages_total, (average_damage, average_damage_crit) = spell.get_detailed_damages(stats, parameters)
+        spell_output = spell.get_detailed_damages(stats, parameters)
 
-        self.assertDictEqual(damages_by_characteristic, {
+        self.assertDictEqual(spell_output.damages_by_characteristic, {
             Characteristics.STRENGTH: {'min': 50, 'max': 60, 'crit_min': 70, 'crit_max': 80},
             Characteristics.INTELLIGENCE: {'min': 35, 'max': 50, 'crit_min': 60, 'crit_max': 90},
             Characteristics.LUCK: {'min': 20, 'max': 40, 'crit_min': 110, 'crit_max': 150},
             Characteristics.AGILITY: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
             Characteristics.NEUTRAL: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
         })
-        self.assertDictEqual(damages_total, {
+        self.assertDictEqual(spell_output.damages, {
             'min': 105,
             'max': 150,
             'crit_min': 240,
             'crit_max': 320
         })
-        self.assertAlmostEqual(average_damage, (105 + 150) / 2)
-        self.assertAlmostEqual(average_damage_crit, (240 + 320) / 2)
+        self.assertAlmostEqual(spell_output.average_damage, (105 + 150) / 2)
+        self.assertAlmostEqual(spell_output.average_damage_crit, (240 + 320) / 2)
 
     def test_create_from_file_with_buff(self):
         filepath = 'test_files\\test_spell_with_buff.json'

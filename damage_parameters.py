@@ -33,10 +33,13 @@ class DamageParameters:
         # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
         return {Characteristics(str(k - 1) if k > 0 else '4'): self.base_damages[k] for k in range(5)}
 
-    def get_total_stats(self, stats: Dict[str, Stats]):
+    def get_total_stats(self, stats: Dict[str, Stats]) -> Stats:
         for stats_short_name in self.stats:
             if not stats_short_name in stats:
                 raise KeyError(f"Stats page '{stats_short_name}' does not exist.")
+
+        if len(self.stats) == 0:
+            return Stats()
 
         return sum(stats[stats_short_name] for stats_short_name in self.stats)
 
@@ -172,7 +175,7 @@ class DamageParameters:
                 damage_parameters.base_damages = [int(parameter[i]) for i in range(1, 5 + 1)]
 
             elif command in ('-state', '-states'):
-                damage_parameters.starting_states = [argument for argument in parameter[1:] if argument != ''] # Copy the list to avoid reference issues                
+                damage_parameters.starting_states = {argument for argument in parameter[1:] if argument != ''}
 
             elif command in ('-name',):
                 damage_parameters.full_name = ' '.join(parameter[1:])
