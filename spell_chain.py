@@ -33,17 +33,29 @@ class SpellChains:
         """Generate a list of list containing the indices of the spells."""
         max_used_pa = parameters.pa
 
-        spells = [(i, spell.get_pa()) for i, spell in enumerate(self.spells)] # Assign a unique index for each spell (so the algorithm works on integers)
+        # Associate a unique integer by "spell family" (indentical spell present multiple times)
+        spells_short_names_unique_id = {short_name: k for k, short_name in enumerate(set([spell.get_short_name() for spell in self.spells]))}
+
+        spells = [(i, spell.get_pa(), spells_short_names_unique_id[spell.get_short_name()]) for i, spell in enumerate(self.spells)] # Assign a unique index for each spell (so the algorithm works on integers)
 
         all_permutations = {0: [[]]}
         for pa in range(1, max_used_pa + 1):
             pa_permutations = []
-            for spell_index, spell_pa in spells:
+            for spell_index, spell_pa, _ in spells:
                 if pa >= spell_pa:
                     previous_permutations = all_permutations[pa - spell_pa]
                     pa_permutations.extend(permutation + [spell_index] for permutation in previous_permutations if spell_index not in permutation)
 
-            all_permutations[pa] = pa_permutations
+            all_permutations[pa] = []
+            permutations_already_seen = set()
+            # Remove "identical" permutation : permutation where the same spell is present at the same index but it is not the same instance
+            for permutation in pa_permutations:
+                unique_permutation_tuple = tuple(spells[spell_index][2] for spell_index in permutation)
+                if not unique_permutation_tuple in permutations_already_seen:
+                    permutations_already_seen.add(unique_permutation_tuple)
+                    all_permutations[pa].append(permutation)
+
+            # all_permutations[pa] = pa_permutations
 
         all_permutations_list = list()
         for pa in all_permutations:
@@ -55,13 +67,6 @@ class SpellChains:
     def _get_detailed_damages_of_permutation(self, permutation: List[int], stats: Stats, parameters: DamageParameters, previous_data: ComputationData = None) -> ComputationData: #Tuple[Dict[str, int], float]:
         spells = [self.spells[index] for index in permutation] # Convert the list of indices into a list of spells
 
-        # if previous_data is None:
-        #     damages: Dict[str, int] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
-        #     average_damages = 0.0
-        #     stats_buff: Dict[str, Stats] = {'__all__': Stats()}
-        #     parameters_buff: Dict[str, DamageParameters] = {'__all__': DamageParameters()}
-        #     current_states: Set[str] = set(parameters.starting_states)
-        # else:
         if previous_data is None:
             previous_data = ComputationData()
 

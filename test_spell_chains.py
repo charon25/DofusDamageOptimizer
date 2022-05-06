@@ -54,14 +54,7 @@ class TestSpellChain(unittest.TestCase):
         self.assertSetEqual(permutations_set, {
             (),
             (0,),
-            (1,),
-            (2,),
-            (1, 0),
-            (1, 2),
             (0, 1),
-            (0, 2),
-            (2, 0),
-            (2, 1)
         })
 
     def test_get_sub_permutation_one_spell_too_much_pa(self):

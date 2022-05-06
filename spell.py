@@ -3,6 +3,7 @@ import json
 import os
 import re
 from typing import Dict, List, Set, Tuple
+from uuid import uuid1
 
 from damages import compute_damage
 from damage_parameters import DamageParameters
@@ -181,6 +182,7 @@ class Spell():
         if from_scratch:
             for characteristic in Characteristics:
                 self.parameters.base_damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
+            self.set_short_name('')
 
 
     def get_detailed_damages(self, stats: Stats, parameters: DamageParameters):
@@ -438,8 +440,8 @@ class Spell():
         return re.sub(r'\W', '_', self.short_name)
 
     def set_short_name(self, short_name):
-        if len(str(short_name)) == 0:
-            raise ValueError('Short name cannot be an empty string.')
+        if short_name == '':
+            short_name = str(uuid1())
 
         self.short_name = str(short_name)
 
