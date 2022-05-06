@@ -6,6 +6,13 @@ It can handle multiple stats pages, spells and spell sets, as well as multiple c
 
 It runs on a Python 3 console (developed on 3.9.10, probably work for older versions) and does not require any external package. So to run it, just use `python main.py` in the python scripts folder.
 
+## TODO
+
+Bug ajout puissance doublée sur Tribut
+Mauvaise optimisation knapsack
+problèmes morph
+(enregister les ComputationState dans des fichiers)
+
 ## General principle
 
 This optimizer works by creating spells, stats page, spell sets and parameters set and then picking the desired one to determine the best possible combination of spells to maximize the damages dealt.
@@ -47,7 +54,7 @@ Every `param` can be replaced with only `p`.
 ### Spells-related
 
  - `sp new <name>` : create a new spell and prompt the user for all the required informations
- - `sp rm <name> ` : delete a spell
+ - `sp rm <name>` : delete a spell
  - `sp mod <name>` : modify a spell (prompt the user for all the changes)
  - `sp ls` : list all the currently available spells
  - `sp show <name>` : show more details on the specified spell

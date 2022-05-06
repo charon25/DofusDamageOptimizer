@@ -69,6 +69,7 @@ class SpellChains:
 
         if previous_data is None:
             previous_data = ComputationData()
+            previous_data.states = set(parameters.starting_states)
 
         damages: Dict[str, int] = previous_data.damages.copy()
         average_damages = previous_data.average_damages

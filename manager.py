@@ -928,8 +928,12 @@ class Manager:
 
             damages = spell_chain.get_detailed_damages(total_stats, damages_parameters)
 
-            for c in damages:
+            for k, c in enumerate(damages):
+                if k > 3:
+                    break
                 print(c, damages[c])
+            
+            print(len(damages))
 
 
     def _execute_damages_combination_command(self, args: List[str]):

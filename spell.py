@@ -22,11 +22,11 @@ class SpellOutput:
 
     def update_stats(self, new_stats: Dict[str, Stats]):
         for name in new_stats:
-            self.stats[name] += new_stats[name]
+            self.stats[name] = self.stats.get(name, Stats()) + new_stats[name]
 
     def update_parameters(self, new_parameters: Dict[str, DamageParameters]):
         for name in new_parameters:
-            self.parameters[name] += new_parameters[name]
+            self.parameters[name] = self.parameters.get(name, DamageParameters()) + new_parameters[name]
 
     def update_damages_from_existing(self, other: 'SpellOutput'):
         for field in ('min', 'max', 'crit_min', 'crit_max'):
