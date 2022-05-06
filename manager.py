@@ -13,7 +13,7 @@ from stats import Characteristics, Damages, Stats
 
 
 class Manager:
-    GENERAL_INSTRUCTIONS = ('s', 'h', 'q', 'i')
+    GENERAL_INSTRUCTIONS = ('s', 'q', 'i')
     PARAMETERS_INSTRUCTION = ('p', 'param')
     STATS_INSTRUCTION = ('st',)
     SPELL_INSTRUCTION = ('sp',)
@@ -141,9 +141,6 @@ class Manager:
         if print_message:
             self.print(0, 'Data successfully saved!')
 
-    def _print_help(self):
-        pass
-
 
     def _print_infos(self):
         # TODO: redo the printing of params and infos
@@ -153,8 +150,6 @@ class Manager:
     def _execute_general_command(self, instr, args: List[str]):
         if instr == 's':
             self.save()
-        elif instr == 'h':
-            self._print_help()
         elif instr == 'i':
             self._print_infos()
 

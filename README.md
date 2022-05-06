@@ -24,7 +24,6 @@ Every `<name>` parameter in the commands below should not contains spaces and is
 
  - `s` : save everything (automatically done after most actions)
  - `i` : get informations on current state (TODO)
- - `h` : help
  - `q` : quit
 
 ### Parameters-related
