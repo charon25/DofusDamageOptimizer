@@ -964,9 +964,9 @@ class Manager:
             spell_chain.add_spell(spell)
 
         permutation = list(range(len(spell_list)))  # Permutation of all specified spells in the specified order
-        damages, average_damages = spell_chain._get_detailed_damages_of_permutation(permutation, total_stats, damages_parameters)
+        computation_data = spell_chain._get_detailed_damages_of_permutation(permutation, total_stats, damages_parameters)
 
-        print(damages, average_damages)
+        print(computation_data.damages, computation_data.average_damages)
 
 
     def execute_command(self, command: str):
