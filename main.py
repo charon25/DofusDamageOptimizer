@@ -17,10 +17,10 @@ def command_loop(manager: Manager):
             break
 
         if command:
-            # try:
+            try:
                 manager.execute_command(command)
-            # except Exception as e:
-            #     print(f"Error while executing command {command}: {e}")
+            except Exception as e:
+                print(f"Error while executing command {command}: {e}")
 
         print()
 

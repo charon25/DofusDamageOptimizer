@@ -8,9 +8,11 @@ from stats import Stats
 class SpellChains:
     def __init__(self) -> None:
         self.spells: List[Spell] = list()
+        self.indexes: Dict[str, int] = dict()
 
 
     def add_spell(self, spell: Spell):
+        self.indexes[spell.get_short_name()] = len(self.spells)
         self.spells.append(spell)
 
 
@@ -73,12 +75,22 @@ class SpellChains:
 
     def get_detailed_damages(self, stats: Stats, parameters: DamageParameters):
         permutations = self._get_permutations(parameters)
-        damages = dict()
+        
+        # If the same spell can be used multiple times, there may be multiple "identical" permutations as they do not have the same index
+        # Example, if self.spells = ["s1", "s2", "s2"] (and there are enough AP), the permutations will have both [0, 1, 2] and [0, 2, 1] which are really the same
+        # So we remove them based on the spells short names
+        unique_permutations = set()
+        for permutation in permutations:
+            unique_permutations.add(tuple(self.spells[index].short_name for index in permutation))
 
-        for index, permutation in enumerate(permutations):
+        # The permutations is then once again transformed into indices
+        unique_permutations = [[self.indexes[short_name] for short_name in permutation] for permutation in sorted(unique_permutations)]
+
+        damages = dict()
+        for index, permutation in enumerate(unique_permutations):
             detailed_damages, average_damages = self._get_detailed_damages_of_permutation(permutation, stats, parameters)
             damages[index] = (average_damages, detailed_damages)
 
-        damages = {tuple(self.spells[index].short_name for index in permutations[key]): value for key, value in sorted(damages.items(), key=lambda item: item[1], reverse=True)}
+        damages = {tuple(self.spells[index].short_name for index in unique_permutations[key]): value for key, value in sorted(damages.items(), key=lambda key_value: key_value[1], reverse=True)}
 
         return damages
