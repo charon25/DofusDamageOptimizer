@@ -316,8 +316,8 @@ class Spell():
         with open(filepath, 'w', encoding='utf-8') as fo:
             json.dump(json_valid_data, fo)
 
+
     def add_buff(self, buff: SpellBuff):
-        # TODO : checks to do ?
         self.buffs.append(buff)
 
 

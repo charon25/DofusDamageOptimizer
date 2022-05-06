@@ -66,13 +66,9 @@ Every `param` can be replaced with only `p`.
 
 ### Damage-related
 
-The command to get the best combination of spells for given constraints is :
-`dmg <spell_set_name> [[<param> <value>] ...]`
-The parameters are described in the "Parameters" section.
-
-There is also the command :
-`dmgs <spell_set_name> [[<param> <value>] ...]`
-to use the simple computation which does not use the interactions between spells.
+ - `dmg <spell_set_name> [[<param> <value>] ...]` : return the best combination of spells for the given constraints (the parameters are described in the "Parameters" section) ;
+ - `dmgs <spell_set_name> [[<param> <value>] ...]` : return the best combination of spells using the simple method which does not use the interactions between spells ;
+ - `dmgc <spell1> <spell2> ... [[<param> <value>] ...]` : return the damages of the specified combination of spells in the specified order.
 
 ## Parameters
 

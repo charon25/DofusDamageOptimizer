@@ -18,7 +18,7 @@ class Manager:
     STATS_INSTRUCTION = ('st',)
     SPELL_INSTRUCTION = ('sp',)
     SPELL_SET_INSTRUCTION = ('ss',)
-    DAMAGES_INSTRUCTION = ('dmg', 'dmgs')
+    DAMAGES_INSTRUCTION = ('dmg', 'dmgs', 'dmgc')
 
     DIRECTORIES = ('stats', 'spells')
 
@@ -937,6 +937,43 @@ class Manager:
                 print(c, damages[c])
 
 
+    def _execute_damages_combination_command(self, args: List[str]):
+        if len(args) < 1:
+            self.print(1, 'Missing spells.')
+            return
+
+        spell_list = list()
+
+        for index, spell_short_name in enumerate(args):
+            if spell_short_name.startswith('-'):
+                index -= 1  # Compensate for the case where the break does not occur
+                break
+
+            if not spell_short_name in self.spells:
+                self.print(1, f"Spell '{spell_short_name}' does not exist.")
+                return
+            
+            spell_list.append(self.spells[spell_short_name])
+
+        command = ' '.join(args[index + 1:])
+        try:
+            damages_parameters = DamageParameters.from_string(command, self._get_default_parameters())
+        except ValueError as e:
+            self.print(1, f'Cannot parse parameters: {str(e)}')
+            return
+
+        total_stats = damages_parameters.get_total_stats(self.stats)
+
+        spell_chain = SpellChains()
+        for spell in spell_list:
+            spell_chain.add_spell(spell)
+
+        permutation = list(range(len(spell_list)))  # Permutation of all specified spells in the specified order
+        damages, average_damages = spell_chain._get_detailed_damages_of_permutation(permutation, total_stats, damages_parameters)
+
+        print(damages, average_damages)
+
+
     def execute_command(self, command: str):
         if command == '':
             raise ValueError('Command should be non empty.')
@@ -964,7 +1001,10 @@ class Manager:
             return
 
         elif instr in Manager.DAMAGES_INSTRUCTION:
-            self._execute_damages_command(args, simple=(instr=='dmgs'))
+            if instr == 'dmgc':
+                self._execute_damages_combination_command(args)
+            else:
+                self._execute_damages_command(args, simple=(instr=='dmgs'))
             return
 
         self.print(1, f"Unknown command instruction: '{instr}'.")
