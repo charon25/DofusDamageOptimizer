@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 import re
-from typing import Dict, List, Literal, Union
+from typing import Dict, List, Literal, Set, Union
 
 from stats import Stats, Characteristics
 
@@ -16,6 +16,7 @@ class DamageParameters:
     distance: Literal['melee', 'range'] = 'range'
     vulnerability: int = 0
     base_damages: List[int] = field(default_factory=lambda: [0, 0, 0, 0, 0])
+    starting_states: Set[str] = field(default_factory=lambda: set())
 
 
     def get_min_po(self):
@@ -169,6 +170,9 @@ class DamageParameters:
             elif command in ('-bdmg', '-bdamages', '-base-damages'):
                 cls._check_parameter(parameter, 5, argument_type=int)
                 damage_parameters.base_damages = [int(parameter[i]) for i in range(1, 5 + 1)]
+
+            elif command in ('-state', '-states'):
+                damage_parameters.starting_states = [argument for argument in parameter[1:] if argument != ''] # Copy the list to avoid reference issues                
 
             elif command in ('-name',):
                 damage_parameters.full_name = ' '.join(parameter[1:])

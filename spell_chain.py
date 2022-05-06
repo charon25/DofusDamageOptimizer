@@ -42,7 +42,7 @@ class SpellChains:
 
         stats_buff: Dict[str, Stats] = {'__all__': Stats()}
         parameters_buff: Dict[str, DamageParameters] = {'__all__': DamageParameters()}
-        current_states: Set[str] = set() # TODO : vérifier les 50 de puissance donnés par les états hupper
+        current_states: Set[str] = set(parameters.starting_states)
         damages = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
         average_damages = 0.0
 
