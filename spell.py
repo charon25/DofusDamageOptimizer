@@ -5,14 +5,15 @@ import re
 from typing import Dict, List, Set, Tuple
 from uuid import uuid1
 
+from characteristics_damages import *
 from damages import compute_damage
 from damage_parameters import DamageParameters
-from stats import Characteristics, Damages, Stats
+from stats import Stats
 
 
 @dataclass
 class SpellOutput:
-    damages_by_characteristic: Dict[Characteristics, Dict[str, int]] = field(default_factory=lambda: {characteristic: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics})
+    damages_by_characteristic: List[Dict[str, int]] = field(default_factory=lambda: [{'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for _ in range(CHARACTERISTICS_COUNT)])
     damages: Dict[str, int] = field(default_factory=lambda: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
     stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
     parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
@@ -30,7 +31,7 @@ class SpellOutput:
 
     def update_damages_from_existing(self, other: 'SpellOutput'):
         for field in ('min', 'max', 'crit_min', 'crit_max'):
-            for characteristic in Characteristics:
+            for characteristic in range(CHARACTERISTICS_COUNT):
                 self.damages_by_characteristic[characteristic][field] = other.damages_by_characteristic[characteristic][field]
             self.damages[field] = other.damages[field]
 
@@ -40,7 +41,7 @@ class SpellOutput:
 
 @dataclass
 class SpellParameters:
-    base_damages: Dict[Characteristics, Dict[str, int]] = field(default_factory=lambda: {})
+    base_damages: List[Dict[str, int]] = field(default_factory=lambda: [{} for _ in range(CHARACTERISTICS_COUNT)])
     pa: int = 1
     crit_chance: float = 0.0
     uses_per_target: int = -1
@@ -64,7 +65,7 @@ class SpellParameters:
 @dataclass
 class SpellBuff:
     trigger_states: Set[str] = field(default_factory=lambda: set())
-    base_damages: Dict[Characteristics, int] = field(default_factory=lambda: {characteristic: 0 for characteristic in Characteristics})
+    base_damages: List[int] = field(default_factory=lambda: [0 for _ in range(CHARACTERISTICS_COUNT)])
     stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
     damage_parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
 
@@ -86,7 +87,7 @@ class SpellBuff:
     def remove_trigger_state(self, state: str):
         self.trigger_states -= {state,}
 
-    def set_base_damages(self, characteristic: Characteristics, base_damages: int):
+    def set_base_damages(self, characteristic: int, base_damages: int):
         self.base_damages[characteristic] = base_damages
 
     def add_stats(self, stats: Stats, spell: str = '__all__'):
@@ -150,7 +151,7 @@ class SpellBuff:
         for state in data['trigger_states']:
             spell_buff.add_trigger_state(state)
 
-        for characteristic in Characteristics:
+        for characteristic in range(CHARACTERISTICS_COUNT):
             spell_buff.set_base_damages(characteristic, data['base_damages'][characteristic])
 
         for spell in data['stats']:
@@ -180,7 +181,7 @@ class Spell():
         self.short_name = ''
 
         if from_scratch:
-            for characteristic in Characteristics:
+            for characteristic in range(CHARACTERISTICS_COUNT):
                 self.parameters.base_damages[characteristic] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
             self.set_short_name('')
 
@@ -188,7 +189,7 @@ class Spell():
     def get_detailed_damages(self, stats: Stats, parameters: DamageParameters):
         spell_output = SpellOutput()
 
-        for characteristic in Characteristics:
+        for characteristic in range(CHARACTERISTICS_COUNT):
             min_damage = compute_damage(self.parameters.base_damages[characteristic]['min'], stats, characteristic, is_weapon=self.parameters.is_weapon, parameters=parameters)
             max_damage = compute_damage(self.parameters.base_damages[characteristic]['max'], stats, characteristic, is_weapon=self.parameters.is_weapon, parameters=parameters)
             spell_output.average_damage += (min_damage + max_damage) / 2
@@ -204,7 +205,7 @@ class Spell():
                 'crit_max': max_damage_crit
             }
         for field in ('min', 'max', 'crit_min', 'crit_max'):
-            spell_output.damages[field] = sum(spell_output.damages_by_characteristic[characteristic][field] for characteristic in spell_output.damages_by_characteristic)
+            spell_output.damages[field] = sum(spell_output.damages_by_characteristic[characteristic][field] for characteristic in range(CHARACTERISTICS_COUNT))
 
         return spell_output
 
@@ -254,7 +255,7 @@ class Spell():
                             # If it is a fire/earth combination, also add 15% vulnerability
                             if not combined in output.states:
                                 output.states.add(combined)
-                                output.stats['__all__'].damages[Damages.POWER] += 50
+                                output.stats['__all__'].damages[POWER] += 50
                                 if combined == 'H:ef':
                                     output.parameters['__all__'].vulnerability += 15
                 else:
@@ -335,14 +336,14 @@ class Spell():
         self.parameters.pa = pa
 
 
-    def get_base_damages(self, characteristic: Characteristics):
-        if not isinstance(characteristic, Characteristics):
+    def get_base_damages(self, characteristic: int):
+        if not isinstance(characteristic, int) or characteristic >= CHARACTERISTICS_COUNT:
             raise TypeError(f"'{characteristic} is not a valid characteristic.")
 
         return self.parameters.base_damages[characteristic]
 
-    def set_base_damages(self, characteristic: Characteristics, base_damages: Dict[str, int]):
-        if not isinstance(characteristic, Characteristics):
+    def set_base_damages(self, characteristic: int, base_damages: Dict[str, int]):
+        if not isinstance(characteristic, int) or characteristic >= CHARACTERISTICS_COUNT:
             raise TypeError(f"'{characteristic} is not a valid characteristic.")
 
         if not isinstance(base_damages, dict):
@@ -453,9 +454,8 @@ class Spell():
             if not field in json_data:
                 raise KeyError(f"JSON string does not contain a '{field}' field (Spell.check_json_validity).")
 
-        for characteristic in Characteristics:
-            if not characteristic in json_data['base_damages']:
-                raise KeyError(f"JSON string 'base_damages' array does not contains '{characteristic}'.")
+        if len(json_data['base_damages']) < CHARACTERISTICS_COUNT:
+            raise KeyError(f"JSON string 'base_damages' array does not contains every characteristics ({len(json_data['base_damages'])} instead of {CHARACTERISTICS_COUNT}).")
 
     @classmethod
     def from_json_string(cls, json_string):
@@ -463,7 +463,7 @@ class Spell():
         Spell.check_json_validity(json_data)
 
         spell = Spell(from_scratch=False)
-        for characteristic in Characteristics:
+        for characteristic in range(CHARACTERISTICS_COUNT):
             spell.set_base_damages(characteristic, json_data['base_damages'][characteristic])
         spell.set_pa(json_data['pa'])
         spell.set_crit_chance(json_data['crit_chance'])

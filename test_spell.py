@@ -1,6 +1,7 @@
 import os
 import unittest
 
+from characteristics_damages import *
 from damage_parameters import DamageParameters
 from spell import Spell
 from stats import Characteristics, Damages, Stats
@@ -9,11 +10,11 @@ from stats import Characteristics, Damages, Stats
 class TestSpell(unittest.TestCase):
 
     def test_create_empty(self):
-        empty_base_damages = {characteristic: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics}
+        empty_base_damages = [{'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for _ in range(CHARACTERISTICS_COUNT)]
 
         spell = Spell()
 
-        self.assertDictEqual(spell.parameters.base_damages, empty_base_damages)
+        self.assertListEqual(spell.parameters.base_damages, empty_base_damages)
         self.assertEqual(spell.parameters.crit_chance, 0.0)
         self.assertEqual(spell.parameters.uses_per_target, -1)
         self.assertEqual(spell.parameters.uses_per_turn, -1)
@@ -30,7 +31,7 @@ class TestSpell(unittest.TestCase):
         json_missing_base_damages = '{"short_name": "sn", "name": "name", "pa": 1, "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_weapon": true}'
         # Double { and } because of .format
         json_missing_one_characteristic = '{{"pa": 1, "short_name": "sn", "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_weapon": true, "base_damages": {0}}}'.format(
-            {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics if characteristic != Characteristics.LUCK}
+            [{'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in range(CHARACTERISTICS_COUNT) if characteristic != LUCK]
         ).replace("'", '"')
 
         with self.assertRaises(KeyError):
@@ -41,7 +42,7 @@ class TestSpell(unittest.TestCase):
 
     def test_create_from_valid_json(self):
         valid_json_string = '{{"buffs": [], "short_name": "sn", "pa": 1, "po": [1, 5], "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_weapon": false, "base_damages": {0}}}'.format(
-            {characteristic.value: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in Characteristics}
+             [{'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in range(CHARACTERISTICS_COUNT)]
         ).replace("'", '"')
 
         Spell.from_json_string(valid_json_string)
@@ -58,7 +59,7 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         empty_base_damages = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
 
-        self.assertDictEqual(spell.get_base_damages(Characteristics.STRENGTH), empty_base_damages)
+        self.assertDictEqual(spell.get_base_damages(STRENGTH), empty_base_damages)
 
         with self.assertRaises(TypeError):
             spell.get_base_damages("string")
@@ -67,16 +68,16 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         damage = {'min': 10, 'max': 20, 'crit_min': 12, 'crit_max': 22}
 
-        spell.set_base_damages(Characteristics.INTELLIGENCE, damage)
-        self.assertDictEqual(spell.get_base_damages(Characteristics.INTELLIGENCE), damage)
+        spell.set_base_damages(INTELLIGENCE, damage)
+        self.assertDictEqual(spell.get_base_damages(INTELLIGENCE), damage)
 
         with self.assertRaises(TypeError):
             spell.set_base_damages("string", damage)
-            spell.set_base_damages(Characteristics.STRENGTH, 0)
-            spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': "string", 'crit_max': 22})
+            spell.set_base_damages(STRENGTH, 0)
+            spell.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': "string", 'crit_max': 22})
 
         with self.assertRaises(KeyError):
-            spell.set_base_damages(Characteristics.LUCK, {})
+            spell.set_base_damages(LUCK, {})
 
     def test_set_pa(self):
         spell = Spell()
@@ -196,10 +197,10 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
-        spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 10, 'crit_min': 10, 'crit_max': 10})
+        spell.set_base_damages(AGILITY, {'min': 10, 'max': 10, 'crit_min': 10, 'crit_max': 10})
         damage_no_var = spell.get_average_damages(stats, parameters) # (10 + 10) / 2
 
-        spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 16, 'crit_min': 10, 'crit_max': 10})
+        spell.set_base_damages(AGILITY, {'min': 10, 'max': 16, 'crit_min': 10, 'crit_max': 10})
         damage_var = spell.get_average_damages(stats, parameters) # (10 + 16) / 2
 
         self.assertAlmostEqual(damage_no_var, 10)
@@ -210,8 +211,8 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
-        spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 18, 'crit_min': 10, 'crit_max': 10})
-        spell.set_base_damages(Characteristics.INTELLIGENCE, {'min': 20, 'max': 30, 'crit_min': 10, 'crit_max': 10})
+        spell.set_base_damages(AGILITY, {'min': 10, 'max': 18, 'crit_min': 10, 'crit_max': 10})
+        spell.set_base_damages(INTELLIGENCE, {'min': 20, 'max': 30, 'crit_min': 10, 'crit_max': 10})
         damage = spell.get_average_damages(stats, parameters) # (10 + 18) / 2 + (20 + 30) / 2
 
         self.assertAlmostEqual(damage, 39)
@@ -221,7 +222,7 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
-        spell.set_base_damages(Characteristics.LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
+        spell.set_base_damages(LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
         spell.set_crit_chance(0.5)
         damage_no_bonus = spell.get_average_damages(stats, parameters) # 0.5 * (10 + 20) / 2 + 0.5 * (50 + 70) / 2
 
@@ -235,7 +236,7 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
-        spell.set_base_damages(Characteristics.STRENGTH, {'min': 10, 'max': 20, 'crit_min': 100, 'crit_max': 110})
+        spell.set_base_damages(STRENGTH, {'min': 10, 'max': 20, 'crit_min': 100, 'crit_max': 110})
         spell.set_crit_chance(0.8)
         stats.set_bonus_crit_chance(0.9)
         damage = spell.get_average_damages(stats, parameters) # 0 * (10 + 20) / 2 + 1 * (100 + 110) / 2
@@ -247,11 +248,11 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
-        spell.set_base_damages(Characteristics.INTELLIGENCE, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
-        spell.set_base_damages(Characteristics.LUCK, {'min': 20, 'max': 30, 'crit_min': 20, 'crit_max': 30})
-        spell.set_base_damages(Characteristics.STRENGTH, {'min': 30, 'max': 40, 'crit_min': 30, 'crit_max': 40})
-        stats.set_characteristic(Characteristics.INTELLIGENCE, 100)
-        stats.set_characteristic(Characteristics.LUCK, 200)
+        spell.set_base_damages(INTELLIGENCE, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
+        spell.set_base_damages(LUCK, {'min': 20, 'max': 30, 'crit_min': 20, 'crit_max': 30})
+        spell.set_base_damages(STRENGTH, {'min': 30, 'max': 40, 'crit_min': 30, 'crit_max': 40})
+        stats.set_characteristic(INTELLIGENCE, 100)
+        stats.set_characteristic(LUCK, 200)
 
         damage = spell.get_average_damages(stats, parameters) # 15 * 2 + 25 * 3 + 35 * 1
 
@@ -263,9 +264,9 @@ class TestSpell(unittest.TestCase):
         parameters = DamageParameters()
 
         spell.set_weapon(True)
-        spell.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
-        stats.set_damage(Damages.SPELL, 100)
-        stats.set_damage(Damages.WEAPON_POWER, 300)
+        spell.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
+        stats.set_damage(SPELL, 100)
+        stats.set_damage(WEAPON_POWER, 300)
 
         damage = spell.get_average_damages(stats, parameters) # 15 * 4
 
@@ -276,9 +277,9 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
-        spell.set_base_damages(Characteristics.NEUTRAL, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
-        stats.set_characteristic(Characteristics.STRENGTH, 200)
-        stats.set_characteristic(Characteristics.INTELLIGENCE, 100)
+        spell.set_base_damages(NEUTRAL, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
+        stats.set_characteristic(STRENGTH, 200)
+        stats.set_characteristic(INTELLIGENCE, 100)
 
         damage = spell.get_average_damages(stats, parameters) # 15 * 3
 
@@ -317,18 +318,18 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
-        spell.set_base_damages(Characteristics.LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
-        stats.set_characteristic(Characteristics.LUCK, 100)
-        stats.set_damage(Damages.CRIT, 10)
+        spell.set_base_damages(LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
+        stats.set_characteristic(LUCK, 100)
+        stats.set_damage(CRIT, 10)
         spell_output = spell.get_detailed_damages(stats, parameters)
 
-        self.assertDictEqual(spell_output.damages_by_characteristic, {
-            Characteristics.STRENGTH: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
-            Characteristics.INTELLIGENCE: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
-            Characteristics.LUCK: {'min': 20, 'max': 40, 'crit_min': 110, 'crit_max': 150},
-            Characteristics.AGILITY: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
-            Characteristics.NEUTRAL: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
-        })
+        self.assertListEqual(spell_output.damages_by_characteristic, [
+            {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
+            {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
+            {'min': 20, 'max': 40, 'crit_min': 110, 'crit_max': 150},
+            {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
+            {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
+        ])
         self.assertDictEqual(spell_output.damages, {
             'min': 20,
             'max': 40,
@@ -343,22 +344,22 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
-        spell.set_base_damages(Characteristics.LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
-        spell.set_base_damages(Characteristics.INTELLIGENCE, {'min': 5, 'max': 10, 'crit_min': 10, 'crit_max': 20})
-        spell.set_base_damages(Characteristics.STRENGTH, {'min': 50, 'max': 60, 'crit_min': 60, 'crit_max': 70})
-        stats.set_characteristic(Characteristics.LUCK, 100)
-        stats.set_characteristic(Characteristics.INTELLIGENCE, 200)
-        stats.set_damage(Damages.CRIT, 10)
-        stats.set_damage(Damages.FIRE, 20)
+        spell.set_base_damages(LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
+        spell.set_base_damages(INTELLIGENCE, {'min': 5, 'max': 10, 'crit_min': 10, 'crit_max': 20})
+        spell.set_base_damages(STRENGTH, {'min': 50, 'max': 60, 'crit_min': 60, 'crit_max': 70})
+        stats.set_characteristic(LUCK, 100)
+        stats.set_characteristic(INTELLIGENCE, 200)
+        stats.set_damage(CRIT, 10)
+        stats.set_damage(FIRE, 20)
         spell_output = spell.get_detailed_damages(stats, parameters)
 
-        self.assertDictEqual(spell_output.damages_by_characteristic, {
-            Characteristics.STRENGTH: {'min': 50, 'max': 60, 'crit_min': 70, 'crit_max': 80},
-            Characteristics.INTELLIGENCE: {'min': 35, 'max': 50, 'crit_min': 60, 'crit_max': 90},
-            Characteristics.LUCK: {'min': 20, 'max': 40, 'crit_min': 110, 'crit_max': 150},
-            Characteristics.AGILITY: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
-            Characteristics.NEUTRAL: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
-        })
+        self.assertListEqual(spell_output.damages_by_characteristic, [
+            {'min': 50, 'max': 60, 'crit_min': 70, 'crit_max': 80},
+            {'min': 35, 'max': 50, 'crit_min': 60, 'crit_max': 90},
+            {'min': 20, 'max': 40, 'crit_min': 110, 'crit_max': 150},
+            {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
+            {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
+        ])
         self.assertDictEqual(spell_output.damages, {
             'min': 105,
             'max': 150,
@@ -377,7 +378,7 @@ class TestSpell(unittest.TestCase):
         self.assertEqual(spell.get_name(), 'test spell')
         self.assertEqual(len(spell.buffs), 1)
         self.assertSetEqual(spell.buffs[0].trigger_states, {'trigger1', 'trigger2'})
-        self.assertEqual(spell.buffs[0].stats['__all__'].get_characteristic(Characteristics.STRENGTH), 100)
+        self.assertEqual(spell.buffs[0].stats['__all__'].get_characteristic(STRENGTH), 100)
         self.assertEqual(spell.buffs[0].damage_parameters['__all__'].vulnerability, 30)
 
 
