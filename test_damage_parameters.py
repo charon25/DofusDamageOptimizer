@@ -2,7 +2,6 @@ import unittest
 from characteristics_damages import CHARACTERISTICS_COUNT
 
 from damage_parameters import DamageParameters
-from stats import Characteristics
 
 
 class TestDamageParameters(unittest.TestCase):

@@ -4,7 +4,7 @@ import unittest
 from characteristics_damages import *
 from damage_parameters import DamageParameters
 from spell import Spell
-from stats import Characteristics, Damages, Stats
+from stats import Stats
 
 
 class TestSpell(unittest.TestCase):

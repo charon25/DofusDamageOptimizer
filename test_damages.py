@@ -3,7 +3,7 @@ import unittest
 from characteristics_damages import *
 from damages import compute_damage
 from damage_parameters import DamageParameters
-from stats import Damages, Characteristics, Stats
+from stats import Stats
 
 
 class TestDamages(unittest.TestCase):

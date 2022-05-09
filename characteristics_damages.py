@@ -15,7 +15,7 @@ CHARACTERISTICS_NAMES = [
     "NEUTRAL"
 ]
 
-# Characteristics
+# Damages
 DAMAGES_COUNT = 14
 
 POWER = 0

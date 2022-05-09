@@ -4,12 +4,13 @@ import os
 import re
 from typing import Any, Callable, Dict, List
 
+from characteristics_damages import *
 from knapsack import get_best_combination
 from damage_parameters import DamageParameters
-from spell import Spell, SpellBuff, SpellParameters
+from spell import Spell, SpellBuff
 from spell_chain import SpellChains
 from spell_set import SpellSet
-from stats import Characteristics, Damages, Stats
+from stats import Stats
 
 
 class Manager:
@@ -229,15 +230,13 @@ class Manager:
             self.print(0, f"Distance: {parameters.distance}")
 
             self.print(0, f"\nBase damage increase:")
-            parameters_base_damages = parameters.get_base_damages_dict()
-            for characteristic in Characteristics:
-                if parameters_base_damages[characteristic] > 0:
-                    self.print(0, f" - {characteristic.name}: {parameters_base_damages[characteristic]}")
+            for characteristic in range(CHARACTERISTICS_COUNT):
+                if parameters.get_base_damage(characteristic) > 0:
+                    self.print(0, f" - {CHARACTERISTICS_NAMES[characteristic]}: {parameters.get_base_damage(characteristic)}")
 
             self.print(0, f"\nResistances:")
-            for k in range(5):
-                characteristic = Characteristics(str(k - 1) if k > 0 else '4')
-                self.print(0, f" - {characteristic.name}: {parameters.resistances[k]} %")
+            for characteristic in range(5):
+                self.print(0, f" - {CHARACTERISTICS_NAMES[characteristic]}: {parameters.get_resistance(characteristic)} %")
 
             if len(parameters.stats) > 0:
                 self.print(0, f"\nStats page{'s' if len(parameters.stats) > 1 else ''}:")
@@ -262,11 +261,11 @@ class Manager:
                 stats.set_name(name)
 
         self.print(0, '\n=== Characteristics\n')
-        for characteristic in Characteristics:
-            if characteristic == Characteristics.NEUTRAL:
+        for characteristic in range(CHARACTERISTICS_COUNT):
+            if characteristic == NEUTRAL:
                 continue
 
-            characteristic_value = input(f'{characteristic.name} ({stats.get_characteristic(characteristic)}): ')
+            characteristic_value = input(f'{CHARACTERISTICS_NAMES[characteristic]} ({stats.get_characteristic(characteristic)}): ')
             if characteristic_value == '/':
                 break
 
@@ -274,8 +273,8 @@ class Manager:
                 stats.set_characteristic(characteristic, int(characteristic_value))
 
         self.print(0, '\n=== Damages\n')
-        for damage in Damages:
-            damage_value = input(f'{damage.name} ({stats.get_damage(damage)}): ')
+        for damage in range(DAMAGES_COUNT):
+            damage_value = input(f'{DAMAGES_NAMES[damage]} ({stats.get_damage(damage)}): ')
             if damage_value == '/':
                 break
 
@@ -333,14 +332,14 @@ class Manager:
             if short_name in self.stats:
                 stats = self.stats[short_name]
                 printed_string = [f"===== Page '{stats.get_name()}' ({short_name})", '=== Characteristics\n']
-                for characteristic in Characteristics:
-                    if characteristic == Characteristics.NEUTRAL:
+                for characteristic in range(CHARACTERISTICS_COUNT):
+                    if characteristic == NEUTRAL:
                         continue
-                    printed_string.append(f"{characteristic.name:.<15}{stats.get_characteristic(characteristic)}")
+                    printed_string.append(f"{CHARACTERISTICS_NAMES[characteristic]:.<15}{stats.get_characteristic(characteristic)}")
 
                 printed_string.append('\n=== Damages\n')
-                for damage in Damages:
-                    printed_string.append(f"{damage.name:.<15}{stats.get_damage(damage)}")
+                for damage in range(DAMAGES_COUNT):
+                    printed_string.append(f"{DAMAGES_NAMES[damage]:.<15}{stats.get_damage(damage)}")
 
                 printed_string.append(f'\n{"BONUS CRIT":.<15}{100 * stats.get_bonus_crit_chance():.1f} %')
 
@@ -441,8 +440,8 @@ class Manager:
                     buff.add_removed_output_state(state)
 
         self.print(0, '\n=== Base damage increase if triggered\n')
-        for characteristic in Characteristics:
-            value = input(f'{characteristic.name} ({buff.base_damages[characteristic]}): ')
+        for characteristic in range(CHARACTERISTICS_COUNT):
+            value = input(f'{CHARACTERISTICS_NAMES[characteristic]} ({buff.base_damages[characteristic]}): ')
             if value == '/':
                 break
 
@@ -507,9 +506,9 @@ class Manager:
                 pass
 
         self.print(0, '\n=== Base damages\n')
-        for characteristic in Characteristics:
+        for characteristic in range(CHARACTERISTICS_COUNT):
             unused_characteristic = False
-            self.print(0, f'{characteristic.name}: ')
+            self.print(0, f'{CHARACTERISTICS_NAMES[characteristic]}: ')
             base_damages = spell.get_base_damages(characteristic)
 
             for field in ('min', 'max', 'crit_min', 'crit_max'):
@@ -644,12 +643,12 @@ class Manager:
                 printed_string.append(f'Weapon: {spell.parameters.is_weapon}')
 
                 printed_string.append("\n=== Base damages\n")
-                for characteristic in Characteristics:
+                for characteristic in range(CHARACTERISTICS_COUNT):
                     base_damages = spell.get_base_damages(characteristic)
                     if all(value == 0 for value in base_damages.values()):
                         continue
 
-                    printed_string.append(f" {characteristic.name}: {base_damages['min']} - {base_damages['max']} ({base_damages['crit_min']} - {base_damages['crit_max']})")
+                    printed_string.append(f" {CHARACTERISTICS_NAMES[characteristic]}: {base_damages['min']} - {base_damages['max']} ({base_damages['crit_min']} - {base_damages['crit_max']})")
 
                 if spell.buffs:
                     printed_string.append("\n=== Buffs\n")
@@ -681,9 +680,9 @@ class Manager:
 
                         if any(value != 0 for value in buff.base_damages.values()):
                             printed_string.append('Base damages:')
-                            for characteristic in Characteristics:
+                            for characteristic in range(CHARACTERISTICS_COUNT):
                                 if buff.base_damages[characteristic] > 0:
-                                    printed_string.append(f' {characteristic.name}: {buff.base_damages[characteristic]}')
+                                    printed_string.append(f' {CHARACTERISTICS_NAMES[characteristic]}: {buff.base_damages[characteristic]}')
                             printed_string.append('')
 
                         if buff.has_stats:
@@ -767,9 +766,9 @@ class Manager:
 
             self.print(0, f"Damages of the spell '{spell.get_name()}' (parameters set : '{self.default_parameters}' ; distance: {damages_parameters.distance} ; initial states: ({','.join(sorted(damages_parameters.starting_states))})):\n")
             self.print(0, 'Individual characteristics:')
-            for characteristic in Characteristics:
+            for characteristic in range(CHARACTERISTICS_COUNT):
                 if sum(spell_output.damages_by_characteristic[characteristic][field] for field in ('min', 'max', 'crit_min', 'crit_max')) > 0:
-                    self.print(0, f' - {characteristic.name}: {spell_output.damages_by_characteristic[characteristic]["min"]} - {spell_output.damages_by_characteristic[characteristic]["max"]} ({spell_output.damages_by_characteristic[characteristic]["crit_min"]} - {spell_output.damages_by_characteristic[characteristic]["crit_max"]})')
+                    self.print(0, f' - {CHARACTERISTICS_NAMES[characteristic]}: {spell_output.damages_by_characteristic[characteristic]["min"]} - {spell_output.damages_by_characteristic[characteristic]["max"]} ({spell_output.damages_by_characteristic[characteristic]["crit_min"]} - {spell_output.damages_by_characteristic[characteristic]["crit_max"]})')
 
             self.print(0, '')
             self.print(0, f'Total damages:   {spell_output.damages["min"]} - {spell_output.damages["max"]} ({spell_output.damages["crit_min"]} - {spell_output.damages["crit_max"]})')
