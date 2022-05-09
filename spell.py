@@ -6,7 +6,8 @@ from typing import Dict, List, Set, Tuple
 from uuid import uuid1
 
 from characteristics_damages import *
-from damages import compute_damage
+# from damages import compute_damage
+from damages import compute_damages
 from damage_parameters import DamageParameters
 from stats import Stats
 
@@ -190,12 +191,8 @@ class Spell():
         spell_output = SpellOutput()
 
         for characteristic in range(CHARACTERISTICS_COUNT):
-            min_damage = compute_damage(self.parameters.base_damages[characteristic]['min'], stats, characteristic, is_weapon=self.parameters.is_weapon, parameters=parameters)
-            max_damage = compute_damage(self.parameters.base_damages[characteristic]['max'], stats, characteristic, is_weapon=self.parameters.is_weapon, parameters=parameters)
+            min_damage, max_damage, min_damage_crit, max_damage_crit = compute_damages(self.parameters.base_damages[characteristic], stats, characteristic, parameters, self.parameters.is_weapon)
             spell_output.average_damage += (min_damage + max_damage) / 2
-
-            min_damage_crit = compute_damage(self.parameters.base_damages[characteristic]['crit_min'], stats, characteristic, is_weapon=self.parameters.is_weapon, is_crit=True, parameters=parameters)
-            max_damage_crit = compute_damage(self.parameters.base_damages[characteristic]['crit_max'], stats, characteristic, is_weapon=self.parameters.is_weapon, is_crit=True, parameters=parameters)
             spell_output.average_damage_crit += (min_damage_crit + max_damage_crit) / 2
 
             spell_output.damages_by_characteristic[characteristic] = {
