@@ -34,20 +34,11 @@ class Damages(str, Enum):
 
 class Stats:
     def __init__(self) -> None:
-        self.characteristics: List[int] = list()
-        self.damages: List[int] = list()
+        self.characteristics: List[int] = [0 for _ in range(CHARACTERISTICS_COUNT)]
+        self.damages: List[int] = [0 for _ in range(DAMAGES_COUNT)]
         self.bonus_crit_chance = 0.0
         self.name = ''
         self.short_name = ''
-
-        self._fill_empty_dicts()
-
-    def _fill_empty_dicts(self):
-        for _ in range(CHARACTERISTICS_COUNT):
-            self.characteristics.append(0)
-
-        for _ in range(DAMAGES_COUNT):
-            self.damages.append(0)
 
     def to_dict(self):
         return {

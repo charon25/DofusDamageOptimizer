@@ -225,10 +225,6 @@ class Spell():
 
 
     def get_damages_and_buffs_with_states(self, stats: Stats, damage_parameters: DamageParameters, states: Set[str]) -> SpellOutput:
-        # Générer les buffs de ce sort liés aux états ok
-        # Retirer les états utilisés et ajoutés les nouveaux ok
-        # Générer les buffs pour les sorts suivants
-
         output = SpellOutput()
 
         computation_parameters = DamageParameters.from_existing(damage_parameters)
