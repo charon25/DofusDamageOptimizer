@@ -1,37 +1,38 @@
+from typing import Callable, Tuple
 from characteristics_damages import *
 from damage_parameters import DamageParameters
 from stats import Stats
 
 
 def compute_damage(base_damages, stats: Stats, characteristic: int, parameters: DamageParameters, is_weapon, is_crit=False):
-    base_damages = base_damages + parameters.get_base_damage(characteristic)
+    base_damages = base_damages + parameters.base_damages[characteristic + 1 if characteristic != 4 else 0]
 
     if base_damages <= 0:
         return 0
 
-    power = stats.get_damage(POWER)
+    power = stats.damages[POWER]
     if is_weapon:
-        power += stats.get_damage(WEAPON_POWER)
+        power += stats.damages[WEAPON_POWER]
 
-    characteristic_multiplier = 1 + (stats.get_characteristic(characteristic) + power) / 100
+    characteristic_multiplier = 1 + (stats.characteristics[characteristic] + power) / 100
 
     # The damages associated with the characteristic is 3 more (STRENGTH is 0, EARTH is 3, ...)
-    flat_damages = stats.get_damage(BASIC) + stats.get_damage(characteristic + 3)
+    flat_damages = stats.damages[BASIC] + stats.damages[characteristic + 3]
     if is_crit:
-        flat_damages += stats.get_damage(CRIT)
+        flat_damages += stats.damages[CRIT]
 
-    final_multiplier = 1.0 + stats.get_damage(FINAL) / 100
+    final_multiplier = 1.0 + stats.damages[FINAL] / 100
     if is_weapon:
-        final_multiplier += stats.get_damage(WEAPON) / 100
+        final_multiplier += stats.damages[WEAPON] / 100
     else:
-        final_multiplier += stats.get_damage(SPELL) / 100
+        final_multiplier += stats.damages[SPELL] / 100
 
     if parameters.distance == 'range':
-        final_multiplier += stats.get_damage(RANGE) / 100
+        final_multiplier += stats.damages[RANGE] / 100
     elif parameters.distance == 'melee':
-        final_multiplier += stats.get_damage(MELEE) / 100
+        final_multiplier += stats.damages[MELEE] / 100
 
-    resistance_multiplier = max(0, 1.0 - parameters.get_resistance(characteristic) / 100) # Can't be negative damages
+    resistance_multiplier = max(0, 1.0 - parameters.resistances[characteristic + 1 if characteristic != 4 else 0] / 100) # Can't be negative damages
 
     vulnerability_multiplier = max(0, 1.0 + parameters.vulnerability / 100) # Can't be negative damages
 
