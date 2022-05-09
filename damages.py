@@ -29,7 +29,7 @@ def compute_damage(base_damages, stats: Stats, characteristic: Characteristics, 
     elif parameters.distance == 'melee':
         final_multiplier += stats.get_damage(Damages.MELEE) / 100
 
-    resistance_multiplier = max(0, 1.0 - parameters.get_resistances_dict()[characteristic] / 100) # Can't be negative damages
+    resistance_multiplier = max(0, 1.0 - parameters.get_resistance(characteristic) / 100) # Can't be negative damages
 
     vulnerability_multiplier = max(0, 1.0 + parameters.vulnerability / 100) # Can't be negative damages
 

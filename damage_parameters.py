@@ -29,6 +29,9 @@ class DamageParameters:
         # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
         return {Characteristics(str(k - 1) if k > 0 else '4'): self.resistances[k] for k in range(5)}
 
+    def get_resistance(self, characteristic: Characteristics):
+        return self.resistances[int(characteristic.value) if characteristic.value != '4' else 0]
+
     def get_base_damages_dict(self):
         # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
         return {Characteristics(str(k - 1) if k > 0 else '4'): self.base_damages[k] for k in range(5)}
