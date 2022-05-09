@@ -2,7 +2,8 @@ from dataclasses import dataclass, field
 import re
 from typing import Dict, List, Literal, Set, Union
 
-from stats import Stats, Characteristics
+from characteristics_damages import *
+from stats import Stats
 
 
 @dataclass
@@ -25,18 +26,11 @@ class DamageParameters:
     def get_max_po(self):
         return self.po[1]
 
-    def get_resistances_dict(self):
-        # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
-        return {Characteristics(str(k - 1) if k > 0 else '4'): self.resistances[k] for k in range(5)}
-
+    # Both functions are reordered from EARTH/FIRE/WATER/AIR/NEUTRAL to NEUTRAL/EARTH/FIRE/WATER/AIR
     def get_resistance(self, characteristic: int):
         return self.resistances[characteristic + 1 if characteristic != 4 else 0]
 
-    def get_base_damages_dict(self):
-        # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
-        return {Characteristics(str(k - 1) if k > 0 else '4'): self.base_damages[k] for k in range(5)}
-
-    def get_base_damage(self, characteristic: Characteristics):
+    def get_base_damage(self, characteristic: int):
         return self.base_damages[characteristic + 1 if characteristic != 4 else 0]
 
     def get_total_stats(self, stats: Dict[str, Stats]) -> Stats:
@@ -49,9 +43,9 @@ class DamageParameters:
 
         return sum(stats[stats_short_name] for stats_short_name in self.stats)
 
-    def add_base_damages(self, base_damages: Dict[Characteristics, int]):
-        for k, characteristic in enumerate(Characteristics):
-            self.base_damages[k + 1 if k < 4 else 0] += base_damages[characteristic]
+    def add_base_damages(self, base_damages: List[int]):
+        for characteristic in range(CHARACTERISTICS_COUNT):
+            self.base_damages[characteristic + 1 if characteristic != 4 else 0] += base_damages[characteristic]
 
 
     def __add__(self, other: Union['DamageParameters', int]):

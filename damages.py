@@ -1,6 +1,6 @@
 from characteristics_damages import *
 from damage_parameters import DamageParameters
-from stats import Damages, Stats
+from stats import Stats
 
 
 def compute_damage(base_damages, stats: Stats, characteristic: int, parameters: DamageParameters, is_weapon, is_crit=False):

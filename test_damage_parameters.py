@@ -1,4 +1,5 @@
 import unittest
+from characteristics_damages import CHARACTERISTICS_COUNT
 
 from damage_parameters import DamageParameters
 from stats import Characteristics
@@ -93,32 +94,20 @@ class TestDamageParameters(unittest.TestCase):
 
         damage_parameters = DamageParameters.from_string(string)
 
-        self.assertDictEqual(damage_parameters.get_resistances_dict(), {
-            Characteristics.NEUTRAL: -10,
-            Characteristics.STRENGTH: 0,
-            Characteristics.INTELLIGENCE: 10,
-            Characteristics.LUCK: 20,
-            Characteristics.AGILITY: 30
-        })
+        self.assertListEqual([damage_parameters.get_resistance(characteristic) for characteristic in range(CHARACTERISTICS_COUNT)], [0, 10, 20, 30, -10])
 
-    def test_get_base_damages_dict(self):
+    def test_get_base_damage(self):
         string = '-bdmg -10 0 10 20 30'
 
         damage_parameters = DamageParameters.from_string(string)
 
-        self.assertDictEqual(damage_parameters.get_base_damages_dict(), {
-            Characteristics.NEUTRAL: -10,
-            Characteristics.STRENGTH: 0,
-            Characteristics.INTELLIGENCE: 10,
-            Characteristics.LUCK: 20,
-            Characteristics.AGILITY: 30
-        })
+        self.assertListEqual([damage_parameters.get_base_damage(characteristic) for characteristic in range(CHARACTERISTICS_COUNT)], [0, 10, 20, 30, -10])
 
     def test_add_base_damages(self):
         string = '-bdmg 5 1 2 3 4'
 
         damage_parameters = DamageParameters.from_string(string)
-        base_damages = {characteristic: 10 * (k + 1) for k, characteristic in enumerate(Characteristics)}
+        base_damages = [10 * (characteristic + 1) for characteristic in range(CHARACTERISTICS_COUNT)]
 
         damage_parameters.add_base_damages(base_damages)
 
