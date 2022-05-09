@@ -2,11 +2,11 @@ import os
 import shutil
 import unittest
 
+from characteristics_damages import *
 from damage_parameters import DamageParameters
 from spell import Spell, SpellBuff
 from spell_chain import SpellChains
-from spell_set import SpellSet
-from stats import Characteristics, Damages, Stats
+from stats import Stats
 
 
 class TestSpellChain(unittest.TestCase):
@@ -109,9 +109,9 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 12, 'crit_min': 20, 'crit_max': 22})
+        spell1.set_base_damages(AGILITY, {'min': 10, 'max': 12, 'crit_min': 20, 'crit_max': 22})
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 5, 'max': 7, 'crit_min': 15, 'crit_max': 17})
+        spell2.set_base_damages(AGILITY, {'min': 5, 'max': 7, 'crit_min': 15, 'crit_max': 17})
 
         stats = Stats()
         parameters = DamageParameters()
@@ -128,14 +128,14 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 12, 'crit_min': 20, 'crit_max': 22})
+        spell1.set_base_damages(AGILITY, {'min': 10, 'max': 12, 'crit_min': 20, 'crit_max': 22})
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.STRENGTH, {'min': 5, 'max': 7, 'crit_min': 15, 'crit_max': 17})
+        spell2.set_base_damages(STRENGTH, {'min': 5, 'max': 7, 'crit_min': 15, 'crit_max': 17})
 
         stats = Stats()
-        stats.set_characteristic(Characteristics.AGILITY, 100)
-        stats.set_damage(Damages.BASIC, 10)
-        stats.set_damage(Damages.CRIT, 2)
+        stats.set_characteristic(AGILITY, 100)
+        stats.set_damage(BASIC, 10)
+        stats.set_damage(CRIT, 2)
         parameters = DamageParameters()
 
         chain.add_spell(spell1)
@@ -149,14 +149,14 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 12, 'crit_min': 20, 'crit_max': 22})
+        spell1.set_base_damages(AGILITY, {'min': 10, 'max': 12, 'crit_min': 20, 'crit_max': 22})
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.STRENGTH, {'min': 5, 'max': 7, 'crit_min': 15, 'crit_max': 17})
+        spell2.set_base_damages(STRENGTH, {'min': 5, 'max': 7, 'crit_min': 15, 'crit_max': 17})
 
         stats = Stats()
-        stats.set_characteristic(Characteristics.AGILITY, 100)
-        stats.set_damage(Damages.BASIC, 10)
-        stats.set_damage(Damages.CRIT, 2)
+        stats.set_characteristic(AGILITY, 100)
+        stats.set_damage(BASIC, 10)
+        stats.set_damage(CRIT, 2)
         parameters = DamageParameters.from_string('-r 0 -100 0 0 0')
 
         chain.add_spell(spell1)
@@ -170,16 +170,16 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 12, 'crit_min': 20, 'crit_max': 22})
+        spell1.set_base_damages(AGILITY, {'min': 10, 'max': 12, 'crit_min': 20, 'crit_max': 22})
 
         buff = SpellBuff()
         buff_stats = Stats()
-        buff_stats.set_characteristic(Characteristics.AGILITY, 100)
+        buff_stats.set_characteristic(AGILITY, 100)
         buff.add_stats(buff_stats)
         spell1.add_buff(buff)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 5, 'max': 7, 'crit_min': 15, 'crit_max': 17})
+        spell2.set_base_damages(AGILITY, {'min': 5, 'max': 7, 'crit_min': 15, 'crit_max': 17})
 
         stats = Stats()
         parameters = DamageParameters()
@@ -195,7 +195,7 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
 
         buff_spell1 = SpellBuff()
         buff_spell1.add_new_output_state('fire')
@@ -203,22 +203,22 @@ class TestSpellChain(unittest.TestCase):
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
 
         buff_spell2 = SpellBuff()
         buff_spell2.add_trigger_state('fire')
         buff_spell2.add_trigger_state('water')
         buff_spell2.add_removed_output_state('fire')
-        buff_spell2.set_base_damages(Characteristics.AGILITY, 1000)
+        buff_spell2.set_base_damages(AGILITY, 1000)
         spell2.add_buff(buff_spell2)
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_base_damages(AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
 
         buff_spell3 = SpellBuff()
         buff_spell3.add_trigger_state('fire')
         buff_spell3.add_removed_output_state('fire')
-        buff_spell3.set_base_damages(Characteristics.AGILITY, 1000)
+        buff_spell3.set_base_damages(AGILITY, 1000)
         spell3.add_buff(buff_spell3)
 
         stats = Stats()
@@ -236,7 +236,7 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
 
         buff_spell1 = SpellBuff()
         buff_spell1.add_new_output_state('fire')
@@ -244,22 +244,22 @@ class TestSpellChain(unittest.TestCase):
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
 
         buff_spell2 = SpellBuff()
         buff_spell2.add_trigger_state('fire')
         buff_spell2.add_trigger_state('water')
         buff_spell2.add_removed_output_state('fire')
-        buff_spell2.set_base_damages(Characteristics.AGILITY, 1000)
+        buff_spell2.set_base_damages(AGILITY, 1000)
         spell2.add_buff(buff_spell2)
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_base_damages(AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
 
         buff_spell3 = SpellBuff()
         buff_spell3.add_trigger_state('fire')
         buff_spell3.add_removed_output_state('fire')
-        buff_spell3.set_base_damages(Characteristics.AGILITY, 1000)
+        buff_spell3.set_base_damages(AGILITY, 1000)
         spell3.add_buff(buff_spell3)
 
         stats = Stats()
@@ -279,12 +279,12 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
 
         buff_spell1 = SpellBuff()
         buff_spell1.add_new_output_state('fire')
         buff_spell1_stats = Stats()
-        buff_spell1_stats.set_characteristic(Characteristics.INTELLIGENCE, 100)
+        buff_spell1_stats.set_characteristic(INTELLIGENCE, 100)
         buff_spell1.add_stats(buff_spell1_stats)
         buff_spell1_parameters = DamageParameters(vulnerability=100)
         buff_spell1.add_damage_parameters(buff_spell1_parameters)
@@ -295,12 +295,12 @@ class TestSpellChain(unittest.TestCase):
         buff_spell2 = SpellBuff()
         buff_spell2.add_trigger_state('fire')
         buff_spell2.add_removed_output_state('fire')
-        buff_spell2.set_base_damages(Characteristics.INTELLIGENCE, 10)
+        buff_spell2.set_base_damages(INTELLIGENCE, 10)
         spell2.add_buff(buff_spell2)
 
         stats = Stats()
-        stats.set_damage(Damages.AIR, 10)
-        stats.set_characteristic(Characteristics.INTELLIGENCE, 100)
+        stats.set_damage(AIR, 10)
+        stats.set_characteristic(INTELLIGENCE, 100)
         parameters = DamageParameters.from_string('-r 0 0 0 0 -100')
 
         chain.add_spell(spell1)
@@ -315,7 +315,7 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
         spell1.set_pa(2)
         spell1.set_short_name('s1')
 
@@ -325,7 +325,7 @@ class TestSpellChain(unittest.TestCase):
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
         spell2.set_pa(2)
         spell2.set_short_name('s2')
 
@@ -333,18 +333,18 @@ class TestSpellChain(unittest.TestCase):
         buff_spell2.add_trigger_state('fire')
         buff_spell2.add_trigger_state('water')
         buff_spell2.add_removed_output_state('fire')
-        buff_spell2.set_base_damages(Characteristics.AGILITY, 1000)
+        buff_spell2.set_base_damages(AGILITY, 1000)
         spell2.add_buff(buff_spell2)
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_base_damages(AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
         spell3.set_pa(2)
         spell3.set_short_name('s3')
 
         buff_spell3 = SpellBuff()
         buff_spell3.add_trigger_state('fire')
         buff_spell3.add_removed_output_state('fire')
-        buff_spell3.set_base_damages(Characteristics.AGILITY, 1000)
+        buff_spell3.set_base_damages(AGILITY, 1000)
         spell3.add_buff(buff_spell3)
 
         stats = Stats()
@@ -364,21 +364,21 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
         buff_spell1 = SpellBuff()
         buff_spell1.is_huppermage_states = True
         buff_spell1.add_new_output_state('h:w')
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
         buff_spell2 = SpellBuff()
         buff_spell2.is_huppermage_states = True
         buff_spell2.add_new_output_state('h:a')
         spell2.add_buff(buff_spell2)
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_base_damages(AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
 
         stats = Stats()
         parameters = DamageParameters()
@@ -395,21 +395,21 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
         buff_spell1 = SpellBuff()
         buff_spell1.is_huppermage_states = True
         buff_spell1.add_new_output_state('h:w')
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
         buff_spell2 = SpellBuff()
         buff_spell2.is_huppermage_states = True
         buff_spell2.add_new_output_state('h:w')
         spell2.add_buff(buff_spell2)
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_base_damages(AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
 
         stats = Stats()
         parameters = DamageParameters()
@@ -426,21 +426,21 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
         buff_spell1 = SpellBuff()
         buff_spell1.is_huppermage_states = True
         buff_spell1.add_new_output_state('h:e')
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
         buff_spell2 = SpellBuff()
         buff_spell2.is_huppermage_states = True
         buff_spell2.add_new_output_state('h:f')
         spell2.add_buff(buff_spell2)
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_base_damages(AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
 
         stats = Stats()
         parameters = DamageParameters()
@@ -457,21 +457,21 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
         buff_spell1 = SpellBuff()
         buff_spell1.is_huppermage_states = True
         buff_spell1.add_new_output_state('h:f')
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
         buff_spell2 = SpellBuff()
         buff_spell2.is_huppermage_states = True
         buff_spell2.add_new_output_state('h:e')
         spell2.add_buff(buff_spell2)
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_base_damages(AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
 
         stats = Stats()
         parameters = DamageParameters()
@@ -488,35 +488,35 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
         buff_spell1 = SpellBuff()
         buff_spell1.is_huppermage_states = True
         buff_spell1.add_new_output_state('h:a')
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
         buff_spell2 = SpellBuff()
         buff_spell2.is_huppermage_states = True
         buff_spell2.add_new_output_state('h:f')
         spell2.add_buff(buff_spell2)
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_base_damages(AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
         buff_spell3 = SpellBuff()
         buff_spell3.is_huppermage_states = True
         buff_spell3.add_new_output_state('h:f')
         spell3.add_buff(buff_spell1)
 
         spell4 = Spell()
-        spell4.set_base_damages(Characteristics.AGILITY, {'min': 1000, 'max': 2000, 'crit_min': 3000, 'crit_max': 4000})
+        spell4.set_base_damages(AGILITY, {'min': 1000, 'max': 2000, 'crit_min': 3000, 'crit_max': 4000})
         buff_spell4 = SpellBuff()
         buff_spell4.is_huppermage_states = True
         buff_spell4.add_new_output_state('h:a')
         spell4.add_buff(buff_spell4)
 
         spell5 = Spell()
-        spell5.set_base_damages(Characteristics.AGILITY, {'min': 10000, 'max': 20000, 'crit_min': 30000, 'crit_max': 40000})
+        spell5.set_base_damages(AGILITY, {'min': 10000, 'max': 20000, 'crit_min': 30000, 'crit_max': 40000})
 
         stats = Stats()
         parameters = DamageParameters()
@@ -535,7 +535,7 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
         buff_spell1 = SpellBuff()
         buff_spell1.is_huppermage_states = True
         buff_spell1.add_new_output_state('h:1w')
@@ -543,7 +543,7 @@ class TestSpellChain(unittest.TestCase):
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
 
         stats = Stats()
         parameters = DamageParameters()
@@ -559,14 +559,14 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
         buff_spell1 = SpellBuff()
         buff_spell1.is_huppermage_states = True
         buff_spell1.add_new_output_state('h:e')
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
         buff_spell2 = SpellBuff()
         buff_spell2.is_huppermage_states = True
         buff_spell2.add_new_output_state('h:1f')
@@ -574,7 +574,7 @@ class TestSpellChain(unittest.TestCase):
         spell2.add_buff(buff_spell2)
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_base_damages(AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
 
         stats = Stats()
         parameters = DamageParameters()
@@ -591,14 +591,14 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
         buff_spell1 = SpellBuff()
         buff_spell1.is_huppermage_states = True
         buff_spell1.add_new_output_state('h:e')
         spell1.add_buff(buff_spell1)
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
         buff_spell2 = SpellBuff()
         buff_spell2.is_huppermage_states = True
         buff_spell2.add_new_output_state('h:1a')
@@ -606,7 +606,7 @@ class TestSpellChain(unittest.TestCase):
         spell2.add_buff(buff_spell2)
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
+        spell3.set_base_damages(AGILITY, {'min': 100, 'max': 200, 'crit_min': 300, 'crit_max': 400})
 
         stats = Stats()
         parameters = DamageParameters()
@@ -623,7 +623,7 @@ class TestSpellChain(unittest.TestCase):
         chain = SpellChains()
 
         spell1 = Spell()
-        spell1.set_base_damages(Characteristics.AGILITY, {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
+        spell1.set_base_damages(AGILITY, {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
         buff_spell1 = SpellBuff()
         buff_spell1.is_huppermage_states = True
         buff_spell1.add_new_output_state('h:e')
@@ -632,7 +632,7 @@ class TestSpellChain(unittest.TestCase):
         spell1.set_short_name('s1')
 
         spell2 = Spell()
-        spell2.set_base_damages(Characteristics.AGILITY, {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
+        spell2.set_base_damages(AGILITY, {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
         buff_spell2 = SpellBuff()
         buff_spell2.is_huppermage_states = True
         buff_spell2.add_new_output_state('h:f')
@@ -641,7 +641,7 @@ class TestSpellChain(unittest.TestCase):
         spell2.set_short_name('s2')
 
         spell3 = Spell()
-        spell3.set_base_damages(Characteristics.AGILITY, {'min': 40, 'max': 40, 'crit_min': 40, 'crit_max': 40})
+        spell3.set_base_damages(AGILITY, {'min': 40, 'max': 40, 'crit_min': 40, 'crit_max': 40})
         spell3.set_pa(1)
         spell3.set_short_name('s3')
 
