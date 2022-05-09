@@ -8,10 +8,10 @@ It runs on a Python 3 console (developed on 3.9.10, probably work for older vers
 
 ## TODO
 
-Bug ajout puissance doublée sur Tribut
 Mauvaise optimisation knapsack
 problèmes morph
 (enregister les ComputationState dans des fichiers)
+gérer ligne/diagonale/coordonnées
 
 ## General principle
 

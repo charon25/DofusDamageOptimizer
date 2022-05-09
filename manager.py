@@ -253,6 +253,8 @@ class Manager:
     def _create_stats(self, stats: Stats = None, no_name: bool = False) -> Stats:
         if stats is None:
             stats = Stats()
+        else:
+            stats = Stats.from_existing(stats)
 
         if not no_name:
             name = input(f'Stats page name{f"({stats.get_name()})" if stats.get_name() != "" else ""}: ')
@@ -563,6 +565,7 @@ class Manager:
                     spell.add_buff(self._create_buff())
                 except KeyboardInterrupt:
                     self.print(0, '\nCancelled buff creation.')
+
             elif buff_command.isnumeric():
                 try:
                     index = int(buff_command) - 1
@@ -571,14 +574,17 @@ class Manager:
                     self.print(0, '\nCancelled buff creation.')
                 except (ValueError, IndexError):
                     self.print(0, '[WARNING] Wrong buff index.')
+
             elif re.match(r'del \d+', buff_command):
                 try:
                     delete_index = int(buff_command.split(' ')[1]) - 1
                     del spell.buffs[delete_index]
                 except (ValueError, IndexError):
                     self.print(0, '[WARNING] Wrong buff index.')
+
             elif buff_command in ('', 'q'):
                 break
+
             else:
                 self.print(0, '[WARNING] Wrong command.')
 
