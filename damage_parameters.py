@@ -33,6 +33,9 @@ class DamageParameters:
         # Reorder from STRENGTH/INTELLIGENCE/LUCK/AGILITY/NEUTRAL to NEUTRAL/STRENGTH/INTELLIGENCE/LUCK/AGILITY
         return {Characteristics(str(k - 1) if k > 0 else '4'): self.base_damages[k] for k in range(5)}
 
+    def get_base_damage(self, characteristic: Characteristics):
+        return self.base_damages[int(characteristic.value) if characteristic.value != '4' else 0]
+
     def get_total_stats(self, stats: Dict[str, Stats]) -> Stats:
         for stats_short_name in self.stats:
             if not stats_short_name in stats:

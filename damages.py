@@ -3,7 +3,7 @@ from stats import Characteristics, Damages, Stats
 
 
 def compute_damage(base_damages, stats: Stats, characteristic: Characteristics, parameters: DamageParameters, is_weapon, is_crit=False):
-    base_damages = base_damages + parameters.get_base_damages_dict()[characteristic]
+    base_damages = base_damages + parameters.get_base_damage(characteristic)
 
     if base_damages <= 0:
         return 0

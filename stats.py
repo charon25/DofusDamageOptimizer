@@ -98,13 +98,13 @@ class Stats:
         result = Stats()
         for characteristic in Characteristics:
             if characteristic != Characteristics.NEUTRAL:
-                result.set_characteristic(characteristic, self.get_characteristic(characteristic) + other.get_characteristic(characteristic))
+                result.characteristics[characteristic] = self.characteristics[characteristic] + other.characteristics[characteristic]
 
         for damage in Damages:
-            result.set_damage(damage, self.get_damage(damage) + other.get_damage(damage))
+            result.damages[damage] = self.damages[damage] + other.damages[damage]
 
-        result.set_bonus_crit_chance(self.get_bonus_crit_chance() + other.get_bonus_crit_chance())
-        result.set_name(self.get_name())
+        result.bonus_crit_chance = self.bonus_crit_chance + other.bonus_crit_chance
+        result.name = self.name
 
         return result
 

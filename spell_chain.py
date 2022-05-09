@@ -4,6 +4,7 @@ from typing import Dict, List, Set, Tuple
 
 from damage_parameters import DamageParameters
 from spell import Spell
+from spell_set import SpellSet
 from stats import Stats
 
 
@@ -142,3 +143,27 @@ class SpellChains:
         damages = {tuple(self.spells[index].short_name for index in unique_permutations[key]): value for key, value in sorted(damages.items(), key=lambda key_value: key_value[1][0], reverse=True)}
 
         return damages
+
+
+if __name__ == '__main__':
+    filenames = ['profiling_spells\\1pa.json', 'profiling_spells\\1pa_.json', 'profiling_spells\\2pa.json', 'profiling_spells\\2pa__.json', 'profiling_spells\\2pa_.json', 'profiling_spells\\2pa___.json', 'profiling_spells\\3pa.json']
+    spells = [Spell.from_file(filename) for filename in filenames]
+
+    spell_set = SpellSet()
+    for spell in spells:
+        spell_set.add_spell(spell)
+    
+    stats = Stats()
+    parameters = DamageParameters.from_string('-pa 9')
+    spell_list = spell_set.get_spell_list_single_target(parameters)
+
+    spell_chain = SpellChains()
+    for spell in spell_list:
+        spell_chain.add_spell(spell)
+
+    dmg = spell_chain.get_detailed_damages(stats, parameters)
+
+    # for k, c in enumerate(dmg):
+    #     print(c, dmg[c])
+    #     if k > 5:
+    #         break
