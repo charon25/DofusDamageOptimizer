@@ -34,8 +34,8 @@ class Damages(str, Enum):
 
 class Stats:
     def __init__(self) -> None:
-        self.characteristics: List[int] = [0 for _ in range(CHARACTERISTICS_COUNT)]
-        self.damages: List[int] = [0 for _ in range(DAMAGES_COUNT)]
+        self.characteristics: List[int] = [0] * CHARACTERISTICS_COUNT
+        self.damages: List[int] = [0] * DAMAGES_COUNT
         self.bonus_crit_chance = 0.0
         self.name = ''
         self.short_name = ''
