@@ -43,6 +43,7 @@ class SpellOutput:
 @dataclass
 class SpellParameters:
     base_damages: List[Dict[str, int]] = field(default_factory=lambda: [{} for _ in range(CHARACTERISTICS_COUNT)])
+    damaging_characteristics: List[int] = field(default_factory=lambda: [])
     pa: int = 1
     crit_chance: float = 0.0
     uses_per_target: int = -1
@@ -67,6 +68,7 @@ class SpellParameters:
 class SpellBuff:
     trigger_states: Set[str] = field(default_factory=lambda: set())
     base_damages: List[int] = field(default_factory=lambda: [0 for _ in range(CHARACTERISTICS_COUNT)])
+    additional_damaging_characteristics: List[int] = field(default_factory=lambda: [])
     stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
     damage_parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
 
@@ -90,6 +92,17 @@ class SpellBuff:
 
     def set_base_damages(self, characteristic: int, base_damages: int):
         self.base_damages[characteristic] = base_damages
+
+    def add_additional_damaging_characteristic(self, characteristic: int):
+        if not characteristic in self.additional_damaging_characteristics:
+            self.additional_damaging_characteristics.append(characteristic)
+
+    def remove_additional_damaging_characteristic(self, characteristic: int):
+        if characteristic in self.additional_damaging_characteristics:
+            self.additional_damaging_characteristics.remove(characteristic)
+
+    def has_additional_damaging_characteristic(self, characteristic: int):
+        return characteristic in self.additional_damaging_characteristics
 
     def add_stats(self, stats: Stats, spell: str = '__all__'):
         self.has_stats = True
@@ -132,6 +145,7 @@ class SpellBuff:
         return {
             'trigger_states': list(self.trigger_states),
             'base_damages': self.base_damages,
+            'additional_damaging_characteristics': self.additional_damaging_characteristics,
             'stats': {spell: stats.to_dict() for spell, stats in self.stats.items()},
             'damage_parameters': {spell: damage_parameters.to_string() for spell, damage_parameters in self.damage_parameters.items()},
             'new_output_states': list(self.new_output_states),
@@ -154,6 +168,9 @@ class SpellBuff:
 
         for characteristic in range(CHARACTERISTICS_COUNT):
             spell_buff.set_base_damages(characteristic, data['base_damages'][characteristic])
+
+        for characteristic in data['additional_damaging_characteristics']:
+            spell_buff.add_additional_damaging_characteristic(characteristic)
 
         for spell in data['stats']:
             spell_buff.add_stats(Stats.from_dict(data['stats'][spell]), spell=spell)
@@ -187,10 +204,13 @@ class Spell():
             self.set_short_name('')
 
 
-    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters):
+    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters, additional_damaging_characteristics: List[int] = None):
         spell_output = SpellOutput()
 
-        for characteristic in range(CHARACTERISTICS_COUNT):
+        if not additional_damaging_characteristics:
+            additional_damaging_characteristics = []
+
+        for characteristic in set(self.parameters.damaging_characteristics + additional_damaging_characteristics):
             min_damage, max_damage, min_damage_crit, max_damage_crit = compute_damages(self.parameters.base_damages[characteristic], stats, characteristic, parameters, self.parameters.is_weapon)
             spell_output.average_damage += (min_damage + max_damage) / 2
             spell_output.average_damage_crit += (min_damage_crit + max_damage_crit) / 2
@@ -201,6 +221,7 @@ class Spell():
                 'crit_min': min_damage_crit,
                 'crit_max': max_damage_crit
             }
+
         for field in ('min', 'max', 'crit_min', 'crit_max'):
             spell_output.damages[field] = sum(spell_output.damages_by_characteristic[characteristic][field] for characteristic in range(CHARACTERISTICS_COUNT))
 
@@ -227,6 +248,7 @@ class Spell():
         computation_parameters = DamageParameters.from_existing(damage_parameters)
         computation_stats = Stats.from_existing(stats)
         output.states.update(states)
+        additional_damaging_characteristics = []
 
         for buff in self.buffs:
             if buff.trigger(states):
@@ -253,6 +275,7 @@ class Spell():
                                     output.parameters['__all__'].vulnerability += 15
                 else:
                     computation_parameters.add_base_damages(buff.base_damages)
+                    additional_damaging_characteristics.extend(buff.additional_damaging_characteristics)
 
                     if buff.has_stats:
                         output.update_stats(buff.stats)
@@ -263,7 +286,7 @@ class Spell():
                     output.states -= buff.removed_output_states
                     output.states.update(buff.new_output_states)
 
-        simple_output = self.get_detailed_damages(computation_stats, computation_parameters)
+        simple_output = self.get_detailed_damages(computation_stats, computation_parameters, additional_damaging_characteristics)
         output.update_damages_from_existing(simple_output)
 
         return output
@@ -295,6 +318,7 @@ class Spell():
     def to_dict(self):
         return {
             'base_damages': self.parameters.base_damages,
+            'damaging_characteristics': self.parameters.damaging_characteristics,
             'pa': self.parameters.pa,
             'crit_chance': self.parameters.crit_chance,
             'uses_per_target': self.parameters.uses_per_target,
@@ -349,6 +373,27 @@ class Spell():
                 raise TypeError(f"Field '{field}' is not an int ('{base_damages[field]}' of type '{type(base_damages[field])}' given instead).")
 
         self.parameters.base_damages[characteristic] = base_damages
+
+
+    def add_damaging_characteristic(self, characteristic: int):
+        if not isinstance(characteristic, int) or characteristic >= CHARACTERISTICS_COUNT:
+            raise TypeError(f"'{characteristic} is not a valid characteristic.")
+
+        if not characteristic in self.parameters.damaging_characteristics:
+            self.parameters.damaging_characteristics.append(characteristic)
+
+    def remove_damaging_characteristic(self, characteristic: int):
+        if not isinstance(characteristic, int) or characteristic >= CHARACTERISTICS_COUNT:
+            raise TypeError(f"'{characteristic} is not a valid characteristic.")
+
+        if characteristic in self.parameters.damaging_characteristics:
+            self.parameters.damaging_characteristics.remove(characteristic)
+
+    def does_damage_in_characteristic(self, characteristic: int):
+        if not isinstance(characteristic, int) or characteristic >= CHARACTERISTICS_COUNT:
+            raise TypeError(f"'{characteristic} is not a valid characteristic.")
+
+        return characteristic in self.parameters.damaging_characteristics
 
 
     def get_crit_chance(self):
@@ -443,7 +488,7 @@ class Spell():
 
     @classmethod
     def check_json_validity(cls, json_data):
-        for field in ('base_damages', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_weapon', 'name', 'short_name', 'po', 'buffs'):
+        for field in ('base_damages', 'damaging_characteristics', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_weapon', 'name', 'short_name', 'po', 'buffs'):
             if not field in json_data:
                 raise KeyError(f"JSON string does not contain a '{field}' field (Spell.check_json_validity).")
 
@@ -458,6 +503,8 @@ class Spell():
         spell = Spell(from_scratch=False)
         for characteristic in range(CHARACTERISTICS_COUNT):
             spell.set_base_damages(characteristic, json_data['base_damages'][characteristic])
+        for characteristic in json_data['damaging_characteristics']:
+            spell.add_damaging_characteristic(characteristic)
         spell.set_pa(json_data['pa'])
         spell.set_crit_chance(json_data['crit_chance'])
         spell.set_uses_per_target(json_data['uses_per_target'])

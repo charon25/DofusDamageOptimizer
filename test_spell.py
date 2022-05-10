@@ -41,7 +41,7 @@ class TestSpell(unittest.TestCase):
             Spell.from_json_string(json_missing_one_characteristic)
 
     def test_create_from_valid_json(self):
-        valid_json_string = '{{"buffs": [], "short_name": "sn", "pa": 1, "po": [1, 5], "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_weapon": false, "base_damages": {0}}}'.format(
+        valid_json_string = '{{"buffs": [], "short_name": "sn", "pa": 1, "po": [1, 5], "name": "name", "crit_chance": 0, "uses_per_target": -1, "uses_per_turn": -1, "is_weapon": false, "base_damages": {0}, "damaging_characteristics": []}}'.format(
              [{'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for characteristic in range(CHARACTERISTICS_COUNT)]
         ).replace("'", '"')
 
@@ -197,6 +197,7 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
+        spell.add_damaging_characteristic(AGILITY)
         spell.set_base_damages(AGILITY, {'min': 10, 'max': 10, 'crit_min': 10, 'crit_max': 10})
         damage_no_var = spell.get_average_damages(stats, parameters) # (10 + 10) / 2
 
@@ -211,6 +212,8 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
+        spell.add_damaging_characteristic(AGILITY)
+        spell.add_damaging_characteristic(INTELLIGENCE)
         spell.set_base_damages(AGILITY, {'min': 10, 'max': 18, 'crit_min': 10, 'crit_max': 10})
         spell.set_base_damages(INTELLIGENCE, {'min': 20, 'max': 30, 'crit_min': 10, 'crit_max': 10})
         damage = spell.get_average_damages(stats, parameters) # (10 + 18) / 2 + (20 + 30) / 2
@@ -222,6 +225,7 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
+        spell.add_damaging_characteristic(LUCK)
         spell.set_base_damages(LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
         spell.set_crit_chance(0.5)
         damage_no_bonus = spell.get_average_damages(stats, parameters) # 0.5 * (10 + 20) / 2 + 0.5 * (50 + 70) / 2
@@ -236,6 +240,7 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
+        spell.add_damaging_characteristic(STRENGTH)
         spell.set_base_damages(STRENGTH, {'min': 10, 'max': 20, 'crit_min': 100, 'crit_max': 110})
         spell.set_crit_chance(0.8)
         stats.set_bonus_crit_chance(0.9)
@@ -248,6 +253,9 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
+        spell.add_damaging_characteristic(INTELLIGENCE)
+        spell.add_damaging_characteristic(LUCK)
+        spell.add_damaging_characteristic(STRENGTH)
         spell.set_base_damages(INTELLIGENCE, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
         spell.set_base_damages(LUCK, {'min': 20, 'max': 30, 'crit_min': 20, 'crit_max': 30})
         spell.set_base_damages(STRENGTH, {'min': 30, 'max': 40, 'crit_min': 30, 'crit_max': 40})
@@ -264,6 +272,7 @@ class TestSpell(unittest.TestCase):
         parameters = DamageParameters()
 
         spell.set_weapon(True)
+        spell.add_damaging_characteristic(AGILITY)
         spell.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
         stats.set_damage(SPELL, 100)
         stats.set_damage(WEAPON_POWER, 300)
@@ -277,6 +286,7 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
+        spell.add_damaging_characteristic(NEUTRAL)
         spell.set_base_damages(NEUTRAL, {'min': 10, 'max': 20, 'crit_min': 10, 'crit_max': 20})
         stats.set_characteristic(STRENGTH, 200)
         stats.set_characteristic(INTELLIGENCE, 100)
@@ -318,6 +328,7 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
+        spell.add_damaging_characteristic(LUCK)
         spell.set_base_damages(LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
         stats.set_characteristic(LUCK, 100)
         stats.set_damage(CRIT, 10)
@@ -344,6 +355,9 @@ class TestSpell(unittest.TestCase):
         spell = Spell()
         parameters = DamageParameters()
 
+        spell.add_damaging_characteristic(LUCK)
+        spell.add_damaging_characteristic(INTELLIGENCE)
+        spell.add_damaging_characteristic(STRENGTH)
         spell.set_base_damages(LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
         spell.set_base_damages(INTELLIGENCE, {'min': 5, 'max': 10, 'crit_min': 10, 'crit_max': 20})
         spell.set_base_damages(STRENGTH, {'min': 50, 'max': 60, 'crit_min': 60, 'crit_max': 70})

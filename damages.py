@@ -69,8 +69,8 @@ def compute_damages(base_damages, stats: Stats, characteristic: int, parameters:
 
     # Game rounds down the damage between each steps
     return (
-        int(int(int(int((base_damages['min'] + additional_base_damages) * characteristic_multiplier + flat_damages) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier),
-        int(int(int(int((base_damages['max'] + additional_base_damages) * characteristic_multiplier + flat_damages) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier),
-        int(int(int(int((base_damages['crit_min'] + additional_base_damages) * characteristic_multiplier + flat_damages + stats.damages[CRIT]) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier),
-        int(int(int(int((base_damages['crit_max'] + additional_base_damages) * characteristic_multiplier + flat_damages + stats.damages[CRIT]) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier),
+        int(int(int(int((base_damages['min'] + additional_base_damages) * characteristic_multiplier + flat_damages) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier) if (base_damages['min'] + additional_base_damages) > 0 else 0,
+        int(int(int(int((base_damages['max'] + additional_base_damages) * characteristic_multiplier + flat_damages) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier) if (base_damages['max'] + additional_base_damages) > 0 else 0,
+        int(int(int(int((base_damages['crit_min'] + additional_base_damages) * characteristic_multiplier + flat_damages + stats.damages[CRIT]) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier) if (base_damages['crit_min'] + additional_base_damages) > 0 else 0,
+        int(int(int(int((base_damages['crit_max'] + additional_base_damages) * characteristic_multiplier + flat_damages + stats.damages[CRIT]) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier) if (base_damages['crit_max'] + additional_base_damages) > 0 else 0,
     )

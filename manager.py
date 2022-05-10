@@ -448,6 +448,16 @@ class Manager:
             if value:
                 buff.set_base_damages(characteristic, int(value))
 
+        self.print(0, '')
+        for characteristic in range(CHARACTERISTICS_COUNT):
+            default_damaging = (buff.base_damages[characteristic] > 0)
+            damaging = input(f'{CHARACTERISTICS_NAMES[characteristic]} damaging ({int(default_damaging)}) (0/1)? ')
+            damaging = distutils.util.strtobool(damaging) if damaging else default_damaging
+            if damaging:
+                buff.add_additional_damaging_characteristic(characteristic)
+            else:
+                buff.remove_additional_damaging_characteristic(characteristic)
+
         self.print(0, '\n=== Stats pages to add to next spells when triggered')
         while True:
             if buff.has_stats:
@@ -521,6 +531,14 @@ class Manager:
 
             if not unused_characteristic:
                 spell.set_base_damages(characteristic, base_damages)
+                default_damaging = (characteristic in spell.parameters.damaging_characteristics) or any(base_damages[field] > 0 for field in base_damages)
+                damaging = input(f'  - Damaging ({int(default_damaging)}) (1/0)? ')
+                damaging = distutils.util.strtobool(damaging) if damaging else default_damaging
+                if damaging:
+                    spell.add_damaging_characteristic(characteristic)
+                else:
+                    spell.remove_damaging_characteristic(characteristic)
+
 
         self.print(0, '')
         pa = input(f'PA count ({spell.get_pa()}): ')
@@ -647,8 +665,12 @@ class Manager:
                     base_damages = spell.get_base_damages(characteristic)
                     if all(value == 0 for value in base_damages.values()):
                         continue
+                    
+                    if spell.does_damage_in_characteristic(characteristic):
+                        printed_string.append(f" {CHARACTERISTICS_NAMES[characteristic]}: {base_damages['min']} - {base_damages['max']} ({base_damages['crit_min']} - {base_damages['crit_max']})")
+                    else:
+                        printed_string.append(f" [{CHARACTERISTICS_NAMES[characteristic]}: {base_damages['min']} - {base_damages['max']} ({base_damages['crit_min']} - {base_damages['crit_max']})]")
 
-                    printed_string.append(f" {CHARACTERISTICS_NAMES[characteristic]}: {base_damages['min']} - {base_damages['max']} ({base_damages['crit_min']} - {base_damages['crit_max']})")
 
                 if spell.buffs:
                     printed_string.append("\n=== Buffs\n")
@@ -678,11 +700,14 @@ class Manager:
 
                         printed_string.append(f'States: {buff.to_compact_string(only_states=True)}\n')
 
-                        if any(value != 0 for value in buff.base_damages.values()):
+                        if any(value != 0 for value in buff.base_damages):
                             printed_string.append('Base damages:')
                             for characteristic in range(CHARACTERISTICS_COUNT):
                                 if buff.base_damages[characteristic] > 0:
-                                    printed_string.append(f' {CHARACTERISTICS_NAMES[characteristic]}: {buff.base_damages[characteristic]}')
+                                    if buff.has_additional_damaging_characteristic(characteristic):
+                                        printed_string.append(f' {CHARACTERISTICS_NAMES[characteristic]}: {buff.base_damages[characteristic]}')
+                                    else:
+                                        printed_string.append(f' [{CHARACTERISTICS_NAMES[characteristic]}: {buff.base_damages[characteristic]}]')
                             printed_string.append('')
 
                         if buff.has_stats:

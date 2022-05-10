@@ -9,10 +9,10 @@ It runs on a Python 3 console (developed on 3.9.10, probably work for older vers
 ## TODO
 
 Mauvaise optimisation knapsack
-problèmes morph
+
 (enregister les ComputationState dans des fichiers)
+
 gérer ligne/diagonale/coordonnées
-optimisation compute_damage en calculant en même temps min et max
 
 ## General principle
 
