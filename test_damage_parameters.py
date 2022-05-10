@@ -159,5 +159,12 @@ class TestDamageParameters(unittest.TestCase):
         self.assertEqual(damage_parameters1.position, 'none')
         self.assertListEqual(damage_parameters1.po, [6, 6])
 
+    def test_hash(self):
+        damage_parameters1 = DamageParameters.from_string("-r 1 2 3 4 5 -d melee -v 15 -bdmg 1 2 3 4 5 -states s1 s2 s3")
+        damage_parameters2 = DamageParameters.from_string("-r 1 2 3 4 5 -d melee -v 16 -bdmg 1 2 3 4 5 -states s1 s2 s3")
+
+        self.assertEqual(type(hash(damage_parameters1)), int)
+        self.assertNotEqual(hash(damage_parameters1), hash(damage_parameters2))
+
 if __name__ == '__main__':
     unittest.main()

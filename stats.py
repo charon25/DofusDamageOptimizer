@@ -110,6 +110,10 @@ class Stats:
             return self + other
 
 
+    def __hash__(self) -> int:
+        return hash(tuple(self.characteristics) + tuple(self.damages) + (self.bonus_crit_chance,))
+
+
     def get_characteristic(self, characteristic):
         if not isinstance(characteristic, int) or characteristic >= CHARACTERISTICS_COUNT:
             raise TypeError(f"{characteristic} is not a valid characteristic.")

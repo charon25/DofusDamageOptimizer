@@ -195,6 +195,31 @@ class TestStats(unittest.TestCase):
 
         print(f"\n{N} repetitions : {1e-6 * (t1 - t0):.1f} ms total ({1e-3 * (t1 - t0) / N:.1f} µs / copy)")
 
+    def test_hash(self):
+        stats = Stats()
+
+        stats.set_characteristic(AGILITY, 779)
+        stats.set_characteristic(LUCK, 86)
+        stats.set_characteristic(STRENGTH, 101)
+        stats.set_characteristic(INTELLIGENCE, 81)
+
+        stats.set_damage(POWER, 121)
+        stats.set_damage(BASIC, 17)
+        stats.set_damage(NEUTRAL, 29)
+        stats.set_damage(EARTH, 31)
+        stats.set_damage(FIRE, 7)
+        stats.set_damage(WATER, 7)
+        stats.set_damage(AIR, 49)
+        stats.set_damage(SPELL, 7)
+
+        stats.set_bonus_crit_chance(0.54)
+
+        stats2 = stats.copy()
+        stats2.set_bonus_crit_chance(0.53)
+
+        self.assertEqual(type(hash(stats)), int)
+        self.assertNotEqual(hash(stats), hash(stats2))
+
 
 if __name__ == '__main__':
     unittest.main()

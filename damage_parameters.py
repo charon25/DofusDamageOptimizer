@@ -67,6 +67,10 @@ class DamageParameters:
         return result
 
 
+    def __hash__(self) -> str:
+        return hash((self.distance, self.vulnerability) + tuple(self.resistances) + tuple(self.base_damages) + tuple(self.starting_states))
+
+
     def to_string(self):
         return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -name {self.full_name} -bdmg {" ".join(map(str, self.base_damages))}'
 
