@@ -18,6 +18,7 @@ class DamageParameters:
     vulnerability: int = 0
     base_damages: List[int] = field(default_factory=lambda: [0, 0, 0, 0, 0])
     starting_states: Set[str] = field(default_factory=lambda: set())
+    position: Literal['none', 'line', 'diag'] = 'none'
 
 
     def get_min_po(self):
@@ -179,6 +180,20 @@ class DamageParameters:
 
             elif command in ('-name',):
                 damage_parameters.full_name = ' '.join(parameter[1:])
+
+            elif command in ('-p', '-position'):
+                if len(parameter) == 2:  # This means only the string position was supplied
+                    cls._check_parameter(parameter, 1, literals=['none', 'line', 'diag'])
+                    damage_parameters.position = parameter[1]
+                else:  # This means two coordinates were supplied
+                    cls._check_parameter(parameter, 2, argument_type=int)
+                    x, y = map(lambda x:abs(int(x)), parameter[1:3])  # Convert both coordinates to integers and take the absolute value
+                    damage_parameters.position = 'none'  # Default position
+                    if abs(x) == abs(y):
+                        damage_parameters.position = 'diag'
+                    elif x == 0 or y == 0:
+                        damage_parameters.position = 'line'
+                    damage_parameters.po = [abs(x) + abs(y), abs(x) + abs(y)]
 
         damage_parameters._assert_correct_parameters()
 

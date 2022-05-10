@@ -137,5 +137,27 @@ class TestDamageParameters(unittest.TestCase):
         self.assertEqual(damage_parameters2.vulnerability, 15)
         self.assertListEqual(damage_parameters2.base_damages, [1, 2, 3, 4, 5])
 
+    def test_position_string(self):
+        self.assertEqual(DamageParameters.from_string('-p diag').position, 'diag')
+        self.assertEqual(DamageParameters.from_string('-p line').position, 'line')
+        self.assertEqual(DamageParameters.from_string('-p none').position, 'none')
+        self.assertEqual(DamageParameters.from_string('').position, 'none')
+
+        with self.assertRaises(ValueError):
+            DamageParameters.from_string('-p no')
+
+    def test_position_coordinates(self):
+        damage_parameters1 = DamageParameters.from_string('-p 1 1')
+        self.assertEqual(damage_parameters1.position, 'diag')
+        self.assertListEqual(damage_parameters1.po, [2, 2])
+
+        damage_parameters1 = DamageParameters.from_string('-p 0 7')
+        self.assertEqual(damage_parameters1.position, 'line')
+        self.assertListEqual(damage_parameters1.po, [7, 7])
+
+        damage_parameters1 = DamageParameters.from_string('-p 2 4')
+        self.assertEqual(damage_parameters1.position, 'none')
+        self.assertListEqual(damage_parameters1.po, [6, 6])
+
 if __name__ == '__main__':
     unittest.main()

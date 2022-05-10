@@ -67,11 +67,11 @@ class Manager:
 
             # SPELLS
             for spells_filepath in json_data['spells']:
-                # try:
+                try:
                     spell = Spell.from_file(spells_filepath)
                     self.spells[spell.get_short_name()] = spell
-                # except (FileNotFoundError, KeyError, TypeError, ValueError):
-                #     self.print(1, f"Could not open or read spell '{spells_filepath}'.")
+                except (FileNotFoundError, KeyError, TypeError, ValueError):
+                    self.print(1, f"Could not open or read spell '{spells_filepath}'.")
 
             # SPELL SETS
             for spell_set_data in json_data['spell_sets']:
@@ -515,6 +515,10 @@ class Manager:
             except ValueError: # if the valeur cannot be converted to a boolean, do as if nothing was input
                 pass
 
+        position = input(f'Spell reach ({spell.parameters.position}) (all/line/diag)? ')
+        if position:
+            spell.set_position(position)
+
         self.print(0, '\n=== Base damages\n')
         for characteristic in range(CHARACTERISTICS_COUNT):
             unused_characteristic = False
@@ -659,6 +663,7 @@ class Manager:
                 printed_string.append(f"Uses per turn: {spell.get_uses_per_turn() if spell.get_uses_per_turn() > 0 else '∞'}")
                 printed_string.append(f'Crit chance: {100 * spell.get_crit_chance():.1f} %')
                 printed_string.append(f'Weapon: {spell.parameters.is_weapon}')
+                printed_string.append(f'Spell reach: {spell.parameters.position.capitalize()}')
 
                 printed_string.append("\n=== Base damages\n")
                 for characteristic in range(CHARACTERISTICS_COUNT):

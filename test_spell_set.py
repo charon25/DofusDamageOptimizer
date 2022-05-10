@@ -186,6 +186,57 @@ class TestSpellSet(unittest.TestCase):
         self.assertEqual(len(spell_list_too_close), 0)
         self.assertEqual(len(spell_list_too_far), 0)
 
+    def test_spell_list_single_target_position_line(self):
+        spell_set = SpellSet()
+        spell1 = Spell()
+        spell1.set_uses_per_target(2)
+        spell1.set_pa(4)
+        spell1.set_position('line')
+
+        spell_set.add_spell(spell1)
+
+        spell_list_line = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='line'))
+        spell_list_diag = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='diag'))
+        spell_list_none = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='none'))
+
+        self.assertEqual(len(spell_list_line), 1)
+        self.assertEqual(len(spell_list_diag), 0)
+        self.assertEqual(len(spell_list_none), 0)
+
+    def test_spell_list_single_target_position_diag(self):
+        spell_set = SpellSet()
+        spell1 = Spell()
+        spell1.set_uses_per_target(2)
+        spell1.set_pa(4)
+        spell1.set_position('diag')
+
+        spell_set.add_spell(spell1)
+
+        spell_list_line = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='line'))
+        spell_list_diag = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='diag'))
+        spell_list_none = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='none'))
+
+        self.assertEqual(len(spell_list_line), 0)
+        self.assertEqual(len(spell_list_diag), 1)
+        self.assertEqual(len(spell_list_none), 0)
+
+    def test_spell_list_single_target_position_all(self):
+        spell_set = SpellSet()
+        spell1 = Spell()
+        spell1.set_uses_per_target(2)
+        spell1.set_pa(4)
+        spell1.set_position('all')
+
+        spell_set.add_spell(spell1)
+
+        spell_list_line = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='line'))
+        spell_list_diag = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='diag'))
+        spell_list_none = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='none'))
+
+        self.assertEqual(len(spell_list_line), 1)
+        self.assertEqual(len(spell_list_diag), 1)
+        self.assertEqual(len(spell_list_none), 1)
+
 
 if __name__ == '__main__':
     unittest.main()

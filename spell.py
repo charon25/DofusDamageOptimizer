@@ -2,7 +2,7 @@ from dataclasses import dataclass, field, replace
 import json
 import os
 import re
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Literal, Set, Tuple
 from uuid import uuid1
 
 from characteristics_damages import *
@@ -50,6 +50,7 @@ class SpellParameters:
     uses_per_turn: int = -1
     is_weapon: bool = False
     po: Tuple[int, int] = field(default_factory=lambda: (0, 1024))
+    position: Literal['all', 'line', 'diag'] = 'all'
 
 
     def get_max_uses_single_target(self, max_used_pa: int) -> int:
@@ -311,8 +312,10 @@ class Spell():
         return self.parameters.get_max_uses_multiple_targets(max_used_pa)
 
 
-    def can_reach_po(self, min_po, max_po):
-        return not (self.get_min_po() > max_po or self.get_max_po() < min_po)
+    def can_reach(self, min_po: int, max_po: int, position: str):
+        can_reach_po = not (self.get_min_po() > max_po or self.get_max_po() < min_po)
+        can_reach_position = (self.parameters.position == 'all') or (self.parameters.position == position)
+        return can_reach_po and can_reach_position
 
 
     def to_dict(self):
@@ -327,6 +330,7 @@ class Spell():
             'name': self.name,
             'short_name': self.short_name,
             'po': list(self.parameters.po),
+            'position': self.parameters.position,
             'buffs': [buff.to_dict() for buff in self.buffs]
         }
 
@@ -462,6 +466,13 @@ class Spell():
         self.parameters.po = (min_po, max_po)
 
 
+    def set_position(self, position: str):
+        if not position in ('all', 'line', 'diag'):
+            raise ValueError(f"position is not one of 'all', 'line' or 'diag' ('{position}' given instead).")
+
+        self.parameters.position = position
+
+
     def get_name(self):
         return self.name
 
@@ -488,7 +499,7 @@ class Spell():
 
     @classmethod
     def check_json_validity(cls, json_data):
-        for field in ('base_damages', 'damaging_characteristics', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_weapon', 'name', 'short_name', 'po', 'buffs'):
+        for field in ('base_damages', 'damaging_characteristics', 'pa', 'crit_chance', 'uses_per_target', 'uses_per_turn', 'is_weapon', 'name', 'short_name', 'po', 'position', 'buffs'):
             if not field in json_data:
                 raise KeyError(f"JSON string does not contain a '{field}' field (Spell.check_json_validity).")
 
@@ -513,6 +524,7 @@ class Spell():
         spell.set_name(json_data['name'])
         spell.set_short_name(json_data['short_name'])
         spell.set_po(min_po=json_data['po'][0], max_po=json_data['po'][1])
+        spell.set_position(json_data['position'])
         for buff in json_data['buffs']:
             spell.add_buff(SpellBuff.from_dict(buff))
 
