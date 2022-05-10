@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+import json
 from math import perm
 from typing import Dict, List, Set, Tuple
 
@@ -17,6 +18,17 @@ class ComputationData:
     stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
     parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
     states: Set[str] = field(default_factory=lambda: set())
+
+    def to_dict(self):
+        return {
+            'permutation': list(self.permutation),
+            'already_computed_count': self.already_computed_count,
+            'damages': self.damages,
+            'average_damages': self.average_damages,
+            'stats': {spell: stats.to_dict() for spell, stats in self.stats.items()},
+            'parameters': {spell: parameters.to_string() for spell, parameters in self.parameters.items()},
+            'states': list(self.states)
+        }
 
 
 class SpellChains:
@@ -112,10 +124,16 @@ class SpellChains:
         return computation_data
 
 
-    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters) -> Dict[Tuple[str], Dict[str, int]]:
+    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters, cache: Dict[int, ComputationData] = None) -> Dict[Tuple[str], Dict[str, int]]:
+        if cache is None:
+            cache = {}
+
         permutations = self._get_permutations(parameters)
         previous_computation_data: Dict[int, ComputationData] = {}
-        
+
+        stats_hash = hash(stats)
+        parameters_hash = hash(parameters)
+
         # If the same spell can be used multiple times, there may be multiple "identical" permutations as they do not have the same index
         # Example, if self.spells = ["s1", "s2", "s2"] (and there are enough AP), the permutations will have both [0, 1, 2] and [0, 2, 1] which are really the same
         # So we remove them based on the spells short names
@@ -126,20 +144,53 @@ class SpellChains:
                 previous_computation_data[len(permutation)] = None
 
         # The permutations is then once again transformed into indices
-        unique_permutations = [tuple(self.indexes[short_name] for short_name in permutation) for permutation in sorted(unique_permutations)]
+        unique_permutations_indexes = [tuple(self.indexes[short_name] for short_name in permutation) for permutation in sorted(unique_permutations)]
+        unique_permutations_short_names = [tuple(short_name for short_name in permutation) for permutation in sorted(unique_permutations)]
 
         damages = dict()
-        for index, permutation in enumerate(unique_permutations):
+        for index, permutation in enumerate(unique_permutations_indexes):
             permutation_length = len(permutation)
             if permutation_length == 0:
                 continue
+
+            permutation_hash = hash((stats_hash, parameters_hash, unique_permutations_short_names[index]))
 
             previous_data = previous_computation_data[permutation_length - 1] if permutation_length > 1 else None
 
             computation_data = self._get_detailed_damages_of_permutation(permutation, stats, parameters, previous_data=previous_data)
             damages[index] = (computation_data.average_damages, computation_data.damages.copy())
             previous_computation_data[len(permutation)] = computation_data
+            cache[permutation_hash] = computation_data
 
-        damages = {tuple(self.spells[index].short_name for index in unique_permutations[key]): value for key, value in sorted(damages.items(), key=lambda key_value: key_value[1][0], reverse=True)}
+        damages = {tuple(self.spells[index].short_name for index in unique_permutations_indexes[key]): value for key, value in sorted(damages.items(), key=lambda key_value: key_value[1][0], reverse=True)}
 
         return damages
+
+
+if __name__ == '__main__':
+    filenames = ['profiling_spells\\1pa.json', 'profiling_spells\\1pa_.json', 'profiling_spells\\2pa.json', 'profiling_spells\\2pa__.json', 'profiling_spells\\2pa_.json', 'profiling_spells\\2pa___.json', 'profiling_spells\\3pa.json']
+    spells = [Spell.from_file(filename) for filename in filenames]
+
+    spell_set = SpellSet()
+    for spell in spells:
+        spell_set.add_spell(spell)
+    
+    stats = Stats()
+    parameters = DamageParameters.from_string('-pa 9')
+    spell_list = spell_set.get_spell_list_single_target(parameters)
+
+    spell_chain = SpellChains()
+    for spell in spell_list:
+        spell_chain.add_spell(spell)
+
+    cache: Dict[int, ComputationData] = {}
+
+    dmg = spell_chain.get_detailed_damages(stats, parameters, cache)
+
+    with open('cache.txt', 'w') as fo:
+        fo.write('\n'.join(f'{h}:{json.dumps(cache[h].to_dict())}' for h in cache))
+
+    # for k, c in enumerate(dmg):
+    #     print(c, dmg[c])
+    #     if k > 5:
+    #         break
