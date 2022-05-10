@@ -1,7 +1,7 @@
 import unittest
 
 from characteristics_damages import *
-from damages import compute_damage
+from damages import compute_one_damage
 from damage_parameters import DamageParameters
 from stats import Stats
 
@@ -12,10 +12,10 @@ class TestDamages(unittest.TestCase):
         stats = Stats()
         parameters = DamageParameters()
 
-        damage_spell_no_crit = compute_damage(10, stats, AGILITY, is_weapon=False, is_crit=False, parameters=parameters)
-        damage_weapon_no_crit = compute_damage(10, stats, AGILITY, is_weapon=True, is_crit=False, parameters=parameters)
-        damage_spell_crit = compute_damage(10, stats, AGILITY, is_weapon=False, is_crit=True, parameters=parameters)
-        damage_weapon_crit = compute_damage(10, stats, AGILITY, is_weapon=True, is_crit=True, parameters=parameters)
+        damage_spell_no_crit = compute_one_damage(10, stats, AGILITY, is_weapon=False, is_crit=False, parameters=parameters)
+        damage_weapon_no_crit = compute_one_damage(10, stats, AGILITY, is_weapon=True, is_crit=False, parameters=parameters)
+        damage_spell_crit = compute_one_damage(10, stats, AGILITY, is_weapon=False, is_crit=True, parameters=parameters)
+        damage_weapon_crit = compute_one_damage(10, stats, AGILITY, is_weapon=True, is_crit=True, parameters=parameters)
 
         self.assertEqual(damage_spell_no_crit, 10)
         self.assertEqual(damage_weapon_no_crit, 10)
@@ -27,11 +27,11 @@ class TestDamages(unittest.TestCase):
         parameters = DamageParameters()
 
         parameters.resistances = [0, 0, 0, 0, 50]
-        damage_spell_50_res = compute_damage(10, stats, AGILITY, is_weapon=False, is_crit=False, parameters=parameters)
+        damage_spell_50_res = compute_one_damage(10, stats, AGILITY, is_weapon=False, is_crit=False, parameters=parameters)
         parameters.resistances = [0, 0, 0, 0, 200]
-        damage_spell_150_res = compute_damage(10, stats, AGILITY, is_weapon=False, is_crit=False, parameters=parameters)
+        damage_spell_150_res = compute_one_damage(10, stats, AGILITY, is_weapon=False, is_crit=False, parameters=parameters)
         parameters.resistances = [0, 0, 0, 0, -200]
-        damage_spell_minus_200_res = compute_damage(10, stats, AGILITY, is_weapon=False, is_crit=False, parameters=parameters)
+        damage_spell_minus_200_res = compute_one_damage(10, stats, AGILITY, is_weapon=False, is_crit=False, parameters=parameters)
 
         self.assertEqual(damage_spell_50_res, 5)
         self.assertEqual(damage_spell_150_res, 0)
@@ -42,12 +42,12 @@ class TestDamages(unittest.TestCase):
         parameters = DamageParameters()
 
         stats.set_characteristic(AGILITY, 100)
-        damage = compute_damage(10, stats, AGILITY, is_weapon=False, parameters=parameters) # 10 * (1 + 100 / 100)
+        damage = compute_one_damage(10, stats, AGILITY, is_weapon=False, parameters=parameters) # 10 * (1 + 100 / 100)
 
         stats.set_damage(POWER, 50)
-        damage2 = compute_damage(10, stats, AGILITY, is_weapon=False, parameters=parameters) # 10 * (1 + (100 + 50) / 100)
+        damage2 = compute_one_damage(10, stats, AGILITY, is_weapon=False, parameters=parameters) # 10 * (1 + (100 + 50) / 100)
 
-        damage3 = compute_damage(10, stats, INTELLIGENCE, is_weapon=False, parameters=parameters) # 10 * (1 + 50 / 100)
+        damage3 = compute_one_damage(10, stats, INTELLIGENCE, is_weapon=False, parameters=parameters) # 10 * (1 + 50 / 100)
 
         self.assertEqual(damage, 20)
         self.assertEqual(damage2, 25)
@@ -58,12 +58,12 @@ class TestDamages(unittest.TestCase):
         parameters = DamageParameters()
 
         stats.set_damage(BASIC, 12)
-        damage = compute_damage(10, stats, STRENGTH, is_weapon=False, parameters=parameters) # 10 + 12
+        damage = compute_one_damage(10, stats, STRENGTH, is_weapon=False, parameters=parameters) # 10 + 12
 
         stats.set_damage(EARTH, 7)
-        damage2 = compute_damage(10, stats, STRENGTH, is_weapon=False, parameters=parameters) # 10 + 12 + 7
+        damage2 = compute_one_damage(10, stats, STRENGTH, is_weapon=False, parameters=parameters) # 10 + 12 + 7
 
-        damage3 = compute_damage(10, stats, INTELLIGENCE, is_weapon=False, parameters=parameters) # 10 + 12
+        damage3 = compute_one_damage(10, stats, INTELLIGENCE, is_weapon=False, parameters=parameters) # 10 + 12
 
         self.assertEqual(damage, 22)
         self.assertEqual(damage2, 29)
@@ -76,7 +76,7 @@ class TestDamages(unittest.TestCase):
         stats.set_characteristic(LUCK, 200)
         stats.set_damage(BASIC, 23)
 
-        damage = compute_damage(10, stats, LUCK, is_weapon=False, parameters=parameters) # 10 * (1 + 200 / 100) + 23
+        damage = compute_one_damage(10, stats, LUCK, is_weapon=False, parameters=parameters) # 10 * (1 + 200 / 100) + 23
 
         self.assertEqual(damage, 53)
 
@@ -86,8 +86,8 @@ class TestDamages(unittest.TestCase):
 
         stats.set_damage(CRIT, 30)
 
-        damage_no_crit = compute_damage(10, stats, LUCK, is_weapon=False, is_crit=False, parameters=parameters) # 10
-        damage_crit = compute_damage(10, stats, LUCK, is_weapon=False, is_crit=True, parameters=parameters) # 10 + 30
+        damage_no_crit = compute_one_damage(10, stats, LUCK, is_weapon=False, is_crit=False, parameters=parameters) # 10
+        damage_crit = compute_one_damage(10, stats, LUCK, is_weapon=False, is_crit=True, parameters=parameters) # 10 + 30
 
         self.assertEqual(damage_no_crit, 10)
         self.assertEqual(damage_crit, 40)
@@ -97,12 +97,12 @@ class TestDamages(unittest.TestCase):
         parameters = DamageParameters()
 
         stats.set_damage(WEAPON_POWER, 300)
-        damage_spell = compute_damage(10, stats, STRENGTH, is_weapon=False, parameters=parameters) # 10
-        damage_weapon = compute_damage(10, stats, STRENGTH, is_weapon=True, parameters=parameters) # 10 * (1 + 300 / 100)
+        damage_spell = compute_one_damage(10, stats, STRENGTH, is_weapon=False, parameters=parameters) # 10
+        damage_weapon = compute_one_damage(10, stats, STRENGTH, is_weapon=True, parameters=parameters) # 10 * (1 + 300 / 100)
 
         stats.set_characteristic(STRENGTH, 50)
-        damage_spell_with_characteristic = compute_damage(10, stats, STRENGTH, is_weapon=False, parameters=parameters) # 10 * (1 + 50 / 100)
-        damage_weapon_with_characteristic = compute_damage(10, stats, STRENGTH, is_weapon=True, parameters=parameters) # 10 * (1 + (50 + 300) / 100)
+        damage_spell_with_characteristic = compute_one_damage(10, stats, STRENGTH, is_weapon=False, parameters=parameters) # 10 * (1 + 50 / 100)
+        damage_weapon_with_characteristic = compute_one_damage(10, stats, STRENGTH, is_weapon=True, parameters=parameters) # 10 * (1 + (50 + 300) / 100)
 
         self.assertEqual(damage_spell, 10)
         self.assertEqual(damage_weapon, 40)
@@ -115,12 +115,12 @@ class TestDamages(unittest.TestCase):
 
         stats.set_damage(SPELL, 10)
         stats.set_damage(WEAPON, 30)
-        damage_spell = compute_damage(10, stats, INTELLIGENCE, is_weapon=False, parameters=parameters) # 10 * (1 + 10 / 100)
-        damage_weapon = compute_damage(10, stats, INTELLIGENCE, is_weapon=True, parameters=parameters) # 10 * (1 + 30 / 100)
+        damage_spell = compute_one_damage(10, stats, INTELLIGENCE, is_weapon=False, parameters=parameters) # 10 * (1 + 10 / 100)
+        damage_weapon = compute_one_damage(10, stats, INTELLIGENCE, is_weapon=True, parameters=parameters) # 10 * (1 + 30 / 100)
 
         stats.set_damage(FINAL, 14)
-        damage_spell_with_final = compute_damage(10, stats, INTELLIGENCE, is_weapon=False, parameters=parameters) # 10 * (1 + (10 + 14) / 100)
-        damage_weapon_with_final = compute_damage(10, stats, INTELLIGENCE, is_weapon=True, parameters=parameters) # 10 * (1 + (30 + 14) / 100)
+        damage_spell_with_final = compute_one_damage(10, stats, INTELLIGENCE, is_weapon=False, parameters=parameters) # 10 * (1 + (10 + 14) / 100)
+        damage_weapon_with_final = compute_one_damage(10, stats, INTELLIGENCE, is_weapon=True, parameters=parameters) # 10 * (1 + (30 + 14) / 100)
 
         self.assertEqual(damage_spell_with_final, 12)
         self.assertEqual(damage_weapon_with_final, 14)
@@ -140,10 +140,10 @@ class TestDamages(unittest.TestCase):
         stats.set_damage(CRIT, 10)
         stats.set_damage(FINAL, 45)
 
-        damage_spell_no_crit = compute_damage(20, stats, AGILITY, is_weapon=False, is_crit=False, parameters=parameters)
-        damage_weapon_no_crit = compute_damage(20, stats, AGILITY, is_weapon=True, is_crit=False, parameters=parameters)
-        damage_spell_crit = compute_damage(20, stats, AGILITY, is_weapon=False, is_crit=True, parameters=parameters)
-        damage_weapon_crit = compute_damage(20, stats, AGILITY, is_weapon=True, is_crit=True, parameters=parameters)
+        damage_spell_no_crit = compute_one_damage(20, stats, AGILITY, is_weapon=False, is_crit=False, parameters=parameters)
+        damage_weapon_no_crit = compute_one_damage(20, stats, AGILITY, is_weapon=True, is_crit=False, parameters=parameters)
+        damage_spell_crit = compute_one_damage(20, stats, AGILITY, is_weapon=False, is_crit=True, parameters=parameters)
+        damage_weapon_crit = compute_one_damage(20, stats, AGILITY, is_weapon=True, is_crit=True, parameters=parameters)
 
         self.assertEqual(damage_spell_no_crit, 198)
         self.assertEqual(damage_weapon_no_crit, 255)
@@ -177,7 +177,7 @@ class TestDamages(unittest.TestCase):
         base_damages = [20, 22, 23, 25]
         is_crit = [False, False, True, True]
 
-        damages = [compute_damage(base_damages[i], stats, AGILITY, is_weapon=False, is_crit=is_crit[i], parameters=parameters) for i in range(4)]
+        damages = [compute_one_damage(base_damages[i], stats, AGILITY, is_weapon=False, is_crit=is_crit[i], parameters=parameters) for i in range(4)]
 
         self.assertListEqual(damages, [284, 306, 316, 338])
 
@@ -188,7 +188,7 @@ class TestDamages(unittest.TestCase):
         base_damages = [32, 35, 36, 39]
         is_crit = [False, False, True, True]
 
-        damages = [compute_damage(base_damages[i], stats, AGILITY, is_weapon=False, is_crit=is_crit[i], parameters=parameters) for i in range(4)]
+        damages = [compute_one_damage(base_damages[i], stats, AGILITY, is_weapon=False, is_crit=is_crit[i], parameters=parameters) for i in range(4)]
 
         self.assertListEqual(damages, [413, 445, 455, 487])
 
@@ -201,8 +201,8 @@ class TestDamages(unittest.TestCase):
         is_crit = [False, False, True, True]
 
         damages = [
-            compute_damage(base_damages_air[i], stats, AGILITY, is_weapon=False, is_crit=is_crit[i], parameters=parameters)
-            + compute_damage(base_damages_fire[i], stats, INTELLIGENCE, is_weapon=False, is_crit=is_crit[i], parameters=parameters)
+            compute_one_damage(base_damages_air[i], stats, AGILITY, is_weapon=False, is_crit=is_crit[i], parameters=parameters)
+            + compute_one_damage(base_damages_fire[i], stats, INTELLIGENCE, is_weapon=False, is_crit=is_crit[i], parameters=parameters)
             for i in range(4)
         ]
 
@@ -217,10 +217,10 @@ class TestDamages(unittest.TestCase):
         is_crit = [False, False, True, True]
 
         damages = [
-              compute_damage(base_damages[i], stats, AGILITY, is_weapon=True, is_crit=is_crit[i], parameters=parameters)
-            + compute_damage(base_damages[i], stats, INTELLIGENCE, is_weapon=True, is_crit=is_crit[i], parameters=parameters)
-            + compute_damage(base_damages[i], stats, LUCK, is_weapon=True, is_crit=is_crit[i], parameters=parameters)
-            + compute_damage(base_damages[i], stats, NEUTRAL, is_weapon=True, is_crit=is_crit[i], parameters=parameters)
+              compute_one_damage(base_damages[i], stats, AGILITY, is_weapon=True, is_crit=is_crit[i], parameters=parameters)
+            + compute_one_damage(base_damages[i], stats, INTELLIGENCE, is_weapon=True, is_crit=is_crit[i], parameters=parameters)
+            + compute_one_damage(base_damages[i], stats, LUCK, is_weapon=True, is_crit=is_crit[i], parameters=parameters)
+            + compute_one_damage(base_damages[i], stats, NEUTRAL, is_weapon=True, is_crit=is_crit[i], parameters=parameters)
             for i in range(4)
         ]
 
@@ -234,10 +234,10 @@ class TestDamages(unittest.TestCase):
         is_crit = [False, False, True, True]
 
         stats.set_damage(SPELL, 0)
-        damages_no_bonus_spell_damages = [compute_damage(base_damages[i], stats, AGILITY, is_weapon=False, is_crit=is_crit[i], parameters=parameters) for i in range(4)]
+        damages_no_bonus_spell_damages = [compute_one_damage(base_damages[i], stats, AGILITY, is_weapon=False, is_crit=is_crit[i], parameters=parameters) for i in range(4)]
 
         stats.set_damage(SPELL, 7)
-        damages_bonus_spell_damages = [compute_damage(base_damages[i], stats, AGILITY, is_weapon=False, is_crit=is_crit[i], parameters=parameters) for i in range(4)]
+        damages_bonus_spell_damages = [compute_one_damage(base_damages[i], stats, AGILITY, is_weapon=False, is_crit=is_crit[i], parameters=parameters) for i in range(4)]
 
         self.assertListEqual(damages_no_bonus_spell_damages, [446, 536, 556, 556])
         self.assertListEqual(damages_bonus_spell_damages, [477, 573, 594, 594])
