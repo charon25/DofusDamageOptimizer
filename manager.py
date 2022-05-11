@@ -942,19 +942,18 @@ class Manager:
                 return
 
             spell_set_short_name = args[1]
-            spell_short_name = args[2]
-
-            if spell_set_short_name in self.spell_sets and spell_short_name in self.spells:
-                spell_set = self.spell_sets[spell_set_short_name]
-                spell = self.spells[spell_short_name]
-                if not spell in spell_set:
-                    spell_set.add_spell(spell)
-                    self.save(False)
-                    self.print(0, f"Spell '{spell_short_name}' successfully added to spell set '{spell_set_short_name}'!")
+            for spell_short_name in args[2:]:
+                if spell_set_short_name in self.spell_sets and spell_short_name in self.spells:
+                    spell_set = self.spell_sets[spell_set_short_name]
+                    spell = self.spells[spell_short_name]
+                    if not spell in spell_set:
+                        spell_set.add_spell(spell)
+                        self.save(False)
+                        self.print(0, f"Spell '{spell_short_name}' successfully added to spell set '{spell_set_short_name}'!")
+                    else:
+                        self.print(1, f"Spell '{spell_short_name}' already in spell set '{spell_set_short_name}'!")
                 else:
-                    self.print(1, f"Spell '{spell_short_name}' already in spell set '{spell_set_short_name}'!")
-            else:
-                self.print(1, f"Spell set '{spell_set_short_name}' or spell '{spell_short_name}' do not exist.")
+                    self.print(1, f"Spell set '{spell_set_short_name}' or spell '{spell_short_name}' do not exist.")
 
         elif command_action == 'del':
             if len(args) < 3:

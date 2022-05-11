@@ -8,7 +8,7 @@ It runs on a Python 3 console (developed on 3.9.10, probably work for older vers
 
 ## TODO
 
-Mauvaise optimisation knapsack
+Mauvaise optimisation knapsack (?)
 
 augmentation des dégâts buff avec min max critmin critmax
 
@@ -67,7 +67,7 @@ Every `param` can be replaced with only `p`.
 
  - `ss new <name>` : creates a new spell set
  - `ss rm <name> ` : deletes a spell set
- - `ss add <spell_set_name> <spell_name>` : add the specified spell to the spell set
+ - `ss add <spell_set_name> <spell_name> [<spell_name> ...]` : add the specified spell(s) to the spell set
  - `ss del <spell_set_name> <spell_name>` : remove the specified spell from the spell set
  - `ss ls` : lists all the currently available spell sets
  - `ss show <name>` : shows more details on the specified spell set
