@@ -9,7 +9,7 @@ def compute_one_damage(base_damage, stats: Stats, characteristic: int, parameter
     return compute_damages(base_damages_dict, stats, characteristic, parameters, is_weapon)[0 if not is_crit else 2]
 
 
-def compute_damages(base_damages, stats: Stats, characteristic: int, parameters: DamageParameters, is_weapon) -> Tuple[int, int, int, int]:
+def compute_damages(base_damages, stats: Stats, characteristic: int, parameters: DamageParameters, is_weapon: bool = False) -> Tuple[int, int, int, int]:
     additional_base_damages = parameters.base_damages[characteristic + 1 if characteristic != 4 else 0]
 
     power = stats.damages[POWER]

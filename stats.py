@@ -92,8 +92,7 @@ class Stats:
 
         result = Stats()
         for characteristic in range(CHARACTERISTICS_COUNT):
-            if characteristic != NEUTRAL:
-                result.characteristics[characteristic] = self.characteristics[characteristic] + other.characteristics[characteristic]
+            result.characteristics[characteristic] = self.characteristics[characteristic] + other.characteristics[characteristic]
 
         for damage in range(DAMAGES_COUNT):
             result.damages[damage] = self.damages[damage] + other.damages[damage]

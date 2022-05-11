@@ -44,8 +44,8 @@ DAMAGES_NAMES = [
     "NEUTRAL",
     "SPELL",
     "WEAPON",
-    "WEAPON_POWER ",
-    "RANGE ",
-    "MELEE ",
-    "FINAL "
+    "WEAPON_POWER",
+    "RANGE",
+    "MELEE",
+    "FINAL"
 ]
