@@ -1013,7 +1013,7 @@ class Manager:
 
             best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
 
-            self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type}) is: {int(max_damage):.0f}\n")
+            self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type}) is: {max_damage:.0f}\n")
             self.print(0, 'Using: ')
             for spell in best_spells:
                 self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(total_stats, damages_parameters)):.0f} dmg)")
@@ -1024,12 +1024,23 @@ class Manager:
 
             damages = spell_chain.get_detailed_damages(total_stats, damages_parameters)
 
-            for k, c in enumerate(damages):
-                if k > 3:
-                    break
-                print(c, damages[c])
-            
-            print(len(damages))
+            better_combination = next(iter(damages))
+            average_damages, detailed_damages = damages[better_combination]
+            self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type}) is:\n")
+            self.print(0, f" => {average_damages:.0f} dmg : {detailed_damages['min']} - {detailed_damages['max']} ({detailed_damages['crit_min']} - {detailed_damages['crit_max']})\n")
+            self.print(0, 'Using, in this order: ')
+            for spell_short_name in better_combination:
+                spell = self.spells[spell_short_name]
+                self.print(0, f" - {spell.get_name()}")
+
+            same_damages_combinations = []
+            for combination in damages:
+                if damages[combination][0] == average_damages:
+                    same_damages_combinations.append(combination)
+
+            self.print(0, f"\n{len(damages)} possible combinations, {len(same_damages_combinations)} with the same damages, including: ")
+            for combination in same_damages_combinations[:3]:
+                self.print(0, f" - {', '.join(self.spells[spell_short_name].get_name() for spell_short_name in combination)}")
 
 
     def _execute_damages_combination_command(self, args: List[str]):
@@ -1066,7 +1077,8 @@ class Manager:
         permutation = list(range(len(spell_list)))  # Permutation of all specified spells in the specified order
         computation_data = spell_chain._get_detailed_damages_of_permutation(permutation, total_stats, damages_parameters)
 
-        print(computation_data.damages, computation_data.average_damages)
+        self.print(0, f"Damages of the given combination (parameters : '{self.default_parameters}') is:\n")
+        self.print(0, f" => {computation_data.average_damages:.0f} dmg : {computation_data.damages['min']} - {computation_data.damages['max']} ({computation_data.damages['crit_min']} - {computation_data.damages['crit_max']})")
 
 
     def execute_command(self, command: str):

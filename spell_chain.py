@@ -112,7 +112,7 @@ class SpellChains:
         return computation_data
 
 
-    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters) -> Dict[Tuple[str], Dict[str, int]]:
+    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters) -> Dict[Tuple[str], Tuple[float, Dict[str, int]]]:
         permutations = self._get_permutations(parameters)
         previous_computation_data: Dict[int, ComputationData] = {}
         
