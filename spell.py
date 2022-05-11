@@ -326,7 +326,7 @@ class Spell():
 
     def can_reach(self, min_po: int, max_po: int, position: str):
         can_reach_po = not (self.get_min_po() > max_po or self.get_max_po() < min_po)
-        can_reach_position = (self.parameters.position == 'all') or (self.parameters.position == position)
+        can_reach_position = (self.parameters.position == 'all') or (position == 'unspecified') or (self.parameters.position == position)
         return can_reach_po and can_reach_position
 
 
@@ -507,6 +507,9 @@ class Spell():
 
         self.short_name = str(short_name)
 
+
+    def __repr__(self) -> str:
+        return f"Spell '{self.short_name}'"
 
 
     @classmethod

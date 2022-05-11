@@ -948,12 +948,13 @@ class Manager:
                     spell = self.spells[spell_short_name]
                     if not spell in spell_set:
                         spell_set.add_spell(spell)
-                        self.save(False)
                         self.print(0, f"Spell '{spell_short_name}' successfully added to spell set '{spell_set_short_name}'!")
                     else:
                         self.print(1, f"Spell '{spell_short_name}' already in spell set '{spell_set_short_name}'!")
                 else:
                     self.print(1, f"Spell set '{spell_set_short_name}' or spell '{spell_short_name}' do not exist.")
+
+            self.save(False)
 
         elif command_action == 'del':
             if len(args) < 3:
@@ -1013,7 +1014,7 @@ class Manager:
 
             best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
 
-            self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type}) is: {max_damage:.0f}\n")
+            self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type} ; position = {damages_parameters.position}) is: {max_damage:.0f}\n")
             self.print(0, 'Using: ')
             for spell in best_spells:
                 self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(total_stats, damages_parameters)):.0f} dmg)")
@@ -1024,18 +1025,18 @@ class Manager:
 
             damages = spell_chain.get_detailed_damages(total_stats, damages_parameters)
 
-            better_combination = next(iter(damages))
-            average_damages, detailed_damages = damages[better_combination]
-            self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type}) is:\n")
+            best_combination = next(iter(damages))
+            average_damages, detailed_damages = damages[best_combination]
+            self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type} ; position = {damages_parameters.position}) is:\n")
             self.print(0, f" => {average_damages:.0f} dmg : {detailed_damages['min']} - {detailed_damages['max']} ({detailed_damages['crit_min']} - {detailed_damages['crit_max']})\n")
             self.print(0, 'Using, in this order: ')
-            for spell_short_name in better_combination:
+            for spell_short_name in best_combination:
                 spell = self.spells[spell_short_name]
                 self.print(0, f" - {spell.get_name()}")
 
             same_damages_combinations = []
             for combination in damages:
-                if damages[combination][0] == average_damages:
+                if combination != best_combination and damages[combination][0] == average_damages:
                     same_damages_combinations.append(combination)
 
             self.print(0, f"\n{len(damages)} possible combinations, {len(same_damages_combinations)} with the same damages, including: ")
@@ -1077,7 +1078,7 @@ class Manager:
         permutation = list(range(len(spell_list)))  # Permutation of all specified spells in the specified order
         computation_data = spell_chain._get_detailed_damages_of_permutation(permutation, total_stats, damages_parameters)
 
-        self.print(0, f"Damages of the given combination (parameters : '{self.default_parameters}') is:\n")
+        self.print(0, f"Damages of the given combination (parameters : '{self.default_parameters}' ; total PA : {sum(spell.get_pa() for spell in spell_list)}) is:\n")
         self.print(0, f" => {computation_data.average_damages:.0f} dmg : {computation_data.damages['min']} - {computation_data.damages['max']} ({computation_data.damages['crit_min']} - {computation_data.damages['crit_max']})")
 
 

@@ -18,7 +18,8 @@ class DamageParameters:
     vulnerability: int = 0
     base_damages: List[int] = field(default_factory=lambda: [0, 0, 0, 0, 0])
     starting_states: Set[str] = field(default_factory=lambda: set())
-    position: Literal['none', 'line', 'diag'] = 'none'
+    # 'unspecified' indicates we do not care about the position
+    position: Literal['unspecified', 'none', 'line', 'diag'] = 'unspecified'
 
 
     def get_min_po(self):
@@ -68,7 +69,7 @@ class DamageParameters:
 
 
     def to_string(self):
-        return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -name {self.full_name} -bdmg {" ".join(map(str, self.base_damages))}'
+        return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -name {self.full_name} -bdmg {" ".join(map(str, self.base_damages))} -p {self.position}'
 
     def to_compact_string(self):
         return f'-r {" ".join(map(str, self.resistances))} -v {self.vulnerability} -bdmg {" ".join(map(str, self.base_damages))}'
@@ -183,12 +184,12 @@ class DamageParameters:
 
             elif command in ('-p', '-position'):
                 if len(parameter) == 2:  # This means only the string position was supplied
-                    cls._check_parameter(parameter, 1, literals=['none', 'line', 'diag'])
+                    cls._check_parameter(parameter, 1, literals=['unspecified', 'none', 'line', 'diag'])
                     damage_parameters.position = parameter[1]
                 else:  # This means two coordinates were supplied
                     cls._check_parameter(parameter, 2, argument_type=int)
                     x, y = map(lambda x:abs(int(x)), parameter[1:3])  # Convert both coordinates to integers and take the absolute value
-                    damage_parameters.position = 'none'  # Default position
+                    damage_parameters.position = 'none'  # Default position if the coordinates are specified
                     if abs(x) == abs(y):
                         damage_parameters.position = 'diag'
                     elif x == 0 or y == 0:
