@@ -12,6 +12,57 @@ Mauvaise optimisation knapsack (?)
 
 augmentation des dégâts buff avec min max critmin critmax
 
+pas tester égalité floats
+
+dupliquer un spell set
+
+try conversion booléen
+
+mettre melee auto quand po 1
+
+refactor dataclasses
+
+progress bar ?
+
+problème :
+```
+>>> dmgc cycle maitrise stalactite tribut zoth
+Damages of the given combination (parameters : 'base' ; total PA : 11) is:
+
+ => 1874 dmg : 1421 - 1941 (1929 - 2450)
+
+>>> dmgc maitrise stalactite tribut zoth
+Damages of the given combination (parameters : 'base' ; total PA : 10) is:
+
+ => 1874 dmg : 1421 - 1941 (1929 - 2450)
+
+>>> dmgc maitrise stalactite tribut zoth -states h:a
+Damages of the given combination (parameters : 'base' ; total PA : 10) is:
+
+ => 922 dmg : 708 - 952 (951 - 1193)
+
+>>> dmgc maitrise stalactite tribut zoth -states h:e
+Damages of the given combination (parameters : 'base' ; total PA : 10) is:
+
+ => 922 dmg : 708 - 952 (951 - 1193)
+
+>>> dmgc maitrise stalactite tribut zoth -states h:f
+Damages of the given combination (parameters : 'base' ; total PA : 10) is:
+
+ => 922 dmg : 708 - 952 (951 - 1193)
+
+>>> dmgc maitrise stalactite tribut zoth -states h:
+Damages of the given combination (parameters : 'base' ; total PA : 10) is:
+
+ => 922 dmg : 708 - 952 (951 - 1193)
+
+>>> dmgc maitrise stalactite tribut zoth -states h
+Damages of the given combination (parameters : 'base' ; total PA : 10) is:
+
+ => 1874 dmg : 1421 - 1941 (1929 - 2450)
+
+>>>
+```
 
 ## General principle
 
