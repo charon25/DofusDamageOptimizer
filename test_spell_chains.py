@@ -732,6 +732,33 @@ class TestSpellChain(unittest.TestCase):
 
         self.assertDictEqual(computation_data.damages, {'min': 11, 'max': 22, 'crit_min': 33, 'crit_max': 44})
 
+    def test_forbidden_states(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.add_damaging_characteristic(AGILITY)
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        buff_spell1 = SpellBuff()
+        buff_spell1.add_new_output_state('st1')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.add_damaging_characteristic(AGILITY)
+        spell2.set_base_damages(AGILITY, {'min': 10, 'max': 20, 'crit_min': 30, 'crit_max': 40})
+        buff_spell2 = SpellBuff()
+        buff_spell2.add_forbidden_state('st1')
+        buff_spell2.set_base_damages(AGILITY, 10)
+        spell2.add_buff(buff_spell2)
+
+        stats = Stats()
+        parameters = DamageParameters()
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+
+        computation_data = chain._get_detailed_damages_of_permutation([0, 1], stats, parameters)
+
+        self.assertDictEqual(computation_data.damages, {'min': 11, 'max': 22, 'crit_min': 33, 'crit_max': 44})
 
 if __name__ == '__main__':
     unittest.main()

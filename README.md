@@ -10,8 +10,6 @@ It runs on a Python 3 console (developed on 3.9.10, probably work for older vers
 
 Mauvaise optimisation knapsack
 
-états interdits (opposés de trigger)
-
 augmentation des dégâts buff avec min max critmin critmax
 
 

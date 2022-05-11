@@ -68,6 +68,7 @@ class SpellParameters:
 @dataclass
 class SpellBuff:
     trigger_states: Set[str] = field(default_factory=lambda: set())
+    forbidden_states: Set[str] = field(default_factory=lambda: set())
     base_damages: List[int] = field(default_factory=lambda: [0 for _ in range(CHARACTERISTICS_COUNT)])
     additional_damaging_characteristics: List[int] = field(default_factory=lambda: [])
     stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
@@ -90,6 +91,15 @@ class SpellBuff:
 
     def remove_trigger_state(self, state: str):
         self.trigger_states -= {state,}
+
+    def add_forbidden_state(self, state: str):
+        self.forbidden_states.add(state)
+
+    def add_forbidden_states(self, states: Set[str]):
+        self.forbidden_states.update(states)
+
+    def remove_forbidden_state(self, state: str):
+        self.forbidden_states -= {state,}
 
     def set_base_damages(self, characteristic: int, base_damages: int):
         self.base_damages[characteristic] = base_damages
@@ -132,19 +142,22 @@ class SpellBuff:
         self.removed_output_states -= {state,}
 
     def trigger(self, states: Set[str]) -> bool:
-        return states.issuperset(self.trigger_states)
+        # Operator '&' is set intersection, so the test returns true if there is no intersection between the sets
+        # It is slightly faster than .intersection
+        return states.issuperset(self.trigger_states) and not (states & self.forbidden_states)
 
 
     def to_compact_string(self, only_states=False):
         if self.is_huppermage_states:
             return f'Huppermage states : ({", ".join(sorted(self.new_output_states))})'
         else:
-            return f'({", ".join(sorted(self.trigger_states))}) -> ({", ".join(sorted((self.trigger_states - self.removed_output_states) | self.new_output_states))}){"(Stats buff)" if self.has_stats and not only_states else ""}{"(Parameters buff)" if self.has_parameters and not only_states else ""}'
+            return f'({", ".join(sorted(self.trigger_states))},{" " if self.forbidden_states else ""}{", ".join(f"!{state}" for state in sorted(self.forbidden_states))}) -> ({", ".join(sorted((self.trigger_states - self.removed_output_states) | self.new_output_states))}){"(Stats buff)" if self.has_stats and not only_states else ""}{"(Parameters buff)" if self.has_parameters and not only_states else ""}'
 
 
     def to_dict(self) -> Dict:
         return {
             'trigger_states': list(self.trigger_states),
+            'forbidden_states': list(self.forbidden_states),
             'base_damages': self.base_damages,
             'additional_damaging_characteristics': self.additional_damaging_characteristics,
             'stats': {spell: stats.to_dict() for spell, stats in self.stats.items()},
@@ -157,37 +170,36 @@ class SpellBuff:
         }
 
     @classmethod
-    def from_dict(cls, data) -> 'SpellBuff':
-        for field in ('trigger_states', 'base_damages', 'stats', 'damage_parameters', 'new_output_states', 'removed_output_states', 'is_huppermage_states', 'has_stats', 'has_parameters'):
-            if not field in data:
-                raise KeyError(f"JSON string does not contain a '{field}' field (SpellBuff.from_dict).")
-
+    def from_dict(cls, data: Dict) -> 'SpellBuff':
         spell_buff = SpellBuff()
 
-        for state in data['trigger_states']:
+        for state in data.get('trigger_states', []):
             spell_buff.add_trigger_state(state)
 
-        for characteristic in range(CHARACTERISTICS_COUNT):
-            spell_buff.set_base_damages(characteristic, data['base_damages'][characteristic])
+        for state in data.get('forbidden_states', []):
+            spell_buff.add_forbidden_state(state)
 
-        for characteristic in data['additional_damaging_characteristics']:
+        for characteristic in range(CHARACTERISTICS_COUNT):
+            spell_buff.set_base_damages(characteristic, data.get('base_damages', [0] * CHARACTERISTICS_COUNT)[characteristic])
+
+        for characteristic in data.get('additional_damaging_characteristics', []):
             spell_buff.add_additional_damaging_characteristic(characteristic)
 
-        for spell in data['stats']:
+        for spell in data.get('stats', []):
             spell_buff.add_stats(Stats.from_dict(data['stats'][spell]), spell=spell)
 
-        for spell in data['damage_parameters']:
+        for spell in data.get('damage_parameters', []):
             spell_buff.add_damage_parameters(DamageParameters.from_string(data['damage_parameters'][spell]), spell=spell)
 
-        for state in data['new_output_states']:
+        for state in data.get('new_output_states', []):
             spell_buff.add_new_output_state(state)
 
-        for state in data['removed_output_states']:
+        for state in data.get('removed_output_states', []):
             spell_buff.add_removed_output_state(state)
 
-        spell_buff.is_huppermage_states = data['is_huppermage_states']
-        spell_buff.has_stats = data['has_stats']
-        spell_buff.has_parameters = data['has_parameters']
+        spell_buff.is_huppermage_states = data.get('is_huppermage_states', False)
+        spell_buff.has_stats = data.get('has_stats', False)
+        spell_buff.has_parameters = data.get('has_parameters', False)
 
         return spell_buff
 
