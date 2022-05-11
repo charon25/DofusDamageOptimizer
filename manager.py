@@ -255,6 +255,8 @@ class Manager:
         else:
             stats = Stats.from_existing(stats)
 
+        print(stats.to_compact_string())
+
         if not no_name:
             name = input(f'Stats page name{f"({stats.get_name()})" if stats.get_name() != "" else ""}: ')
             if name:
@@ -286,6 +288,7 @@ class Manager:
         if bonus_crit_chance:
             stats.set_bonus_crit_chance(float(bonus_crit_chance) / 100.0)
 
+        print("fin:", stats.to_compact_string())
         return stats
 
     def _execute_stats_command(self, args: List[str]):
@@ -486,6 +489,10 @@ class Manager:
         for characteristic in range(CHARACTERISTICS_COUNT):
             default_damaging = (buff.base_damages[characteristic] > 0)
             damaging = input(f'{CHARACTERISTICS_NAMES[characteristic]} damaging ({int(default_damaging)}) (0/1)? ')
+
+            if damaging == '/':
+                break
+
             damaging = distutils.util.strtobool(damaging) if damaging else default_damaging
             if damaging:
                 buff.add_additional_damaging_characteristic(characteristic)
@@ -505,7 +512,7 @@ class Manager:
             spell = input(f"\nSpell name (or '__all__') to add another stats page to (ENTER to skip)? ")
             if spell:
                 try:
-                    buff.add_stats(self._create_stats(buff.stats.get(spell, None), no_name=True), spell)
+                    buff.stats[spell] = self._create_stats(buff.stats.get(spell, None), no_name=True)
                 except KeyboardInterrupt:
                     self.print(0, f"\n\nCancelled page creation for spell '{spell}'.")
             else:
@@ -571,6 +578,10 @@ class Manager:
                 spell.set_base_damages(characteristic, base_damages)
                 default_damaging = (characteristic in spell.parameters.damaging_characteristics) or any(base_damages[field] > 0 for field in base_damages)
                 damaging = input(f'  - Damaging ({int(default_damaging)}) (1/0)? ')
+
+                if damaging == '/':
+                    continue
+
                 damaging = distutils.util.strtobool(damaging) if damaging else default_damaging
                 if damaging:
                     spell.add_damaging_characteristic(characteristic)
