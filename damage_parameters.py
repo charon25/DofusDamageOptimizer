@@ -202,16 +202,14 @@ class DamageParameters:
     @classmethod
     def from_existing(cls, default_parameters: 'DamageParameters'):
         # Using [::] is faster than a list comprehension
-        parameters = DamageParameters()
-
-        parameters.full_name = default_parameters.full_name
-        parameters.stats = default_parameters.stats[::]
-        parameters.pa = default_parameters.pa
-        parameters.po = default_parameters.po[::]
-        parameters.type = default_parameters.type
-        parameters.resistances = default_parameters.resistances[::]
-        parameters.distance = default_parameters.distance
-        parameters.vulnerability = default_parameters.vulnerability
-        parameters.base_damages = default_parameters.base_damages[::]
-
-        return parameters
+        return DamageParameters(
+            full_name = default_parameters.full_name,
+            stats = default_parameters.stats[::],
+            pa = default_parameters.pa,
+            po = default_parameters.po[::],
+            type = default_parameters.type,
+            resistances = default_parameters.resistances[::],
+            distance = default_parameters.distance,
+            vulnerability = default_parameters.vulnerability,
+            base_damages = default_parameters.base_damages[::]
+        )

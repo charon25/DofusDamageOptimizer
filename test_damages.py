@@ -160,7 +160,7 @@ class TestDamages(unittest.TestCase):
 
         stats.set_damage(POWER, 121)
         stats.set_damage(BASIC, 17)
-        stats.set_damage(NEUTRAL, 29)
+        stats.set_damage(D_NEUTRAL, 29)
         stats.set_damage(EARTH, 31)
         stats.set_damage(FIRE, 7)
         stats.set_damage(WATER, 7)
@@ -208,7 +208,6 @@ class TestDamages(unittest.TestCase):
 
         self.assertListEqual(damages, [429, 485, 498, 554])
 
-    # TODO : vérifier les dégâts réels de l'arme
     def test_real_value_weapon(self):
         stats = self.get_real_stats()
         parameters = DamageParameters()
