@@ -10,6 +10,11 @@ It runs on a Python 3 console (developed on 3.9.10, probably work for older vers
 
 Mauvaise optimisation knapsack
 
+états interdits (opposés de trigger)
+
+augmentation des dégâts buff avec min max critmin critmax
+
+
 ## General principle
 
 This optimizer works by creating spells, stats page, spell sets and parameters set and then picking the desired one to determine the best possible combination of spells to maximize the damages dealt.
@@ -47,6 +52,7 @@ Every `param` can be replaced with only `p`.
  - `st mod <name>` : modify a stats page (prompt the user for all the changes)
  - `st ls` : list all the currently available stats pages
  - `st show <name>` : show more details on the specified stats pages
+ - `st addfile <name>` : create a stats page from a file whose path is `stats\\{name}.json`
 
 ### Spells-related
 
@@ -57,6 +63,7 @@ Every `param` can be replaced with only `p`.
  - `sp show <name>` : show more details on the specified spell
  - `sp buffs <name>` : show every buff of the specified spell in details
  - `sp dmg|d <spell_name> [[<parameter> <value>] ...]` : compute and show the detailed damages of a spell (the parameters are described in the "Parameters" section)
+ - `sp addfile <name>` : create a spell from a file whose path is `spells\\{name}.json`
 
 ### Spell sets-related
 

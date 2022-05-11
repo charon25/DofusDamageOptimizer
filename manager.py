@@ -66,12 +66,12 @@ class Manager:
                     self.print(1, f"Could not open or read stats page '{stats_filepath}'.")
 
             # SPELLS
-            for spells_filepath in json_data['spells']:
+            for spell_filepath in json_data['spells']:
                 try:
-                    spell = Spell.from_file(spells_filepath)
+                    spell = Spell.from_file(spell_filepath)
                     self.spells[spell.get_short_name()] = spell
                 except (FileNotFoundError, KeyError, TypeError, ValueError):
-                    self.print(1, f"Could not open or read spell '{spells_filepath}'.")
+                    self.print(1, f"Could not open or read spell '{spell_filepath}'.")
 
             # SPELL SETS
             for spell_set_data in json_data['spell_sets']:
@@ -378,6 +378,31 @@ class Manager:
                 self.print(0, f"Page '{short_name}' successfully deleted!")
             else:
                 self.print(1, f"Stats page '{short_name}' does not exist.")
+
+        elif command_action == 'addfile':
+            if len(args) < 2:
+                self.print(1, 'Missing stats page name.')
+                return
+
+            stats_short_name = args[1]
+            if stats_short_name in self.spells:
+                self.print(1, f"Stats page '{stats_short_name}' already exist.")
+                return
+
+            spell_filepath = f'stats\\{stats_short_name}.json'
+            try:
+                stats = Stats.from_file(spell_filepath)
+                self.stats[stats.get_short_name()] = stats
+            except FileNotFoundError:
+                self.print(1, f"'{spell_filepath}' file does not exist.")
+                return
+            except (KeyError, TypeError, ValueError):
+                self.print(1, f"Could not read '{spell_filepath}' file : invalid stats page.")
+                return
+
+            self.save()
+            self.print(0, f"Stats page '{stats_short_name}' successfully added.")
+
         else:
             self.print(1, f"Unknown action '{command_action}' for stats commands.")
 
@@ -803,6 +828,30 @@ class Manager:
             self.print(0, '')
             self.print(0, f'Total damages:   {spell_output.damages["min"]} - {spell_output.damages["max"]} ({spell_output.damages["crit_min"]} - {spell_output.damages["crit_max"]})')
             self.print(0, f'Average damages: {spell_output.average_damage:.0f} ({spell_output.average_damage_crit:.0f}) => {average_dmg_final:.0f} with {100 * final_crit_chance:.0f} % crit chance')
+
+        elif command_action == 'addfile':
+            if len(args) < 2:
+                self.print(1, 'Missing spell name.')
+                return
+
+            spell_short_name = args[1]
+            if spell_short_name in self.spells:
+                self.print(1, f"Spell '{spell_short_name}' already exist.")
+                return
+
+            spell_filepath = f'spells\\{spell_short_name}.json'
+            try:
+                spell = Spell.from_file(spell_filepath)
+                self.spells[spell.get_short_name()] = spell
+            except FileNotFoundError:
+                self.print(1, f"'{spell_filepath}' file does not exist.")
+                return
+            except (KeyError, TypeError, ValueError):
+                self.print(1, f"Could not read '{spell_filepath}' file : invalid spell.")
+                return
+
+            self.save()
+            self.print(0, f"Spell '{spell_short_name}' successfully added.")
 
         else:
             self.print(1, f"Unknown action '{command_action}' for spell commands.")
