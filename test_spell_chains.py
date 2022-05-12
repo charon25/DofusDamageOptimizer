@@ -22,7 +22,7 @@ class TestSpellChain(unittest.TestCase):
         spell2.set_pa(2)
         chain.add_spell(spell2)
 
-        parameters = DamageParameters(pa=6)
+        parameters = DamageParameters.from_string('-pa 6')
 
         permutations = chain._get_permutations(parameters)
 
@@ -45,7 +45,7 @@ class TestSpellChain(unittest.TestCase):
         chain.add_spell(spell1)
         chain.add_spell(spell1)
 
-        parameters = DamageParameters(pa=5)
+        parameters = DamageParameters.from_string('-pa 5')
 
         permutations = chain._get_permutations(parameters)
 
@@ -68,7 +68,7 @@ class TestSpellChain(unittest.TestCase):
         spell2.set_pa(10)
         chain.add_spell(spell2)
 
-        parameters = DamageParameters(pa=5)
+        parameters = DamageParameters.from_string('-pa 5')
 
         permutations = chain._get_permutations(parameters)
 
@@ -98,7 +98,7 @@ class TestSpellChain(unittest.TestCase):
         spell4.set_pa(4)
         chain.add_spell(spell4)
 
-        parameters = DamageParameters(pa=8)
+        parameters = DamageParameters.from_string('-pa 8')
 
         permutations = chain._get_permutations(parameters)
 
@@ -301,7 +301,7 @@ class TestSpellChain(unittest.TestCase):
         buff_spell1_stats = Stats()
         buff_spell1_stats.set_characteristic(INTELLIGENCE, 100)
         buff_spell1.add_stats(buff_spell1_stats)
-        buff_spell1_parameters = DamageParameters(vulnerability=100)
+        buff_spell1_parameters = DamageParameters.from_string('-v 100')
         buff_spell1.add_damage_parameters(buff_spell1_parameters)
         spell1.add_buff(buff_spell1)
 

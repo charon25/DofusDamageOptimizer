@@ -1,25 +1,25 @@
-from dataclasses import dataclass, field
 import re
-from typing import Dict, List, Literal, Set, Union
+from typing import Dict, List, Literal, Set, Tuple, Union
 
 from characteristics_damages import *
 from stats import Stats
 
 
-@dataclass
 class DamageParameters:
-    full_name: str = ''
-    stats: List[str] = field(default_factory=lambda: [])
-    pa: int = 1
-    po: List[int] = field(default_factory=lambda: [0, 2048])
-    type: Literal['mono', 'multi', 'versa'] = 'mono'
-    resistances: List[int] = field(default_factory=lambda: [0, 0, 0, 0, 0])
-    distance: Literal['melee', 'range'] = 'range'
-    vulnerability: int = 0
-    base_damages: List[int] = field(default_factory=lambda: [0, 0, 0, 0, 0])
-    starting_states: Set[str] = field(default_factory=lambda: set())
-    # 'unspecified' indicates we do not care about the position
-    position: Literal['unspecified', 'none', 'line', 'diag'] = 'unspecified'
+
+    def __init__(self) -> None:
+        self.full_name: str = ''
+        self.stats: List[str] = []
+        self.pa: int = 1
+        self.po: Tuple[int, int] = (0, 2048)
+        self.type: Literal['mono', 'multi', 'versa'] = 'mono'
+        self.resistances: List[int] = [0, 0, 0, 0, 0]
+        self.distance: Literal['melee', 'range'] = 'range'
+        self.vulnerability: int = 0
+        self.base_damages: List[int] = [0, 0, 0, 0, 0]
+        self.starting_states: Set[str] = set()
+        # 'unspecified' indicates we do not care about the position
+        self.position: Literal['unspecified', 'none', 'line', 'diag'] = 'unspecified'
 
 
     def get_min_po(self):
@@ -145,15 +145,15 @@ class DamageParameters:
             elif command == '-po':
                 cls._check_parameter(parameter, 1, argument_type=int)
                 po = int(parameter[1])
-                damage_parameters.po = [po, po]
+                damage_parameters.po = (po, po)
 
             elif command in ('-pomin', '-minpo'):
                 cls._check_parameter(parameter, 1, argument_type=int)
-                damage_parameters.po = [int(parameter[1]), damage_parameters.get_max_po()]
+                damage_parameters.po = (int(parameter[1]), damage_parameters.get_max_po())
 
             elif command in ('-pomax', '-maxpo'):
                 cls._check_parameter(parameter, 1, argument_type=int)
-                damage_parameters.po = [damage_parameters.get_min_po(), int(parameter[1])]
+                damage_parameters.po = (damage_parameters.get_min_po(), int(parameter[1]))
 
             elif command in ('-t', '-type'):
                 cls._check_parameter(parameter, 1, literals=['mono', 'multi', 'versa'])
@@ -210,14 +210,16 @@ class DamageParameters:
     @classmethod
     def from_existing(cls, default_parameters: 'DamageParameters'):
         # Using [::] is faster than a list comprehension
-        return DamageParameters(
-            full_name = default_parameters.full_name,
-            stats = default_parameters.stats[::],
-            pa = default_parameters.pa,
-            po = default_parameters.po[::],
-            type = default_parameters.type,
-            resistances = default_parameters.resistances[::],
-            distance = default_parameters.distance,
-            vulnerability = default_parameters.vulnerability,
-            base_damages = default_parameters.base_damages[::]
-        )
+        parameters = DamageParameters()
+
+        parameters.full_name = default_parameters.full_name
+        parameters.stats = default_parameters.stats[::]
+        parameters.pa = default_parameters.pa
+        parameters.po = default_parameters.po[::]
+        parameters.type = default_parameters.type
+        parameters.resistances = default_parameters.resistances[::]
+        parameters.distance = default_parameters.distance
+        parameters.vulnerability = default_parameters.vulnerability
+        parameters.base_damages = default_parameters.base_damages[::]
+
+        return parameters

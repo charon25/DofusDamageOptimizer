@@ -128,7 +128,7 @@ class TestSpellSet(unittest.TestCase):
         spell_set.add_spell(spell1)
         spell_set.add_spell(spell2)
 
-        spell_list = spell_set.get_spell_list_single_target(DamageParameters(pa=10))
+        spell_list = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 10"))
 
         self.assertEqual(spell_list.count(spell1), 2)
         self.assertEqual(spell_list.count(spell2), 1)
@@ -146,7 +146,7 @@ class TestSpellSet(unittest.TestCase):
         spell_set.add_spell(spell1)
         spell_set.add_spell(spell2)
 
-        spell_list = spell_set.get_spell_list_multiple_targets(DamageParameters(pa=10))
+        spell_list = spell_set.get_spell_list_multiple_targets(DamageParameters.from_string("-pa 10"))
 
         self.assertEqual(spell_list.count(spell1), 2)
         self.assertEqual(spell_list.count(spell2), 1)
@@ -166,7 +166,7 @@ class TestSpellSet(unittest.TestCase):
         spell_set.add_spell(spell1)
         spell_set.add_spell(spell2)
 
-        spell_list = spell_set.get_spell_list_versatile(DamageParameters(pa=6))
+        spell_list = spell_set.get_spell_list_versatile(DamageParameters.from_string("-pa 6"))
 
         self.assertEqual(spell_list.count(spell1), 1)
         self.assertTrue(spell2 not in spell_list)
@@ -180,8 +180,8 @@ class TestSpellSet(unittest.TestCase):
 
         spell_set.add_spell(spell1)
 
-        spell_list_too_close = spell_set.get_spell_list_single_target(DamageParameters(pa=10, po=[0, 2]))
-        spell_list_too_far = spell_set.get_spell_list_single_target(DamageParameters(pa=10, po=[10, 2048]))
+        spell_list_too_close = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 10 -pomin 0 -pomax 2"))
+        spell_list_too_far = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 10 -pomin 10 -pomax 2048"))
 
         self.assertEqual(len(spell_list_too_close), 0)
         self.assertEqual(len(spell_list_too_far), 0)
@@ -195,9 +195,9 @@ class TestSpellSet(unittest.TestCase):
 
         spell_set.add_spell(spell1)
 
-        spell_list_line = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='line'))
-        spell_list_diag = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='diag'))
-        spell_list_none = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='none'))
+        spell_list_line = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 4 -p line"))
+        spell_list_diag = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 4 -p diag"))
+        spell_list_none = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 4 -p none"))
 
         self.assertEqual(len(spell_list_line), 1)
         self.assertEqual(len(spell_list_diag), 0)
@@ -212,9 +212,9 @@ class TestSpellSet(unittest.TestCase):
 
         spell_set.add_spell(spell1)
 
-        spell_list_line = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='line'))
-        spell_list_diag = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='diag'))
-        spell_list_none = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='none'))
+        spell_list_line = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 4 -p line"))
+        spell_list_diag = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 4 -p diag"))
+        spell_list_none = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 4 -p none"))
 
         self.assertEqual(len(spell_list_line), 0)
         self.assertEqual(len(spell_list_diag), 1)
@@ -229,9 +229,9 @@ class TestSpellSet(unittest.TestCase):
 
         spell_set.add_spell(spell1)
 
-        spell_list_line = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='line'))
-        spell_list_diag = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='diag'))
-        spell_list_none = spell_set.get_spell_list_single_target(DamageParameters(pa=4, position='none'))
+        spell_list_line = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 4 -p line"))
+        spell_list_diag = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 4 -p diag"))
+        spell_list_none = spell_set.get_spell_list_single_target(DamageParameters.from_string("-pa 4 -p none"))
 
         self.assertEqual(len(spell_list_line), 1)
         self.assertEqual(len(spell_list_diag), 1)

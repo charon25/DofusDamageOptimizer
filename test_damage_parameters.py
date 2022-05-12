@@ -55,7 +55,7 @@ class TestDamageParameters(unittest.TestCase):
         damage_parameters = DamageParameters.from_string(string)
 
         self.assertEqual(damage_parameters.pa, 1)
-        self.assertListEqual(damage_parameters.po, [3, 3])
+        self.assertTupleEqual(damage_parameters.po, (3, 3))
 
     def test_from_string_with_default(self):
         default_string = '-pa 1 -po 3'
@@ -66,7 +66,7 @@ class TestDamageParameters(unittest.TestCase):
         damage_parameters = DamageParameters.from_string(string, default_parameters)
 
         self.assertEqual(damage_parameters.pa, 1)
-        self.assertListEqual(damage_parameters.po, [3, 8])
+        self.assertTupleEqual(damage_parameters.po, (3, 8))
 
     def test_from_string_all_parameters(self):
         string = '-s a b c -pa 3 -pomin 1 -maxpo 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -bdmg 1 2 3 4 5'
@@ -75,14 +75,14 @@ class TestDamageParameters(unittest.TestCase):
 
         self.assertListEqual(damage_parameters.stats, ['a', 'b', 'c'])
         self.assertEqual(damage_parameters.pa, 3)
-        self.assertListEqual(damage_parameters.po, [1, 6])
+        self.assertTupleEqual(damage_parameters.po, (1, 6))
         self.assertEqual(damage_parameters.type, 'multi')
         self.assertListEqual(damage_parameters.resistances, [1, 2, 3, 4, 5])
         self.assertEqual(damage_parameters.distance, 'melee')
         self.assertEqual(damage_parameters.vulnerability, 15)
 
     def test_to_string(self):
-        string = '-s a b c -pa 3 -pomin 1 -pomax 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -name nom -bdmg 1 2 3 4 5'
+        string = '-s a b c -pa 3 -pomin 1 -pomax 6 -t multi -r 1 2 3 4 5 -d melee -v 15 -name nom -bdmg 1 2 3 4 5 -p unspecified'
 
         damage_parameters = DamageParameters.from_string(string)
 
@@ -141,7 +141,7 @@ class TestDamageParameters(unittest.TestCase):
         self.assertEqual(DamageParameters.from_string('-p diag').position, 'diag')
         self.assertEqual(DamageParameters.from_string('-p line').position, 'line')
         self.assertEqual(DamageParameters.from_string('-p none').position, 'none')
-        self.assertEqual(DamageParameters.from_string('').position, 'none')
+        self.assertEqual(DamageParameters.from_string('').position, 'unspecified')
 
         with self.assertRaises(ValueError):
             DamageParameters.from_string('-p no')
