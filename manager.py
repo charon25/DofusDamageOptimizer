@@ -995,6 +995,38 @@ class Manager:
             else:
                 self.print(1, f"Spell set '{spell_set_short_name}' or spell '{spell_short_name}' do not exist.")
 
+        elif command_action == 'copy':
+            if len(args) < 3:
+                self.print(1, 'Missing current or new spell set name.')
+                return
+
+            current_set_short_name = args[1]
+
+            if not current_set_short_name in self.spell_sets:
+                self.print(1, f"Spell set '{current_set_short_name}' does not exists.")
+                return
+            
+            current_spell_set = self.spell_sets[current_set_short_name]
+
+            new_set_short_name = args[2]
+
+            if new_set_short_name in self.spell_sets:
+                self.print(1, f"Spell set '{current_set_short_name}' already exists.")
+                return
+
+            new_spell_set = SpellSet()
+            new_spell_set.short_name = new_set_short_name
+            new_spell_set.spells = current_spell_set.spells[:]
+
+            try:
+                new_spell_set.set_name(input("Copied spell set name: ") or new_set_short_name)
+            except KeyboardInterrupt:
+                self.print(0, '\nCancelled spell set creation.')
+                return
+
+            self.spell_sets[new_set_short_name] = new_spell_set
+            self.print(0, 'Spell set successfully copied.')
+
         else:
             self.print(1, f"Unknown action '{command_action}' for spell commands.")
 

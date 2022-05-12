@@ -12,8 +12,6 @@ Mauvaise optimisation knapsack (?)
 
 augmentation des dégâts buff avec min max critmin critmax
 
-dupliquer un spell set
-
 refactor dataclasses
 
 progress bar ?
@@ -77,6 +75,7 @@ Every `param` can be replaced with only `p`.
  - `ss del <spell_set_name> <spell_name>` : remove the specified spell from the spell set
  - `ss ls` : lists all the currently available spell sets
  - `ss show <name>` : shows more details on the specified spell set
+ - `ss copy <source_name> <target_name> ` : duplicate the source spell set with the new specified name
 
 ### Damage-related
 
