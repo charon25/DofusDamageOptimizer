@@ -1,5 +1,6 @@
 import distutils.util
 import json
+import math
 import os
 import re
 from typing import Any, Callable, Dict, List
@@ -418,7 +419,7 @@ class Manager:
         if is_huppermage_states:
             try:
                 buff.is_huppermage_states = distutils.util.strtobool(is_huppermage_states)
-            except ValueError: # if the valeur cannot be converted to a boolean, do as if nothing was input
+            except ValueError:  # if the valeur cannot be converted to a boolean, do as if nothing was input
                 pass
 
         if buff.is_huppermage_states:
@@ -493,7 +494,11 @@ class Manager:
             if damaging == '/':
                 break
 
-            damaging = distutils.util.strtobool(damaging) if damaging else default_damaging
+            try:
+                damaging = distutils.util.strtobool(damaging) if damaging else default_damaging
+            except ValueError:  # if the valeur cannot be converted to a boolean, do as if False was input
+                damaging = False
+
             if damaging:
                 buff.add_additional_damaging_characteristic(characteristic)
             else:
@@ -553,7 +558,7 @@ class Manager:
         if is_weapon:
             try:
                 spell.set_weapon(distutils.util.strtobool(is_weapon))
-            except ValueError: # if the valeur cannot be converted to a boolean, do as if nothing was input
+            except ValueError:  # if the valeur cannot be converted to a boolean, do as if nothing was input
                 pass
 
         position = input(f'Spell reach ({spell.parameters.position}) (all/line/diag)? ')
@@ -582,7 +587,11 @@ class Manager:
                 if damaging == '/':
                     continue
 
-                damaging = distutils.util.strtobool(damaging) if damaging else default_damaging
+                try:
+                    damaging = distutils.util.strtobool(damaging) if damaging else default_damaging
+                except ValueError:  # if the valeur cannot be converted to a boolean, do as if False was input
+                    damaging = False
+
                 if damaging:
                     spell.add_damaging_characteristic(characteristic)
                 else:
@@ -1025,7 +1034,7 @@ class Manager:
 
             best_spells.sort(key=lambda spell:spell.get_pa(), reverse=True)
 
-            self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type} ; position = {damages_parameters.position}) is: {max_damage:.0f}\n")
+            self.print(0, f"Maximum average damages ('{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type} ; position = {damages_parameters.position} ; distance = {damages_parameters.distance}) is: {max_damage:.0f}\n")
             self.print(0, 'Using: ')
             for spell in best_spells:
                 self.print(0, f" - {spell.get_name()} ({int(spell.get_average_damages(total_stats, damages_parameters)):.0f} dmg)")
@@ -1038,7 +1047,7 @@ class Manager:
 
             best_combination = next(iter(damages))
             average_damages, detailed_damages = damages[best_combination]
-            self.print(0, f"Maximum average damages (parameters : '{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type} ; position = {damages_parameters.position}) is:\n")
+            self.print(0, f"Maximum average damages ('{self.default_parameters}' ; PA = {damages_parameters.pa} ; PO = {damages_parameters.get_min_po()} - {damages_parameters.get_max_po()} ; type = {damages_parameters.type} ; position = {damages_parameters.position} ; distance = {damages_parameters.distance}) is:\n")
             self.print(0, f" => {average_damages:.0f} dmg : {detailed_damages['min']} - {detailed_damages['max']} ({detailed_damages['crit_min']} - {detailed_damages['crit_max']})\n")
             self.print(0, 'Using, in this order: ')
             for spell_short_name in best_combination:
@@ -1047,7 +1056,7 @@ class Manager:
 
             same_damages_combinations = []
             for combination in damages:
-                if combination != best_combination and damages[combination][0] == average_damages:
+                if combination != best_combination and math.isclose(damages[combination][0], average_damages, abs_tol=1e-4):
                     same_damages_combinations.append(combination)
 
             self.print(0, f"\n{len(damages)} possible combinations, {len(same_damages_combinations)} with the same damages, including: ")

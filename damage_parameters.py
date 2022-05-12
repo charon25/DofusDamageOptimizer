@@ -196,6 +196,13 @@ class DamageParameters:
                         damage_parameters.position = 'line'
                     damage_parameters.po = [abs(x) + abs(y), abs(x) + abs(y)]
 
+        # If the specified PO is one, this means the enemy is in melee range
+        # If the minimum PO is > 1, the enemy is not in melee range
+        if damage_parameters.po == [1, 1]:
+            damage_parameters.distance = 'melee'
+        elif min(damage_parameters.po) > 1:
+            damage_parameters.distance = 'range'
+
         damage_parameters._assert_correct_parameters()
 
         return damage_parameters
