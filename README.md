@@ -4,7 +4,7 @@ This program is designed to help determine to best combinations of spells to use
 
 It can handle multiple stats pages, spells and spell sets, as well as multiple conditions for the damage computations, in order to give the most freedom possible.
 
-It runs on a Python 3 console (developed on 3.9.10, probably work for older versions) and does not require any external package. So to run it, just use `python main.py` in the python scripts folder.
+It runs on a Python 3 console (developed on 3.9.10, probably work for older versions) and does not require any external package. However, if the [tqdm](https://pypi.org/project/tqdm/) package is installed, it will be used for some progress bars. So to run it, just use `python main.py` in the python scripts folder.
 
 ## TODO
 
@@ -13,9 +13,6 @@ Mauvaise optimisation knapsack (?)
 augmentation des dégâts buff avec min max critmin critmax
 
 refactor dataclasses
-
-progress bar ?
-
 
 ## General principle
 

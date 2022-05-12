@@ -2,6 +2,11 @@ from dataclasses import dataclass, field
 from math import perm
 from typing import Dict, List, Set, Tuple
 
+try:
+    from tqdm import tqdm as progress_bar
+except ImportError:  # If the 'tqdm' module is not installed, define the progress bar as the identity function
+    def progress_bar(iterator, *args, **kwargs): return iterator
+
 from damage_parameters import DamageParameters
 from spell import Spell
 from spell_set import SpellSet
@@ -128,8 +133,10 @@ class SpellChains:
         # The permutations is then once again transformed into indices
         unique_permutations = [tuple(self.indexes[short_name] for short_name in permutation) for permutation in sorted(unique_permutations)]
 
+        permutations_iterator = progress_bar(enumerate(unique_permutations), total=len(unique_permutations), leave=False) if len(unique_permutations) > 20000 else enumerate(unique_permutations)
+
         damages = dict()
-        for index, permutation in enumerate(unique_permutations):
+        for index, permutation in permutations_iterator:
             permutation_length = len(permutation)
             if permutation_length == 0:
                 continue
