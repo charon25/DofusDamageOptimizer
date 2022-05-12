@@ -146,6 +146,7 @@ class SpellChains:
             damages[index] = (computation_data.average_damages, computation_data.damages.copy())
             previous_computation_data[len(permutation)] = computation_data
 
-        damages = {tuple(self.spells[index].short_name for index in unique_permutations[key]): value for key, value in sorted(damages.items(), key=lambda key_value: key_value[1][0], reverse=True)}
+        # Sort first by damages decreasing, then by permutation length increase
+        damages = {tuple(self.spells[index].short_name for index in unique_permutations[key]): value for key, value in sorted(damages.items(), key=lambda key_value: (key_value[1][0], -len(unique_permutations[key_value[0]])), reverse=True)}
 
         return damages
