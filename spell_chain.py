@@ -1,5 +1,3 @@
-from dataclasses import dataclass, field
-from math import perm
 from typing import Dict, List, Set, Tuple
 
 try:
@@ -13,15 +11,16 @@ from spell_set import SpellSet
 from stats import Stats
 
 
-@dataclass
 class ComputationData:
-    permutation: Tuple[str] = field(default_factory=lambda: tuple())
-    already_computed_count: int = 0
-    damages: Dict[str, int] = field(default_factory=lambda: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
-    average_damages: float = 0.0
-    stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
-    parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
-    states: Set[str] = field(default_factory=lambda: set())
+
+    def __init__(self) -> None:
+        self.permutation: Tuple[str] = ()
+        self.already_computed_count: int = 0
+        self.damages: Dict[str, int] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
+        self.average_damages: float = 0.0
+        self.stats: Dict[str, Stats] = {'__all__': Stats()}
+        self.parameters: Dict[str, DamageParameters] = {'__all__': DamageParameters()}
+        self.states: Set[str] = set()
 
 
 class SpellChains:

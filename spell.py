@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field, replace
 import json
 import os
 import re
@@ -12,15 +11,15 @@ from damage_parameters import DamageParameters
 from stats import Stats
 
 
-@dataclass
 class SpellOutput:
-    damages_by_characteristic: List[Dict[str, int]] = field(default_factory=lambda: [{'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for _ in range(CHARACTERISTICS_COUNT)])
-    damages: Dict[str, int] = field(default_factory=lambda: {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0})
-    stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
-    parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
-    states: Set[str] = field(default_factory=lambda: set())
-    average_damage: float = 0.0
-    average_damage_crit: float = 0.0
+    def __init__(self) -> None:
+        self.damages_by_characteristic: List[Dict[str, int]] = [{'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0} for _ in range(CHARACTERISTICS_COUNT)]
+        self.damages: Dict[str, int] = {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
+        self.stats: Dict[str, Stats] = {'__all__': Stats()}
+        self.parameters: Dict[str, DamageParameters] = {'__all__': DamageParameters()}
+        self.states: Set[str] = set()
+        self.average_damage: float = 0.0
+        self.average_damage_crit: float = 0.0
 
     def update_stats(self, new_stats: Dict[str, Stats]):
         for name in new_stats:
@@ -40,17 +39,17 @@ class SpellOutput:
         self.average_damage_crit = other.average_damage_crit
 
 
-@dataclass
 class SpellParameters:
-    base_damages: List[Dict[str, int]] = field(default_factory=lambda: [{} for _ in range(CHARACTERISTICS_COUNT)])
-    damaging_characteristics: List[int] = field(default_factory=lambda: [])
-    pa: int = 1
-    crit_chance: float = 0.0
-    uses_per_target: int = -1
-    uses_per_turn: int = -1
-    is_weapon: bool = False
-    po: Tuple[int, int] = field(default_factory=lambda: (0, 1024))
-    position: Literal['all', 'line', 'diag'] = 'all'
+    def __init__(self) -> None:
+        self.base_damages: List[Dict[str, int]] = [{} for _ in range(CHARACTERISTICS_COUNT)]
+        self.damaging_characteristics: List[int] = []
+        self.pa: int = 1
+        self.crit_chance: float = 0.0
+        self.uses_per_target: int = -1
+        self.uses_per_turn: int = -1
+        self.is_weapon: bool = False
+        self.po: Tuple[int, int] = (0, 1024)
+        self.position: Literal['all', 'line', 'diag'] = 'all'
 
 
     def get_max_uses_single_target(self, max_used_pa: int) -> int:
@@ -65,22 +64,23 @@ class SpellParameters:
         else:
             return min(max_used_pa // self.pa, self.uses_per_turn)
 
-@dataclass
+
 class SpellBuff:
-    trigger_states: Set[str] = field(default_factory=lambda: set())
-    forbidden_states: Set[str] = field(default_factory=lambda: set())
-    base_damages: List[int] = field(default_factory=lambda: [0 for _ in range(CHARACTERISTICS_COUNT)])
-    additional_damaging_characteristics: List[int] = field(default_factory=lambda: [])
-    stats: Dict[str, Stats] = field(default_factory=lambda: {'__all__': Stats()})
-    damage_parameters: Dict[str, DamageParameters] = field(default_factory=lambda: {'__all__': DamageParameters()})
+    def __init__(self) -> None:
+        self.trigger_states: Set[str] = set()
+        self.forbidden_states: Set[str] = set()
+        self.base_damages: List[int] = [0] * CHARACTERISTICS_COUNT
+        self.additional_damaging_characteristics: List[int] = []
+        self.stats: Dict[str, Stats] = {'__all__': Stats()}
+        self.damage_parameters: Dict[str, DamageParameters] = {'__all__': DamageParameters()}
 
-    new_output_states: Set[str] = field(default_factory=lambda: set())
-    removed_output_states: Set[str] = field(default_factory=lambda: set())
+        self.new_output_states: Set[str] = set()
+        self.removed_output_states: Set[str] = set()
 
-    has_stats: bool = False
-    has_parameters: bool = False
+        self.has_stats: bool = False
+        self.has_parameters: bool = False
 
-    is_huppermage_states: bool = False
+        self.is_huppermage_states: bool = False
 
 
     def add_trigger_state(self, state: str):
