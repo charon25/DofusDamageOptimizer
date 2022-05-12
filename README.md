@@ -12,8 +12,6 @@ Mauvaise optimisation knapsack (?)
 
 augmentation des dégâts buff avec min max critmin critmax
 
-refactor dataclasses
-
 ## General principle
 
 This optimizer works by creating spells, stats page, spell sets and parameters set and then picking the desired one to determine the best possible combination of spells to maximize the damages dealt.

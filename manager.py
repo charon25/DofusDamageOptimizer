@@ -50,7 +50,7 @@ class Manager:
 
 
     def _load_default(self):
-        self.parameters['__default__'] = DamageParameters(pa=1, po=[0, 2048], type='mono')
+        self.parameters['__default__'] = DamageParameters.from_string("-pa 1 -pomin 0 -pomax 2048 -t mono")
         self.default_parameters = '__default__'
 
     def _load_from_file(self):
