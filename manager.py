@@ -419,7 +419,7 @@ class Manager:
         if is_huppermage_states:
             try:
                 buff.is_huppermage_states = distutils.util.strtobool(is_huppermage_states)
-            except ValueError:  # if the valeur cannot be converted to a boolean, do as if nothing was input
+            except ValueError:  # if the value cannot be converted to a boolean, do as if nothing was input
                 pass
 
         if buff.is_huppermage_states:
@@ -476,6 +476,13 @@ class Manager:
                     buff.remove_removed_output_state(state[1:])
                 else:
                     buff.add_removed_output_state(state)
+
+        deactivate_damages = input(f'\nDoes trigger deactivates spell damages ({buff.deactivate_damages}) (0/1)? ')
+        if deactivate_damages:
+            try:
+                buff.deactivate_damages = distutils.util.strtobool(deactivate_damages)
+            except ValueError:  # if the value cannot be converted to a boolean, do as if nothing was input
+                pass
 
         self.print(0, '\n=== Base damage increase if triggered\n')
         for characteristic in range(CHARACTERISTICS_COUNT):

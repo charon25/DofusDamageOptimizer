@@ -82,6 +82,8 @@ class SpellBuff:
 
         self.is_huppermage_states: bool = False
 
+        self.deactivate_damages: bool = False
+
 
     def add_trigger_state(self, state: str):
         self.trigger_states.add(state)
@@ -151,7 +153,7 @@ class SpellBuff:
         if self.is_huppermage_states:
             return f'Huppermage states : ({", ".join(sorted(self.new_output_states))})'
         else:
-            return f'({", ".join(sorted(self.trigger_states))},{" " if self.forbidden_states else ""}{", ".join(f"!{state}" for state in sorted(self.forbidden_states))}) -> ({", ".join(sorted((self.trigger_states - self.removed_output_states) | self.new_output_states))}){"(Stats buff)" if self.has_stats and not only_states else ""}{"(Parameters buff)" if self.has_parameters and not only_states else ""}'
+            return f'({", ".join(sorted(self.trigger_states))},{" " if self.forbidden_states else ""}{", ".join(f"!{state}" for state in sorted(self.forbidden_states))}) -> ({", ".join(sorted((self.trigger_states - self.removed_output_states) | self.new_output_states))}){"(Stats buff)" if self.has_stats and not only_states else ""}{"(Parameters buff)" if self.has_parameters and not only_states else ""}{"[X]" if self.deactivate_damages else ""}'
 
 
     def to_dict(self) -> Dict:
@@ -166,7 +168,8 @@ class SpellBuff:
             'removed_output_states': list(self.removed_output_states),
             'is_huppermage_states': self.is_huppermage_states,
             'has_stats': self.has_stats,
-            'has_parameters': self.has_parameters
+            'has_parameters': self.has_parameters,
+            'deactivate_damages': self.deactivate_damages
         }
 
     @classmethod
@@ -200,6 +203,7 @@ class SpellBuff:
         spell_buff.is_huppermage_states = data.get('is_huppermage_states', False)
         spell_buff.has_stats = data.get('has_stats', False)
         spell_buff.has_parameters = data.get('has_parameters', False)
+        spell_buff.deactivate_damages = data.get('deactivate_damages', False)
 
         return spell_buff
 
@@ -262,6 +266,7 @@ class Spell():
         computation_stats = Stats.from_existing(stats)
         output.states.update(states)
         additional_damaging_characteristics = []
+        does_compute_damage = True
 
         for buff in self.buffs:
             if buff.trigger(states):
@@ -290,6 +295,9 @@ class Spell():
                     computation_parameters.add_base_damages(buff.base_damages)
                     additional_damaging_characteristics.extend(buff.additional_damaging_characteristics)
 
+                    if buff.deactivate_damages:
+                        does_compute_damage = False
+
                     if buff.has_stats:
                         output.update_stats(buff.stats)
 
@@ -299,8 +307,9 @@ class Spell():
                     output.states -= buff.removed_output_states
                     output.states.update(buff.new_output_states)
 
-        simple_output = self.get_detailed_damages(computation_stats, computation_parameters, additional_damaging_characteristics)
-        output.update_damages_from_existing(simple_output)
+        if does_compute_damage:
+            simple_output = self.get_detailed_damages(computation_stats, computation_parameters, additional_damaging_characteristics)
+            output.update_damages_from_existing(simple_output)
 
         return output
 

@@ -760,5 +760,35 @@ class TestSpellChain(unittest.TestCase):
 
         self.assertDictEqual(computation_data.damages, {'min': 11, 'max': 22, 'crit_min': 33, 'crit_max': 44})
 
+    def test_deactivate_damages(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.add_damaging_characteristic(AGILITY)
+        spell1.set_base_damages(AGILITY, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        buff_spell1 = SpellBuff()
+        buff_spell1.add_new_output_state('st1')
+        spell1.add_buff(buff_spell1)
+
+        spell2 = Spell()
+        spell2.add_damaging_characteristic(AGILITY)
+        spell2.set_base_damages(AGILITY, {'min': 1000, 'max': 2000, 'crit_min': 3000, 'crit_max': 4000})
+        buff_spell2 = SpellBuff()
+        buff_spell2.add_trigger_state('st1')
+        buff_spell2.deactivate_damages = True
+        spell2.add_buff(buff_spell2)
+
+        stats = Stats()
+        parameters = DamageParameters()
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+
+        computation_data1 = chain._get_detailed_damages_of_permutation([0, 1], stats, parameters)
+        computation_data2 = chain._get_detailed_damages_of_permutation([1, 0], stats, parameters)
+
+        self.assertDictEqual(computation_data1.damages, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
+        self.assertDictEqual(computation_data2.damages, {'min': 1001, 'max': 2002, 'crit_min': 3003, 'crit_max': 4004})
+
 if __name__ == '__main__':
     unittest.main()

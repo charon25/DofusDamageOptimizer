@@ -6,14 +6,6 @@ It can handle multiple stats pages, spells and spell sets, as well as multiple c
 
 It runs on a Python 3 console (developed on 3.9.10, probably work for older versions) and does not require any external package. However, if the [tqdm](https://pypi.org/project/tqdm/) package is installed, it will be used for some progress bars. So to run it, just use `python main.py` in the python scripts folder.
 
-## TODO
-
-Mauvaise optimisation knapsack (?)
-
-augmentation des dégâts buff avec min max critmin critmax
-
-ajouter possibilité pour un buff de désactiver un sort
-
 ## General principle
 
 This optimizer works by creating spells, stats page, spell sets and parameters set and then picking the desired one to determine the best possible combination of spells to maximize the damages dealt.
