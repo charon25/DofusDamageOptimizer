@@ -256,8 +256,6 @@ class Manager:
         else:
             stats = Stats.from_existing(stats)
 
-        print(stats.to_compact_string())
-
         if not no_name:
             name = input(f'Stats page name{f"({stats.get_name()})" if stats.get_name() != "" else ""}: ')
             if name:
@@ -289,7 +287,6 @@ class Manager:
         if bonus_crit_chance:
             stats.set_bonus_crit_chance(float(bonus_crit_chance) / 100.0)
 
-        print("fin:", stats.to_compact_string())
         return stats
 
     def _execute_stats_command(self, args: List[str]):
@@ -1108,7 +1105,7 @@ class Manager:
             self.print(1, 'Missing spells.')
             return
 
-        spell_list = list()
+        spell_list: List[Spell] = list()
 
         for index, spell_short_name in enumerate(args):
             if spell_short_name.startswith('-'):
@@ -1137,7 +1134,7 @@ class Manager:
         permutation = list(range(len(spell_list)))  # Permutation of all specified spells in the specified order
         computation_data = spell_chain._get_detailed_damages_of_permutation(permutation, total_stats, damages_parameters)
 
-        self.print(0, f"Damages of the given combination (parameters : '{self.default_parameters}' ; total PA : {sum(spell.get_pa() for spell in spell_list)}) is:\n")
+        self.print(0, f"Damages of the given combination (parameters : '{self.default_parameters}' ; total PA : {sum(spell.get_pa() for spell in spell_list)} ; initial states: ({','.join(sorted(damages_parameters.starting_states))})) is:\n")
         self.print(0, f" => {computation_data.average_damages:.0f} dmg : {computation_data.damages['min']} - {computation_data.damages['max']} ({computation_data.damages['crit_min']} - {computation_data.damages['crit_max']})")
 
 

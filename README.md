@@ -4,7 +4,8 @@ This program is designed to help determine to best combinations of spells to use
 
 It can handle multiple stats pages, spells and spell sets, as well as multiple conditions for the damage computations, in order to give the most freedom possible.
 
-It runs on a Python 3 console (developed on 3.9.10, probably work for older versions) and does not require any external package. However, if the [tqdm](https://pypi.org/project/tqdm/) package is installed, it will be used for some progress bars. So to run it, just use `python main.py` in the python scripts folder.
+It runs on a Python 3 console (developed on 3.9.10, probably work for older versions) and does not require any external package. However, if the [tqdm](https://pypi.org/project/tqdm/) package is installed, it will be used for some progress bars. To run it, just use `python main.py` in the folder containing the python files.
+
 
 ## General principle
 
@@ -90,57 +91,78 @@ The possible parameters for every command that requires it are :
 
 ## Examples of damages computation
 
-**All the following is currently outdated**
-
-Setting default parameters :
+Setting default parameters:
 ```
->>> def -s base -pa 11 -pomin 1 -pomax 10 -t mono
+>>> param -s base -pa 11 -pomin 1 -pomax 10 -t mono
 Default parameters successfully set.
 ```
 
-Simple damages optimisation (`base` is the name of the spell set) :
+Simple damages optimisation (`base` is the name of the spell set):
 ```
->>> dmg base
-Maximum average damages (PA = 11 ; PO = 1 - 10 ; type = mono) is : 1278
+>>> dmg all
+Maximum average damages ('base' ; PA = 11 ; PO = 1 - 10 ; type = mono ; position = unspecified ; distance = range) is:
 
-Using :
- - Ether (300 dmg)
- - Ether (300 dmg)
- - Morph (air) (408 dmg)
- - Ouragan (270 dmg)
-```
+ => 1697 dmg : 1577 - 1714 (1768 - 1906)
 
-With parameters :
-```
->>> dmg base -po 8 -t multi
-Maximum average damages (PA = 11 ; PO = 8 - 8 ; type = multi) is : 1287
+Using, in this order:
+ - Ouragan
+ - Drain Elémentaire
+ - Ether
+ - Lame Astrale
 
-Using :
- - Lame Astrale (439 dmg)
- - Lame Astrale (439 dmg)
- - Morph (air) (408 dmg)
+189924 possible combinations, 1 with the same damages, including:
+ - Ouragan, Drain Elémentaire, Lame Astrale, Ether
 ```
 
-With an additional stats page :
+With parameters:
 ```
->>> dmg base -po 8 -t versa -s turquoise
-Maximum average damages (PA = 11 ; PO = 8 - 8 ; type = versa) is : 1324
+>>> dmg all -po 8 -t multi
+Maximum average damages ('base' ; PA = 11 ; PO = 8 - 8 ; type = multi ; position = unspecified ; distance = range) is:
 
-Using :
- - Comète (425 dmg)
- - Lame Astrale (464 dmg)
- - Morph (air) (433 dmg)
+ => 1275 dmg : 1189 - 1278 (1327 - 1416)
+
+Using, in this order:
+ - Lame Astrale
+ - Orage
+ - Lame Astrale
+
+2720 possible combinations, 1 with the same damages, including:
+ - Orage, Lame Astrale, Lame Astrale
 ```
 
-Calculating only one spell damages :
+With an additional stats page:
+```
+>>> dmg all -po 8 -t versa -s turquoise
+Maximum average damages ('base' ; PA = 11 ; PO = 8 - 8 ; type = versa ; position = unspecified ; distance = range) is:
+
+ => 1292 dmg : 1184 - 1286 (1325 - 1429)
+
+Using, in this order:
+ - Comète
+ - Orage
+ - Lame Astrale
+
+700 possible combinations, 1 with the same damages, including:
+ - Orage, Comète, Lame Astrale
+```
+
+Calculating only one spell damages:
 ```
 >>> sp d tison
-Damages of the spell Tison:
+Damages of the spell 'Tison' (parameters set : 'base' ; distance: range ; initial states: ()):
 
 Individual characteristics:
- - INTELLIGENCE: 102 - 115 (118 - 131)
- - AGILITY: 327 - 370 (380 - 423)
+ - INTELLIGENCE: 144 - 160 (171 - 185)
+ - AGILITY: 384 - 430 (449 - 495)
 
-Total damages:   429 - 485 (498 - 554)
-Average damages: 457 (526) => 468 with 16 % crit chance
+Total damages:   528 - 590 (620 - 680)
+Average damages: 559 (650) => 575 with 18 % crit chance
+```
+
+Calculating damages of a specific combination of spells (with starting states):
+```
+>>> dmgc tribut ether -states h:w
+Damages of the given combination (parameters : 'base' ; total PA : 4 ; initial states: (h:w)) is:
+
+ => 393 dmg : 371 - 397 (418 - 445)
 ```
