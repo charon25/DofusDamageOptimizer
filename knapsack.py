@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from damages_parameters import DamageParameters
+from damage_parameters import DamageParameters
 from spell import Spell
 from stats import Stats
 

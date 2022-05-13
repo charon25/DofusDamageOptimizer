@@ -2,7 +2,10 @@ from enum import Enum
 import json
 import os
 import re
-from typing import Dict
+from typing import Dict, List
+from uuid import uuid1
+
+from characteristics_damages import *
 
 
 class Characteristics(str, Enum):
@@ -13,41 +16,32 @@ class Characteristics(str, Enum):
     NEUTRAL = 4
 
 class Damages(str, Enum):
-    POWER = 9
-    BASIC = 5
-    CRIT = 8
-    EARTH = 0
-    FIRE = 1
-    WATER = 2
-    AIR = 3
-    NEUTRAL = 4
-    SPELL = 6
-    WEAPON = 7
+    POWER = 0
+    BASIC = 1
+    CRIT = 2
+    EARTH = 3
+    FIRE = 4
+    WATER = 5
+    AIR = 6
+    NEUTRAL = 7
+    SPELL = 8
+    WEAPON = 9
     WEAPON_POWER = 10
-    RANGE = 12
-    MELEE = 13
-    FINAL = 11
+    RANGE = 11
+    MELEE = 12
+    FINAL = 13
 
 
 class Stats:
     def __init__(self) -> None:
-        self.characteristics: Dict[Characteristics, int] = dict()
-        self.damages: Dict[Characteristics, int] = dict()
+        self.characteristics: List[int] = [0] * CHARACTERISTICS_COUNT
+        self.damages: List[int] = [0] * DAMAGES_COUNT
         self.bonus_crit_chance = 0.0
         self.name = ''
         self.short_name = ''
 
-        self._fill_empty_dicts()
-
-    def _fill_empty_dicts(self):
-        for characteristic in Characteristics:
-            self.characteristics[characteristic] = 0
-
-        for damage in Damages:
-            self.damages[damage] = 0
-
-    def save_to_file(self, filepath):
-        json_valid_data = {
+    def to_dict(self):
+        return {
             'characteristics': self.characteristics,
             'damages': self.damages,
             'bonus_crit_chance': self.bonus_crit_chance,
@@ -55,24 +49,56 @@ class Stats:
             'short_name': self.short_name
         }
 
+    def to_compact_string(self, indentation: str = ''):
+        output_lines = []
+        characteristic_lines = []
+        for characteristic in range(CHARACTERISTICS_COUNT):
+            if characteristic == NEUTRAL:
+                continue
+            if self.characteristics[characteristic] != 0:
+                characteristic_lines.append(f'{indentation * 2}{CHARACTERISTICS_NAMES[characteristic]}: {self.characteristics[characteristic]}')
+
+        if characteristic_lines:
+            output_lines.append(f'{indentation}-> Characteristics')
+            output_lines.extend(characteristic_lines)
+
+        damage_lines = []
+        for damage in range(DAMAGES_COUNT):
+            if self.damages[damage] != 0:
+                damage_lines.append(f'{indentation * 2}{DAMAGES_NAMES[damage]}: {self.damages[damage]}')
+
+        if damage_lines:
+            output_lines.append(f'{indentation}-> Damages')
+            output_lines.extend(damage_lines)
+
+        if self.bonus_crit_chance > 0.0:
+            output_lines.append(f'{indentation}-> Bonus crit chance: {100 * self.bonus_crit_chance:.0f} %')
+
+        return '\n'.join(output_lines) if output_lines else None
+
+
+    def save_to_file(self, filepath):
+        json_valid_data = self.to_dict()
+
         with open(filepath, 'w', encoding='utf-8') as fo:
             json.dump(json_valid_data, fo)
 
 
     def __add__(self, other: 'Stats'):
-        if not isinstance(other, Stats):
+        if isinstance(other, int):  # Useful when doing stats + sum([]) - No matter the integer, return the stats
+            return Stats.from_existing(self)
+        elif not isinstance(other, Stats):
             raise TypeError(f"unsupported operand type(s) for +: 'Stats' and '{type(other)}'.")
 
         result = Stats()
-        for characteristic in Characteristics:
-            if characteristic != Characteristics.NEUTRAL:
-                result.set_characteristic(characteristic, self.get_characteristic(characteristic) + other.get_characteristic(characteristic))
+        for characteristic in range(CHARACTERISTICS_COUNT):
+            result.characteristics[characteristic] = self.characteristics[characteristic] + other.characteristics[characteristic]
 
-        for damage in Damages:
-            result.set_damage(damage, self.get_damage(damage) + other.get_damage(damage))
+        for damage in range(DAMAGES_COUNT):
+            result.damages[damage] = self.damages[damage] + other.damages[damage]
 
-        result.set_bonus_crit_chance(self.get_bonus_crit_chance() + other.get_bonus_crit_chance())
-        result.set_name(self.get_name())
+        result.bonus_crit_chance = self.bonus_crit_chance + other.bonus_crit_chance
+        result.name = self.name
 
         return result
 
@@ -84,16 +110,16 @@ class Stats:
 
 
     def get_characteristic(self, characteristic):
-        if not isinstance(characteristic, Characteristics):
-            raise TypeError(f"'{characteristic} is not a valid characteristic.")
+        if not isinstance(characteristic, int) or characteristic >= CHARACTERISTICS_COUNT:
+            raise TypeError(f"{characteristic} is not a valid characteristic.")
 
         return self.characteristics[characteristic]
 
     def set_characteristic(self, characteristic, value):
-        if not isinstance(characteristic, Characteristics):
-            raise TypeError(f"'{characteristic} is not a valid characteristic.")
+        if not isinstance(characteristic, int) or characteristic >= CHARACTERISTICS_COUNT:
+            raise TypeError(f"{characteristic} is not a valid characteristic.")
 
-        if characteristic == Characteristics.NEUTRAL:
+        if characteristic == NEUTRAL:
             raise TypeError('Neutral caracteritics cannot be changed on its own.')
 
         if not isinstance(value, int):
@@ -101,19 +127,19 @@ class Stats:
 
         self.characteristics[characteristic] = value
 
-        if characteristic == Characteristics.STRENGTH:
-            self.characteristics[Characteristics.NEUTRAL] = value
+        if characteristic == STRENGTH:
+            self.characteristics[NEUTRAL] = value
 
 
     def get_damage(self, damage):
-        if not isinstance(damage, Damages):
-            raise TypeError(f"'{damage} is not a valid damage.")
+        if not isinstance(damage, int) or damage >= DAMAGES_COUNT:
+            raise TypeError(f"{damage} is not a valid damage.")
 
         return self.damages[damage]
 
     def set_damage(self, damage, value):
-        if not isinstance(damage, Damages):
-            raise TypeError(f"'{damage}' is not a valid damage.")
+        if not isinstance(damage, int) or damage >= DAMAGES_COUNT:
+            raise TypeError(f"{damage} is not a valid damage.")
 
         if not isinstance(value, int):
             raise TypeError(f"Value should be an int ('{value}' of type '{type(value)}' given instead).")
@@ -133,12 +159,13 @@ class Stats:
 
         self.bonus_crit_chance = float(bonus_crit_chance)
 
+
     def get_name(self):
         return self.name
 
     def set_name(self, name):
-        if len(str(name)) == 0:
-            raise ValueError('Name cannot be an empty string.')
+        if name == '':
+            name = 'Unnamed stats'
 
         self.name = str(name)
 
@@ -150,10 +177,32 @@ class Stats:
         return re.sub(r'\W', '_', self.short_name)
 
     def set_short_name(self, short_name):
-        if len(str(short_name)) == 0:
-            raise ValueError('Short name cannot be an empty string.')
+        if short_name == '':
+            short_name = str(uuid1())
 
         self.short_name = str(short_name)
+
+
+    def copy(self):
+        return Stats.from_existing(self)
+
+
+    @classmethod
+    def from_existing(cls, other_stats: 'Stats'):
+        # This function does not use the getters and setters to minimize the execution time
+        stats = Stats()
+
+        for characteristic in range(CHARACTERISTICS_COUNT):
+            stats.characteristics[characteristic] = other_stats.characteristics[characteristic]
+
+        for damage in range(DAMAGES_COUNT):
+            stats.damages[damage] = other_stats.damages[damage]
+
+        stats.bonus_crit_chance = other_stats.bonus_crit_chance
+        stats.name = other_stats.name
+        stats.short_name = other_stats.short_name
+
+        return stats
 
 
     @classmethod
@@ -162,16 +211,14 @@ class Stats:
             if not key in json_data:
                 raise KeyError(f"JSON string does not contain a '{key}' key.")
 
-        for characteristic in Characteristics:
-            if not characteristic in json_data['characteristics']:
-                raise KeyError(f"JSON string 'characteristics' array does not contains '{characteristic}'.")
+        if len(json_data['characteristics']) < CHARACTERISTICS_COUNT:
+            raise KeyError(f"JSON string 'characteristics' array does not contains every characteristics ({len(json_data['characteristics'])} instead of {CHARACTERISTICS_COUNT}).")
 
-        if json_data['characteristics'][Characteristics.NEUTRAL] != json_data['characteristics'][Characteristics.STRENGTH]:
+        if json_data['characteristics'][NEUTRAL] != json_data['characteristics'][STRENGTH]:
             raise ValueError("Neutral and Strength characteristics have to be equal.")
 
-        for damage in Damages:
-            if not damage in json_data['damages']:
-                raise KeyError(f"JSON string 'damages' array does not contains '{damage}'.")
+        if len(json_data['damages']) < DAMAGES_COUNT:
+            raise KeyError(f"JSON string 'damages' array does not contains every damages ({len(json_data['damages'])} instead of {DAMAGES_COUNT}).")
 
     @classmethod
     def from_json_string(cls, json_string):
@@ -180,11 +227,11 @@ class Stats:
 
         stats = Stats()
 
-        for characteristic in Characteristics:
-            if characteristic != Characteristics.NEUTRAL:
+        for characteristic in range(CHARACTERISTICS_COUNT):
+            if characteristic != NEUTRAL:
                 stats.set_characteristic(characteristic, json_data['characteristics'][characteristic])
 
-        for damage in Damages:
+        for damage in range(DAMAGES_COUNT):
             stats.set_damage(damage, json_data['damages'][damage])
 
         stats.set_bonus_crit_chance(json_data['bonus_crit_chance'])
@@ -202,3 +249,7 @@ class Stats:
             json_string = fi.read()
 
         return Stats.from_json_string(json_string)
+
+    @classmethod
+    def from_dict(cls, data):
+        return Stats.from_json_string(json.dumps(data))

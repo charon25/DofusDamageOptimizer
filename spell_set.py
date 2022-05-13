@@ -3,7 +3,7 @@ import os
 import re
 from typing import List
 
-from damages_parameters import DamageParameters
+from damage_parameters import DamageParameters
 from spell import Spell
 
 
@@ -29,7 +29,7 @@ class SpellSet:
         spell_list: List[Spell] = list()
 
         for spell in self.spells:
-            if spell.can_reach_po(parameters.get_min_po(), parameters.get_max_po()):
+            if spell.can_reach(parameters.get_min_po(), parameters.get_max_po(), parameters.position):
                 uses = spell.get_max_uses_single_target(parameters.pa)
                 spell_list.extend([spell for _ in range(uses)])
 
@@ -39,14 +39,14 @@ class SpellSet:
         spell_list: List[Spell] = list()
 
         for spell in self.spells:
-            if spell.can_reach_po(parameters.get_min_po(), parameters.get_max_po()):
+            if spell.can_reach(parameters.get_min_po(), parameters.get_max_po(), parameters.position):
                 uses = spell.get_max_uses_multiple_targets(parameters.pa)
                 spell_list.extend([spell for _ in range(uses)])
 
         return spell_list
 
     def get_spell_list_versatile(self, parameters: DamageParameters):
-        return [spell for spell in self.spells if spell.get_pa() <= parameters.pa and spell.can_reach_po(parameters.get_min_po(), parameters.get_max_po())]
+        return [spell for spell in self.spells if spell.get_pa() <= parameters.pa and spell.can_reach(parameters.get_min_po(), parameters.get_max_po(), parameters.position)]
 
 
     def save_only_set_file(self, filepath, spell_filepaths):

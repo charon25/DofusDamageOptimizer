@@ -6,7 +6,11 @@ def manager_print(code, message):
 def command_loop(manager: Manager):
 
     while True:
-        command = input('>>> ').strip().lower()
+        try:
+            command = input('>>> ').strip().lower()
+        except KeyboardInterrupt: # If user uses Ctrl C, prompt for another one
+            print()
+            continue
 
         if command == 'q':
             manager.save()
@@ -25,7 +29,7 @@ if __name__ == '__main__':
 
     try:
         command_loop(manager)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, EOFError):
         print('\nExiting...')
         manager.save()
 

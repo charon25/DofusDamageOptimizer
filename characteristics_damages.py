@@ -1,0 +1,51 @@
+# Characteristics
+CHARACTERISTICS_COUNT = 5
+
+STRENGTH = 0
+INTELLIGENCE = 1
+LUCK = 2
+AGILITY = 3
+NEUTRAL = 4
+
+CHARACTERISTICS_NAMES = [
+    "STRENGTH",
+    "INTELLIGENCE",
+    "LUCK",
+    "AGILITY",
+    "NEUTRAL"
+]
+
+# Damages
+DAMAGES_COUNT = 14
+
+POWER = 0
+BASIC = 1
+CRIT = 2
+EARTH = 3
+FIRE = 4
+WATER = 5
+AIR = 6
+D_NEUTRAL = 7
+SPELL = 8
+WEAPON = 9
+WEAPON_POWER = 10
+RANGE = 11
+MELEE = 12
+FINAL = 13
+
+DAMAGES_NAMES = [
+    "POWER",
+    "BASIC",
+    "CRIT",
+    "EARTH",
+    "FIRE",
+    "WATER",
+    "AIR",
+    "NEUTRAL",
+    "SPELL",
+    "WEAPON",
+    "WEAPON_POWER",
+    "RANGE",
+    "MELEE",
+    "FINAL"
+]
