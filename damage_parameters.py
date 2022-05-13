@@ -136,7 +136,7 @@ class DamageParameters:
         for parameter in parameters:
             command = parameter[0]
             if command in ('-s', '-stats'):
-                damage_parameters.stats = [argument for argument in parameter[1:] if argument != ''] # Copy the list to avoid reference issues
+                damage_parameters.stats = damage_parameters.stats + [argument for argument in parameter[1:] if argument != ''] # Copy the list to avoid reference issues
 
             elif command == '-pa':
                 cls._check_parameter(parameter, 1, argument_type=int)
