@@ -16,7 +16,8 @@ def compute_damages(base_damages, stats: Stats, characteristic: int, parameters:
     if is_weapon:
         power += stats.damages[WEAPON_POWER]
 
-    characteristic_multiplier = 1 + (stats.characteristics[characteristic] + power) / 100
+    # Characteristic multiplier cannot reduce damages
+    characteristic_multiplier = max(1, 1 + (stats.characteristics[characteristic] + power) / 100)
 
     # The damages associated with the characteristic is 3 more (STRENGTH is 0, EARTH is 3, ...)
     flat_damages = stats.damages[BASIC] + stats.damages[characteristic + 3]

@@ -235,8 +235,8 @@ class Spell():
             spell_output.damages_by_characteristic[characteristic] = {
                 'min': min_damage,
                 'max': max_damage,
-                'crit_min': min_damage_crit,
-                'crit_max': max_damage_crit
+                'crit_min': min_damage_crit if self.parameters.crit_chance > 0 else min_damage,
+                'crit_max': max_damage_crit if self.parameters.crit_chance > 0 else max_damage
             }
 
         for field in ('min', 'max', 'crit_min', 'crit_max'):
