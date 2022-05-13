@@ -3,7 +3,8 @@ import json
 import math
 import os
 import re
-from typing import Any, Callable, Dict, List
+import sys
+from typing import Any, Callable, Dict, List, Tuple
 
 from characteristics_damages import *
 from knapsack import get_best_combination
@@ -15,7 +16,7 @@ from stats import Stats
 
 
 class Manager:
-    GENERAL_INSTRUCTIONS = ('s', 'q', 'i')
+    GENERAL_INSTRUCTIONS = ('s', 'q', 'i', 'cache')
     PARAMETERS_INSTRUCTION = ('p', 'param')
     STATS_INSTRUCTION = ('st',)
     SPELL_INSTRUCTION = ('sp',)
@@ -31,10 +32,12 @@ class Manager:
         self.spell_sets: Dict[str, SpellSet] = dict()
         self.parameters: Dict[str, DamageParameters] = dict()
         self.default_parameters: str = ''
+        self.cache: Dict[int, List[Tuple[int, ...]]] = {}
 
         self._create_dirs()
         self._load_default()
         self._load_from_file()
+        self._load_cache()
 
     def _create_dirs(self):
         for directory in Manager.DIRECTORIES:
@@ -104,7 +107,20 @@ class Manager:
             return
 
 
-    def save(self, print_message=True):
+    def _load_cache(self) -> None:
+        try:
+            with open('cache.txt', 'r', encoding='ascii') as fi:
+                for line in fi:
+                    computation_hash, permutations = line.split(':')
+                    permutations = [tuple(map(int, permutation.split(','))) if permutation != '' else tuple() for permutation in permutations.split(';')]
+                    self.cache[computation_hash] = permutations
+        except FileNotFoundError:  # File does not exist, do nothing
+            pass
+        except (ValueError, TypeError):  # Error while unpacking or splitting
+            self.print(1, 'Could not read part or all of cache file.')
+
+
+    def save(self, print_message=True, save_cache=False):
         stats_filepaths = list()
         for stats in self.stats.values():
             filepath = f'stats\\{stats.get_safe_name()}.json'
@@ -140,6 +156,11 @@ class Manager:
         with open('manager.json', 'w', encoding='utf-8') as fo:
             json.dump(json_valid_data, fo)
 
+        if save_cache:
+            with open('cache.txt', 'w', encoding='ascii') as fo:
+                for computation_hash in self.cache:
+                    fo.write(f'{computation_hash}:{";".join(",".join(map(str, permutation)) for permutation in self.cache[computation_hash])}\n')
+
         if print_message:
             self.print(0, 'Data successfully saved!')
 
@@ -149,11 +170,22 @@ class Manager:
         self.print(0, self._get_default_parameters().to_string())
 
 
+    def _print_cache(self):
+        self.print(0, f'Cache entries count: {len(self.cache)}')
+        try:
+            total_size = f"{os.path.getsize('cache.txt') / 1024 / 1024:.2f} MB"
+        except OSError:
+            total_size = 'Unknown'
+        self.print(0, f'Total size of cache file: {total_size}')
+
+
     def _execute_general_command(self, instr, args: List[str]):
         if instr == 's':
-            self.save()
+            self.save(save_cache=True)
         elif instr == 'i':
             self._print_infos()
+        elif instr == 'cache':
+            self._print_cache()
 
 
     def _execute_parameters_command(self, instr, args: List[str]):
@@ -1079,7 +1111,11 @@ class Manager:
             for spell in spell_list:
                 spell_chain.add_spell(spell)
 
-            damages = spell_chain.get_detailed_damages(total_stats, damages_parameters)
+            try:
+                damages = spell_chain.get_detailed_damages(total_stats, damages_parameters, cache=self.cache)
+            except KeyboardInterrupt:
+                self.print(0, 'Cancelled damages computation.')
+                return
 
             best_combination = next(iter(damages))
             average_damages, detailed_damages = damages[best_combination]

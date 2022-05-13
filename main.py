@@ -13,7 +13,7 @@ def command_loop(manager: Manager):
             continue
 
         if command == 'q':
-            manager.save()
+            manager.save(save_cache=True)
             break
 
         if command:
@@ -31,5 +31,5 @@ if __name__ == '__main__':
         command_loop(manager)
     except (KeyboardInterrupt, EOFError):
         print('\nExiting...')
-        manager.save()
+        manager.save(save_cache=True)
 

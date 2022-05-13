@@ -790,5 +790,20 @@ class TestSpellChain(unittest.TestCase):
         self.assertDictEqual(computation_data1.damages, {'min': 1, 'max': 2, 'crit_min': 3, 'crit_max': 4})
         self.assertDictEqual(computation_data2.damages, {'min': 1001, 'max': 2002, 'crit_min': 3003, 'crit_max': 4004})
 
+    def test_computation_hash(self):
+        chain = SpellChains()
+
+        spell1 = Spell()
+        spell1.set_short_name('spell1')
+        spell2 = Spell()
+        spell2.set_short_name('spell2')
+
+        parameters = DamageParameters.from_string('-pa 10')
+
+        chain.add_spell(spell1)
+        chain.add_spell(spell2)
+
+        self.assertEqual(chain._get_computation_hash(parameters), 'eecf0f05b5077b6152bc8e850d9a447ae2d583a7')
+
 if __name__ == '__main__':
     unittest.main()

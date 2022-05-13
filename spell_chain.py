@@ -1,3 +1,4 @@
+from hashlib import sha1
 from typing import Dict, List, Set, Tuple
 
 try:
@@ -69,6 +70,10 @@ class SpellChains:
         return all_permutations_list
 
 
+    def _get_computation_hash(self, parameters: DamageParameters) -> int:
+        return sha1(str(sorted(spell.short_name for spell in self.spells) + [parameters.pa]).encode('ascii')).hexdigest()
+
+
     def _get_detailed_damages_of_permutation(self, permutation: List[int], stats: Stats, parameters: DamageParameters, previous_data: ComputationData = None) -> ComputationData: #Tuple[Dict[str, int], float]:
         spells = [self.spells[index] for index in permutation] # Convert the list of indices into a list of spells
 
@@ -116,22 +121,29 @@ class SpellChains:
         return computation_data
 
 
-    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters) -> Dict[Tuple[str], Tuple[float, Dict[str, int]]]:
-        permutations = self._get_permutations(parameters)
+    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters, cache: Dict[int, List[Tuple[int, ...]]] = None) -> Dict[Tuple[str], Tuple[float, Dict[str, int]]]:
+        if cache is None:
+            cache = {}
+
+        computation_hash = self._get_computation_hash(parameters)
+
+        if not computation_hash in cache:
+            permutations = self._get_permutations(parameters)
+            
+            # If the same spell can be used multiple times, there may be multiple "identical" permutations as they do not have the same index
+            # Example, if self.spells = ["s1", "s2", "s2"] (and there are enough AP), the permutations will have both [0, 1, 2] and [0, 2, 1] which are really the same
+            # So we remove them based on the spells short names
+            unique_permutations = set()
+            for permutation in permutations:
+                unique_permutations.add(tuple(self.spells[index].short_name for index in permutation))
+
+            # The permutations is then once again transformed into indices
+            unique_permutations = [tuple(self.indexes[short_name] for short_name in permutation) for permutation in sorted(unique_permutations)]
+            cache[computation_hash] = unique_permutations
+        else:
+            unique_permutations = cache[computation_hash]
+
         previous_computation_data: Dict[int, ComputationData] = {}
-        
-        # If the same spell can be used multiple times, there may be multiple "identical" permutations as they do not have the same index
-        # Example, if self.spells = ["s1", "s2", "s2"] (and there are enough AP), the permutations will have both [0, 1, 2] and [0, 2, 1] which are really the same
-        # So we remove them based on the spells short names
-        unique_permutations = set()
-        for permutation in permutations:
-            unique_permutations.add(tuple(self.spells[index].short_name for index in permutation))
-            if not len(permutation) in previous_computation_data:
-                previous_computation_data[len(permutation)] = None
-
-        # The permutations is then once again transformed into indices
-        unique_permutations = [tuple(self.indexes[short_name] for short_name in permutation) for permutation in sorted(unique_permutations)]
-
         permutations_iterator = progress_bar(enumerate(unique_permutations), total=len(unique_permutations), leave=False) if len(unique_permutations) > 20000 else enumerate(unique_permutations)
 
         damages = dict()

@@ -25,6 +25,7 @@ Every `<name>` parameter in the commands below should not contains spaces and is
 
  - `s` : save everything (automatically done after most actions)
  - `i` : get informations on current state (TODO)
+ - `cache` : get informations on the cache
  - `q` : quit
 
 ### Parameters-related
@@ -170,3 +171,4 @@ Damages of the given combination (parameters : 'base' ; total PA : 4 ; initial s
 ## TODO
 
  - Spell buffs can increase damage field by field ('min', 'max', 'crit_min', 'crit_max') instead of one flat value
+ - `i` command
