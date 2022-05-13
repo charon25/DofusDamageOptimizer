@@ -97,7 +97,7 @@ Setting default parameters:
 Default parameters successfully set.
 ```
 
-Simple damages optimisation (`base` is the name of the spell set):
+Simple damages optimisation (`all` is the name of the spell set):
 ```
 >>> dmg all
 Maximum average damages ('base' ; PA = 11 ; PO = 1 - 10 ; type = mono ; position = unspecified ; distance = range) is:
@@ -166,3 +166,7 @@ Damages of the given combination (parameters : 'base' ; total PA : 4 ; initial s
 
  => 393 dmg : 371 - 397 (418 - 445)
 ```
+
+## TODO
+
+ - Spell buffs can increase damage field by field ('min', 'max', 'crit_min', 'crit_max') instead of one flat value
