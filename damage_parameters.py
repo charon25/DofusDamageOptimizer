@@ -198,7 +198,7 @@ class DamageParameters:
 
         # If the specified PO is one, this means the enemy is in melee range
         # If the minimum PO is > 1, the enemy is not in melee range
-        if damage_parameters.po == [1, 1]:
+        if max(damage_parameters.po) <= 1:
             damage_parameters.distance = 'melee'
         elif min(damage_parameters.po) > 1:
             damage_parameters.distance = 'range'
