@@ -330,6 +330,7 @@ class TestSpell(unittest.TestCase):
 
         spell.add_damaging_characteristic(LUCK)
         spell.set_base_damages(LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
+        spell.set_crit_chance(0.1)
         stats.set_characteristic(LUCK, 100)
         stats.set_damage(CRIT, 10)
         spell_output = spell.get_detailed_damages(stats, parameters)
@@ -361,6 +362,7 @@ class TestSpell(unittest.TestCase):
         spell.set_base_damages(LUCK, {'min': 10, 'max': 20, 'crit_min': 50, 'crit_max': 70})
         spell.set_base_damages(INTELLIGENCE, {'min': 5, 'max': 10, 'crit_min': 10, 'crit_max': 20})
         spell.set_base_damages(STRENGTH, {'min': 50, 'max': 60, 'crit_min': 60, 'crit_max': 70})
+        spell.set_crit_chance(0.1)
         stats.set_characteristic(LUCK, 100)
         stats.set_characteristic(INTELLIGENCE, 200)
         stats.set_damage(CRIT, 10)

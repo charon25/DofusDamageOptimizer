@@ -172,4 +172,3 @@ Damages of the given combination (parameters : 'base' ; total PA : 4 ; initial s
 
  - Spell buffs can increase damage field by field ('min', 'max', 'crit_min', 'crit_max') instead of one flat value
  - `i` command
- - Command to remove stats page from parameters
