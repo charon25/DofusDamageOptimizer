@@ -159,5 +159,15 @@ class TestDamageParameters(unittest.TestCase):
         self.assertEqual(damage_parameters1.position, 'none')
         self.assertListEqual(damage_parameters1.po, [6, 6])
 
+    def test_remove_stats(self):
+        string1 = '-s stats1 stats2'
+        string2 = '-s !stats1 stats3 !stats4'
+
+        damage_parameters1 = DamageParameters.from_string(string1)
+        damage_parameters2 = DamageParameters.from_string(string2, damage_parameters1)
+
+        self.assertListEqual(damage_parameters2.stats, ['stats2', 'stats3'])
+
+
 if __name__ == '__main__':
     unittest.main()

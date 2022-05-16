@@ -77,7 +77,7 @@ Every `param` can be replaced with only `p`.
 ## Parameters
 
 The possible parameters for every command that requires it are :
- - `-s` (or `-stats`) followed by as many stats page short name as wanted : the stats page to use for the computations ;
+ - `-s` (or `-stats`) followed by as many stats page short name as wanted : the stats page to use for the computations (if one starts with a `!`, it will remove this page) ;
  - `-pa` followed by a positive integer : the maximum number of AP (*action point*) to use ;
  - `-po` followed by a non negative integer : the exact range to the enemy ;
  - `-pomin` (or `-minpo`) followed by a non negative integer : the minimum range to the enemy ;
