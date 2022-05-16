@@ -70,12 +70,20 @@ class SpellChains:
         return all_permutations_list
 
 
-    def _get_computation_hash(self, parameters: DamageParameters) -> int:
+    def _get_computation_hash(self, parameters: DamageParameters) -> str:
         return sha1(str(sorted(spell.short_name for spell in self.spells) + [parameters.pa]).encode('ascii')).hexdigest()
+
+
+    def _is_combination_possible(self, spells: List[Spell]) -> bool:
+        # First member is the minimum of the maximum range of the spells, and inversely for the second member
+        return min(spell.parameters.po[1] for spell in spells) >= max(spell.parameters.po[0] for spell in spells)
 
 
     def _get_detailed_damages_of_permutation(self, permutation: List[int], stats: Stats, parameters: DamageParameters, previous_data: ComputationData = None) -> ComputationData: #Tuple[Dict[str, int], float]:
         spells = [self.spells[index] for index in permutation] # Convert the list of indices into a list of spells
+
+        if not self._is_combination_possible(spells):
+            return None
 
         if previous_data is None:
             previous_data = ComputationData()
@@ -155,6 +163,9 @@ class SpellChains:
             previous_data = previous_computation_data[permutation_length - 1] if permutation_length > 1 else None
 
             computation_data = self._get_detailed_damages_of_permutation(permutation, stats, parameters, previous_data=previous_data)
+            if computation_data is None:
+                continue
+
             damages[index] = (computation_data.average_damages, computation_data.damages.copy())
             previous_computation_data[len(permutation)] = computation_data
 
