@@ -433,8 +433,29 @@ class Manager:
                 self.print(1, f"Could not read '{spell_filepath}' file : invalid stats page.")
                 return
 
-            self.save()
+            self.save(False)
             self.print(0, f"Stats page '{stats_short_name}' successfully added.")
+
+        elif command_action == 'copy':
+            if len(args) < 3:
+                self.print(1, 'Missing current or new stats page name.')
+                return
+
+            current_stats_short_name = args[1]
+
+            if not current_stats_short_name in self.stats:
+                self.print(1, f"Stats page '{current_stats_short_name}' does not exists.")
+                return
+
+            new_stats_short_name = args[2]
+
+            if new_stats_short_name in self.stats:
+                self.print(1, f"Stats page '{new_stats_short_name}' already exists.")
+                return
+
+            self.stats[new_stats_short_name] = self.stats[current_stats_short_name].copy()
+            self.save(False)
+            self.print(0, 'Stats page succesfully copied.')
 
         else:
             self.print(1, f"Unknown action '{command_action}' for stats commands.")
@@ -1041,8 +1062,6 @@ class Manager:
             if not current_set_short_name in self.spell_sets:
                 self.print(1, f"Spell set '{current_set_short_name}' does not exists.")
                 return
-            
-            current_spell_set = self.spell_sets[current_set_short_name]
 
             new_set_short_name = args[2]
 
@@ -1050,6 +1069,7 @@ class Manager:
                 self.print(1, f"Spell set '{current_set_short_name}' already exists.")
                 return
 
+            current_spell_set = self.spell_sets[current_set_short_name]
             new_spell_set = SpellSet()
             new_spell_set.short_name = new_set_short_name
             new_spell_set.spells = current_spell_set.spells[:]
