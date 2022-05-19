@@ -453,7 +453,9 @@ class Manager:
                 self.print(1, f"Stats page '{new_stats_short_name}' already exists.")
                 return
 
-            self.stats[new_stats_short_name] = self.stats[current_stats_short_name].copy()
+            new_stats = self.stats[current_stats_short_name].copy()
+            new_stats.set_short_name(new_stats_short_name)
+            self.stats[new_stats_short_name] = new_stats
             self.save(False)
             self.print(0, 'Stats page succesfully copied.')
 
