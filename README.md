@@ -6,6 +6,14 @@ It can handle multiple stats pages, spells and spell sets, as well as multiple c
 
 It runs on a Python 3 console (developed on 3.9.10, probably work for older versions) and does not require any external package. However, if the [tqdm](https://pypi.org/project/tqdm/) package is installed, it will be used for some progress bars. To run it, just use `python main.py` in the folder containing the python files.
 
+## "Stuff" TODO
+
+- commande pour optimiser le stuff pour une séquence de sort (version équipement par équipement ou panoplie par panoplie)
+- commande pour optimiser les sorts avec un équipement donné
+- commande pour optimiser un seul équipement pour une séquence de sort
+- commande pour maximiser une caractéristique donnée (stuff entier ou un seul équipement)
+
+possibilité d'ajouter des stats de départ à chaque fois
 
 ## General principle
 
