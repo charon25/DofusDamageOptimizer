@@ -229,14 +229,20 @@ class Spell():
 
         for characteristic in set(self.parameters.damaging_characteristics + additional_damaging_characteristics):
             min_damage, max_damage, min_damage_crit, max_damage_crit = compute_damages(self.parameters.base_damages[characteristic], stats, characteristic, parameters, self.parameters.is_weapon)
+
+            # If the spell cannot do a critical strike, the crit damages are set to the normal damages
+            if self.parameters.crit_chance <= 0:
+                min_damage_crit = min_damage
+                max_damage_crit = max_damage
+
             spell_output.average_damage += (min_damage + max_damage) / 2
             spell_output.average_damage_crit += (min_damage_crit + max_damage_crit) / 2
 
             spell_output.damages_by_characteristic[characteristic] = {
                 'min': min_damage,
                 'max': max_damage,
-                'crit_min': min_damage_crit if self.parameters.crit_chance > 0 else min_damage,
-                'crit_max': max_damage_crit if self.parameters.crit_chance > 0 else max_damage
+                'crit_min': min_damage_crit,
+                'crit_max': max_damage_crit
             }
 
         for field in ('min', 'max', 'crit_min', 'crit_max'):
