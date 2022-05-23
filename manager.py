@@ -1197,9 +1197,6 @@ class Manager:
 
 
     def execute_command(self, command: str):
-        if command == '':
-            raise ValueError('Command should be non empty.')
-
         instr, *args = command.split(' ')
 
         if instr in Manager.GENERAL_INSTRUCTIONS:
