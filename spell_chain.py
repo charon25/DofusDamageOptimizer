@@ -137,7 +137,7 @@ class SpellChains:
 
         if not computation_hash in cache:
             permutations = self._get_permutations(parameters)
-            
+
             # If the same spell can be used multiple times, there may be multiple "identical" permutations as they do not have the same index
             # Example, if self.spells = ["s1", "s2", "s2"] (and there are enough AP), the permutations will have both [0, 1, 2] and [0, 2, 1] which are really the same
             # So we remove them based on the spells short names

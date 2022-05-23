@@ -24,7 +24,7 @@ for file in os.listdir(SPELL_DIR):
         continue
     with open(SPELL_DIR + file, 'r', encoding='utf-8') as fi:
         spell = json.load(fi)
-    
+
     spell['position'] = 'all'
     base_damages = [None for _ in range(5)]
     dmg_char = []

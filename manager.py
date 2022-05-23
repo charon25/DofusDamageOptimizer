@@ -786,7 +786,7 @@ class Manager:
                 base_damages = spell.get_base_damages(characteristic)
                 if all(value == 0 for value in base_damages.values()):
                     continue
-                
+
                 if spell.does_damage_in_characteristic(characteristic):
                     printed_string.append(f" {CHARACTERISTICS_NAMES[characteristic]}: {base_damages['min']} - {base_damages['max']} ({base_damages['crit_min']} - {base_damages['crit_max']})")
                 else:
@@ -1173,7 +1173,7 @@ class Manager:
             if not spell_short_name in self.spells:
                 self.print(1, f"Spell '{spell_short_name}' does not exist.")
                 return
-            
+
             spell_list.append(self.spells[spell_short_name])
 
         command = ' '.join(args[index + 1:])

@@ -6,7 +6,7 @@ def manager_print(code, message):
     print(f"{'[ERROR] ' if code == 1 else ''}{message}")
 
 def command_loop(manager: Manager, stuff_manager: StuffManager):
-    mode = 'base'
+    mode = 'stuff' # TODO change 'base'
 
     while True:
         if mode == 'base':
@@ -48,13 +48,13 @@ def command_loop(manager: Manager, stuff_manager: StuffManager):
                 try:
                     stuff_manager.execute_command(command)
                 except Exception as e:
-                    print(f"Error while executing command {command}: {e}")
+                    print(f"Error while executing stuff command {command}: {e}")
 
         print()
 
 if __name__ == '__main__':
     manager = Manager(manager_print)
-    stuff_manager = Manager(manager_print)
+    stuff_manager = StuffManager(manager_print, manager)
 
     try:
         command_loop(manager, stuff_manager)

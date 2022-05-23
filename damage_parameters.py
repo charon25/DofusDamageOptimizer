@@ -21,12 +21,23 @@ class DamageParameters:
         # 'unspecified' indicates we do not care about the position
         self.position: Literal['unspecified', 'none', 'line', 'diag'] = 'unspecified'
 
+        # Stuff mode
+        self.level: Tuple[int, int] = (1, 200)
+        self.stuff: Literal = 'all'
+        self.stuff_stats_mode: Literal['min', 'ave', 'max'] = 'max'
+
 
     def get_min_po(self):
         return self.po[0]
 
     def get_max_po(self):
         return self.po[1]
+
+    def get_min_level(self):
+        return self.level[0]
+
+    def get_max_level(self):
+        return self.level[1]
 
     # Both functions are reordered from EARTH/FIRE/WATER/AIR/NEUTRAL to NEUTRAL/EARTH/FIRE/WATER/AIR
     def get_resistance(self, characteristic: int):
@@ -82,6 +93,8 @@ class DamageParameters:
             raise ValueError(f"Minimum PO should be non negative ({self.get_min_po()} given instead).")
         if self.get_min_po() > self.get_max_po():
             raise ValueError(f"Minimum PO should be less than or equal to maximum PO ({self.get_min_po()} and {self.get_max_po()} given instead).")
+        if self.get_min_level() > self.get_max_level():
+            raise ValueError(f"Minimum level should be less than or equal to maximum level ({self.get_min_level()} and {self.get_max_level()} given instead).")
 
 
     def copy(self):
@@ -201,13 +214,35 @@ class DamageParameters:
                         damage_parameters.position = 'line'
                     damage_parameters.po = [abs(x) + abs(y), abs(x) + abs(y)]
 
+            elif command in ('-lvl', '-level'):
+                cls._check_parameter(parameter, 1, argument_type=int)
+                level = int(parameter[1])
+                damage_parameters.level = (level, level)
+
+            elif command in ('-minlvl', '-minlevel', '-levelmin'):
+                cls._check_parameter(parameter, 1, argument_type=int)
+                min_level = int(parameter[1])
+                damage_parameters.level = (min_level, damage_parameters.get_max_level())
+
+            elif command in ('-maxlvl', '-maxlevel', '-levelmax'):
+                cls._check_parameter(parameter, 1, argument_type=int)
+                max_level = int(parameter[1])
+                damage_parameters.level = (damage_parameters.get_min_level(), max_level)
+
+            elif command == '-stuff':
+                cls._check_parameter(parameter, 1, literals=('all', 'pet', 'hat', 'amulet', 'belt', 'ring', 'boots', 'cloak', 'shield', 'dofus', 'weapon'))
+                damage_parameters.stuff = parameter[1]
+
+            elif command in ('-stuffmode', '-mode'):
+                cls._check_parameter(parameter, 1, literals=('min', 'ave', 'max'))
+                damage_parameters.stuff_stats_mode = parameter[1]
+
         # If the specified PO is one, this means the enemy is in melee range
         # If the minimum PO is > 1, the enemy is not in melee range
         if max(damage_parameters.po) <= 1:
             damage_parameters.distance = 'melee'
         elif min(damage_parameters.po) > 1:
             damage_parameters.distance = 'range'
-
         damage_parameters._assert_correct_parameters()
 
         return damage_parameters

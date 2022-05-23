@@ -109,6 +109,23 @@ class Stats:
             return self + other
 
 
+    def __truediv__(self, divisor: int):
+        if not isinstance(divisor, int):
+            raise TypeError(f"unsupported operand type(s) for /: 'Stats' and '{type(divisor)}'.")
+
+        result = Stats()
+        for characteristic in range(CHARACTERISTICS_COUNT):
+            result.characteristics[characteristic] = self.characteristics[characteristic] / divisor
+
+        for damage in range(DAMAGES_COUNT):
+            result.damages[damage] = self.damages[damage] / divisor
+
+        result.bonus_crit_chance = self.bonus_crit_chance / divisor
+        result.name = self.name
+
+        return result
+
+
     def get_characteristic(self, characteristic):
         if not isinstance(characteristic, int) or characteristic >= CHARACTERISTICS_COUNT:
             raise TypeError(f"{characteristic} is not a valid characteristic.")
