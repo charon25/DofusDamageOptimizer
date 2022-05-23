@@ -154,8 +154,8 @@ class Stats:
         if not (isinstance(bonus_crit_chance, float) or isinstance(bonus_crit_chance, int)):
             raise TypeError(f"Bonus crit chance is not a float ('{bonus_crit_chance}' of type '{type(bonus_crit_chance)}' given instead).")
 
-        if not (0.0 <= bonus_crit_chance <= 1.0):
-            raise ValueError(f"Bonus crit chance should be between 0 and 1 inclusive ('{bonus_crit_chance}' given instead).")
+        if not (bonus_crit_chance <= 1.0):
+            raise ValueError(f"Bonus crit chance should be inferior or equal to 1 ('{bonus_crit_chance}' given instead).")
 
         self.bonus_crit_chance = float(bonus_crit_chance)
 

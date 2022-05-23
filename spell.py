@@ -5,7 +5,6 @@ from typing import Dict, List, Literal, Set, Tuple
 from uuid import uuid1
 
 from characteristics_damages import *
-# from damages import compute_damage
 from damages import compute_damages
 from damage_parameters import DamageParameters
 from stats import Stats
