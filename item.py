@@ -10,7 +10,7 @@ from stats import Stats
 class Item:
     def __init__(self) -> None:
         self.name: str = ''
-        self.id: int = ''
+        self.id: int = 0
         self.set: int = None
         self.type: str = ''
         self.stats: Dict[str, Stats] = {'min': Stats(), 'max': Stats()}
