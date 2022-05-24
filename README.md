@@ -95,6 +95,9 @@ Every `param` can be replaced with only `p`.
  - `equip show <name>` : shows more details on the specified equipment
  - `equip copy <source_name> <target_name>` : copy the source equipment with the new specified name
 
+### Search-related
+
+ - `search <search_phrase>` : print the type and id of items whose name contains the search phrase
 
 ## Parameters
 

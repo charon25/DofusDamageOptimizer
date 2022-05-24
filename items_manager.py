@@ -1,6 +1,7 @@
 from ctypes import Union
 import json
 from typing import Dict, List, Tuple
+from unicodedata import normalize
 
 from damage_parameters import DamageParameters
 from item import Item
@@ -27,6 +28,18 @@ class ItemsManager:
             if not item.type in self.items_by_type:
                 self.items_by_type[item.type] = []
             self.items_by_type[item.type].append(item)
+
+    def _get_normalised_string(self, string: str) -> str:
+        return normalize('NFKD', string.lower()).encode('ASCII', 'ignore')
+
+    def search(self, search_phrase: str) -> List[Item]:
+        results = []
+        search_phrase = self._get_normalised_string(search_phrase)
+        for item in self.items.values():
+            if search_phrase in self._get_normalised_string(item.name):
+                results.append(item)
+        
+        return sorted(results, key=lambda item:item.name)
 
 
     def _get_n_best_items_from_damages(self, damages: Dict[Tuple[str], Tuple[float, Dict[str, int]]], n: int = 1) -> List[Item]:

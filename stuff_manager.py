@@ -22,6 +22,7 @@ from stats import Stats
 class StuffManager:
     OPTIMIZE_STUFF_COMMAND = ('optstuff', )
     EQUIPMENT_COMMAND = ('equip', 'equipment')
+    SEARCH_COMMAND = ('search', )
 
 
     def __init__(self, print_method: Callable[[int, str], Any], manager: Manager) -> None:
@@ -207,6 +208,17 @@ class StuffManager:
             self.print(0, f"Equipment '{new_equip_name}' succesfully created from '{current_equip_name}'.")
 
 
+    def _execute_search_command(self, args: List[str]):
+        if len(args) < 1:
+            self.print(1, 'Missing item name.')
+
+        search_phrase = ' '.join(args)
+        search_result = self.items_manager.search(search_phrase)
+
+        self.print(0, '=== Search results\n')
+        for item in search_result[:25]:
+            self.print(0, f" - {item.name} ({item.type}): {item.id}")
+
 
     def execute_command(self, command: str):
         instr, *args = command.split(' ')
@@ -215,3 +227,5 @@ class StuffManager:
             self._execute_optimize_stuff_command(args)
         elif instr in StuffManager.EQUIPMENT_COMMAND:
             self._execute_equipment_command(args)
+        elif instr in StuffManager.SEARCH_COMMAND:
+            self._execute_search_command(args)
