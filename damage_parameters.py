@@ -241,12 +241,12 @@ class DamageParameters:
                 level = int(parameter[1])
                 damage_parameters.level = (level, level)
 
-            elif command in ('-minlvl', '-minlevel', '-levelmin'):
+            elif command in ('-lvlmin', '-minlvl', '-minlevel', '-levelmin'):
                 cls._check_parameter(parameter, 1, argument_type=int)
                 min_level = int(parameter[1])
                 damage_parameters.level = (min_level, damage_parameters.get_max_level())
 
-            elif command in ('-maxlvl', '-maxlevel', '-levelmax'):
+            elif command in ('-lvlmax', '-maxlvl', '-maxlevel', '-levelmax'):
                 cls._check_parameter(parameter, 1, argument_type=int)
                 max_level = int(parameter[1])
                 damage_parameters.level = (damage_parameters.get_min_level(), max_level)

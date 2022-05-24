@@ -95,9 +95,24 @@ Every `param` can be replaced with only `p`.
  - `equip show <name>` : shows more details on the specified equipment
  - `equip copy <source_name> <target_name>` : copy the source equipment with the new specified name
 
-### Search-related
+### Item-related
 
  - `search <search_phrase>` : print the type and id of items whose name contains the search phrase
+ - `item <item_id> [mode]` : print the stats of the given item id, with the mode being 'max', 'min' or 'ave' (default: 'max')
+
+### Equipment type
+
+All equipments have a unique type in the list :
+ - `hat`: for hats
+ - `amulet`: for amulets
+ - `cloak`: for cloaks
+ - `ring`: for rings (two will be chosen when optimized)
+ - `weapon`: for every kind of weapon
+ - `shield`: for shields
+ - `belt`: for belts
+ - `boots`: for boots
+ - `pet`: for pets, petsmounts and mounts
+ - `dofus`: for dofus and trophies
 
 ## Parameters
 
@@ -114,6 +129,13 @@ The possible parameters for every command that requires it are :
  - `-bdmg` (or `-bdamages`, `-base-damages`) followed by five integers (may be negative) : bonus (or malus) base damages of each element (in order : NEUTRAL, EARTH, FIRE, WATER, AIR) of the spell ;
  - `-states` (or `-state`) followed by as many states as wanted : the starting states used for the computations (only used in a damage command).
 
+The following additional parameters are only used for the stuff section :
+ - `-lvl` (or `-level`) followed by an integer between 1 and 200 : the exact level of items ;
+ - `-lvlmin` (or `-levelmin`, `-minlvl`, `-minlevel`) followed by an integer between 1 and 200 : the minimum level of items ;
+ - `-lvlmax` (or `-levelmax`, `-maxlvl`, `-maxlevel`) followed by an integer between 1 and 200 : the maximum level of items ;
+ - `-stuff` followed by one or more of the stuff types (or 'all') : indicate what equipment to optimize (if one starts with a `!`, it means to not chose this type) ;
+ - `-stuffmode` (or `-mode`) followed by one of `min`, `max`, `ave` : what type of stats to consider on every item (respectively the maximum possible, the minimum possible or the average of the two) ;
+ - `-e` (or `-equip`) followed by one equipment name : the equipment already chosen before the optimization.
 
 ## Examples of damages computation
 
