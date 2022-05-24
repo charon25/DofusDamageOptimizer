@@ -45,10 +45,10 @@ def command_loop(manager: Manager, stuff_manager: StuffManager):
                 continue
 
             if command:
-                try:
+                # try:
                     stuff_manager.execute_command(command)
-                except Exception as e:
-                    print(f"Error while executing stuff command {command}: {e}")
+                # except Exception as e:
+                #     print(f"Error while executing stuff command {command}: {e}")
 
         print()
 

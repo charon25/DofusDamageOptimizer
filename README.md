@@ -8,9 +8,7 @@ It runs on a Python 3 console (developed on 3.9.10, probably work for older vers
 
 ## "Stuff" TODO
 
-- commande pour optimiser le stuff pour une séquence de sort (version équipement par équipement ou panoplie par panoplie)
 - commande pour optimiser les sorts avec un équipement donné
-- commande pour optimiser un seul équipement pour une séquence de sort
 - commande pour maximiser une caractéristique donnée (stuff entier ou un seul équipement)
 
 possibilité d'ajouter des stats de départ à chaque fois
@@ -28,6 +26,8 @@ Every computation need to use a spell set and a parameters set (which eventually
 ## Commands
 
 Every `<name>` parameter in the commands below should not contains spaces and is unique for each type of commands.
+
+## Spell section
 
 ### General
 
@@ -69,8 +69,8 @@ Every `param` can be replaced with only `p`.
 
 ### Spell sets-related
 
- - `ss new <name>` : creates a new spell set
- - `ss rm <name> ` : deletes a spell set
+ - `ss new <name>` : create a new spell set
+ - `ss rm <name> ` : delete a spell set
  - `ss add <spell_set_name> <spell_name> [<spell_name> ...]` : add the specified spell(s) to the spell set
  - `ss del <spell_set_name> <spell_name>` : remove the specified spell from the spell set
  - `ss ls` : lists all the currently available spell sets
@@ -82,6 +82,19 @@ Every `param` can be replaced with only `p`.
  - `dmg <spell_set_name> [[<param> <value>] ...]` : return the best combination of spells for the given constraints (the parameters are described in the "Parameters" section) ;
  - `dmgs <spell_set_name> [[<param> <value>] ...]` : return the best combination of spells using the simple method which does not use the interactions between spells ;
  - `dmgc <spell1> <spell2> ... [[<param> <value>] ...]` : return the damages of the specified combination of spells in the specified order.
+
+## Stuff section
+
+### Equipment-related
+
+ - `equip new <name>` : create a new equipment
+ - `equip rm <name> ` : delete a equipment
+ - `equip add <equipment_name> <item_id> [<item_id> ...]` : add the specified item(s) to the equipment
+ - `equip del <equipment_name> <item_id> [<item_id> ...]` : remove the specified item(s) from the equipment
+ - `equip ls` : lists all the currently available equipments
+ - `equip show <name>` : shows more details on the specified equipment
+ - `equip copy <source_name> <target_name>` : copy the source equipment with the new specified name
+
 
 ## Parameters
 

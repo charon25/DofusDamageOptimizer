@@ -1,10 +1,65 @@
 import json
 import os
 import re
-from typing import Dict, Literal
+from typing import Dict, List
 
 from characteristics_damages import *
 from stats import Stats
+
+
+class Equipment:
+    def __init__(self) -> None:
+        self.items: Dict[str, int] = {}
+        self.name: str = ''
+
+
+    def add_item(self, item_type: str, item_id: int):
+        if not item_type in Item.TYPES:
+            raise ValueError(f"Item type should be one of {Item.TYPES} ('{item_type}' given instead).")
+
+        self.items[item_type] = item_id
+
+    def remove_item(self, item_id_to_remove: int):
+        removed_type = None
+        for item_type, item_id in self.items.items():
+            if item_id == item_id_to_remove:
+                removed_type = item_type
+        
+        if removed_type is not None:
+            self.items.pop(removed_type)
+        
+        return removed_type is not None
+
+
+    def to_dict(self) -> Dict:
+        return {
+            'items': self.items,
+            'name': self.name
+        }
+
+
+    def copy(self, new_name: str) -> 'Equipment':
+        new_equipment = Equipment()
+        new_equipment.items = {item_type: item_id for item_type, item_id in self.items.items()}
+        new_equipment.name = new_name
+
+        return new_equipment
+
+
+    def __len__(self):
+        return len(self.items)
+
+    def __contains__(self, item_type: str):
+        return item_type in self.items
+
+
+    @classmethod
+    def from_dict(cls, data: Dict) -> 'Equipment':
+        equipment = Equipment()
+        for item_type in data['items']:
+            equipment.add_item(item_type, data['items'][item_type])
+        equipment.name = data['name']
+        return equipment
 
 
 class Item:

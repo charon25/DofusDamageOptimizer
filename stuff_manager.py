@@ -8,7 +8,7 @@ import sys
 from typing import Any, Callable, Dict, List, Tuple
 
 from characteristics_damages import *
-from item import Item
+from item import Equipment, Item
 from items_manager import ItemsManager
 from knapsack import get_best_combination
 from damage_parameters import DamageParameters
@@ -21,6 +21,8 @@ from stats import Stats
 
 class StuffManager:
     OPTIMIZE_STUFF_COMMAND = ('optstuff', )
+    EQUIPMENT_COMMAND = ('equip', 'equipment')
+
 
     def __init__(self, print_method: Callable[[int, str], Any], manager: Manager) -> None:
         self.print: Callable[[int, str], Any] = print_method
@@ -74,9 +76,142 @@ class StuffManager:
         self.print(0, f" => {damages[1][0]:.0f} : {damages[1][1]['min']:.0f} - {damages[1][1]['max']:.0f} ({damages[1][1]['crit_min']:.0f} - {damages[1][1]['crit_max']:.0f})")
 
 
+    def _execute_equipment_command(self, args: List[str]):
+        if len(args) == 0:
+            self.print(1, 'Missing action in the command.')
+            return
+
+        command_action = args[0]
+
+        if command_action == 'new':
+            if len(args) < 2:
+                self.print(1, 'Missing equipment name.')
+                return
+
+            equip_name = args[1]
+
+            if equip_name in self.manager.equipments:
+                self.print(1, 'Equipment already exist.')
+                return
+
+            equipment = Equipment()
+            equipment.name = equip_name
+            self.manager.equipments[equip_name] = equipment
+
+            self.manager.save(False)
+            self.print(0, f"Equipment '{equip_name}' successfully created.")
+
+        elif command_action == 'rm':
+            if len(args) < 2:
+                self.print(1, 'Missing equipment name.')
+                return
+
+            equip_name = args[1]
+
+            if not equip_name in self.manager.equipments:
+                self.print(1, 'Equipment does not exist.')
+                return
+
+            self.manager.equipments.pop(equip_name)
+
+        elif command_action == 'ls':
+            self.print(0, '=== Equipments\n')
+            for equipment in sorted(self.manager.equipments.values(), key=lambda equipment: equipment.name):
+                self.print(0, f" - '{equipment.name}': {len(equipment)} item{'s' if len(equipment) > 1 else ''}")
+
+        elif command_action == 'show':
+            if len(args) < 2:
+                self.print(1, 'Missing equipment name.')
+                return
+
+            equip_name = args[1]
+
+            if not equip_name in self.manager.equipments:
+                self.print(1, 'Equipment does not exist.')
+                return
+
+            equipment = self.manager.equipments[equip_name]
+            printed_string = [f"===== Equipment '{equip_name}'", '']
+
+            for item_type in Item.TYPES:
+                if item_type in equipment:
+                    printed_string.append(f" - {item_type.capitalize(): <7} : {self.items_manager.items[equipment.items[item_type]].name}")
+
+            self.print(0, '\n'.join(printed_string))
+
+        elif command_action == 'add':
+            if len(args) < 3:
+                self.print(1, 'Missing equipment name or items to add.')
+
+            equip_name = args[1]
+
+            if not equip_name in self.manager.equipments:
+                self.print(1, 'Equipment does not exist.')
+                return
+
+            equipment = self.manager.equipments[equip_name]
+            added_count = 0
+            for item_id in args[2:]:
+                if item_id.isnumeric() and int(item_id) in self.items_manager.items:
+                    item_id = int(item_id)
+                    equipment.add_item(self.items_manager.items[item_id].type, item_id)
+                    added_count += 1
+                else:
+                    self.print(0, f"[WARNING] Item '{item_id}' is invalid or does not exist.")
+
+            self.manager.save(False)
+            self.print(0, f"{added_count} item{'s' if added_count > 1 else ''} added to '{equip_name}' successfully.")
+
+        elif command_action == 'del':
+            if len(args) < 3:
+                self.print(1, 'Missing equipment name or items to add.')
+
+            equip_name = args[1]
+
+            if not equip_name in self.manager.equipments:
+                self.print(1, 'Equipment does not exist.')
+                return
+
+            equipment = self.manager.equipments[equip_name]
+            removed_count = 0
+            for item_id in args[2:]:
+                could_be_removed = False
+                if item_id.isnumeric():
+                    could_be_removed = equipment.remove_item(int(item_id))
+                    removed_count += int(could_be_removed)
+                
+                if not item_id.isnumeric() or not could_be_removed:
+                    self.print(0, f"[WARNING] Item '{item_id}' is invalid or does not belong to equipment '{equip_name}'.")
+                
+
+            self.print(0, f"{removed_count} item{'s' if removed_count > 1 else ''} removed from '{equip_name}' successfully.")
+
+        elif command_action == 'copy':
+            if len(args) < 3:
+                self.print(1, 'Missing current or new equipment.')
+
+            current_equip_name = args[1]
+
+            if not current_equip_name in self.manager.equipments:
+                self.print(1, f"Equipment '{current_equip_name}' does not exist.")
+                return
+
+            new_equip_name = args[2]
+
+            if new_equip_name in self.manager.equipments:
+                self.print(1, f"Equipment '{new_equip_name}' already exist.")
+
+            self.manager.equipments[new_equip_name] = self.manager.equipments[current_equip_name].copy(new_equip_name)
+
+            self.manager.save(False)
+            self.print(0, f"Equipment '{new_equip_name}' succesfully created from '{current_equip_name}'.")
+
+
 
     def execute_command(self, command: str):
         instr, *args = command.split(' ')
 
         if instr in StuffManager.OPTIMIZE_STUFF_COMMAND:
             self._execute_optimize_stuff_command(args)
+        elif instr in StuffManager.EQUIPMENT_COMMAND:
+            self._execute_equipment_command(args)

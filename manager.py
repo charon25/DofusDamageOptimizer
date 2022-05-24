@@ -7,6 +7,7 @@ import sys
 from typing import Any, Callable, Dict, List, Tuple
 
 from characteristics_damages import *
+from item import Equipment
 from knapsack import get_best_combination
 from damage_parameters import DamageParameters
 from spell import Spell, SpellBuff
@@ -33,6 +34,7 @@ class Manager:
         self.parameters: Dict[str, DamageParameters] = dict()
         self.default_parameters: str = ''
         self.cache: Dict[int, List[Tuple[int, ...]]] = {}
+        self.equipments: Dict[str, Equipment] = dict()
 
         self._create_dirs()
         self._load_default()
@@ -59,7 +61,7 @@ class Manager:
     def _load_from_file(self):
         try:
             with open('manager.json', 'r', encoding='utf-8') as fi:
-                json_data = json.load(fi)
+                json_data: Dict = json.load(fi)
 
             # STATS
             for stats_filepath in json_data['stats']:
@@ -101,6 +103,13 @@ class Manager:
                     self.print(1, f"Could not load parameters '{parameters_name}'.")
 
             self.default_parameters = json_data['default_parameters']
+
+            # EQUIPMENTS
+            for equipment in json_data.get('equipments', []):
+                try:
+                    self.equipments[equipment['name']] = Equipment.from_dict(equipment)
+                except KeyError:
+                    self.print(1, f"Could not load equipment '{equipment['name']}'.")
 
         except (FileNotFoundError, KeyError, TypeError):
             self.print(1, "'manager.json' file does not exist or is innaccessible, using default load only.")
@@ -145,12 +154,17 @@ class Manager:
         for parameters_name in self.parameters:
             string_parameters[parameters_name] = self.parameters[parameters_name].to_string()
 
+        equipments = list()
+        for equip_name in self.equipments:
+            equipments.append(self.equipments[equip_name].to_dict())
+
         json_valid_data = {
             'stats': stats_filepaths,
             'spells': spells_filepaths,
             'spell_sets': spell_sets,
             'parameters': string_parameters,
-            'default_parameters': self.default_parameters
+            'default_parameters': self.default_parameters,
+            'equipments': equipments
         }
 
         with open('manager.json', 'w', encoding='utf-8') as fo:
