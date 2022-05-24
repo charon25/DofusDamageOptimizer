@@ -2,7 +2,7 @@ import re
 from typing import Dict, List, Literal, Set, Tuple, Union
 
 from characteristics_damages import *
-from item import Item
+from item import Equipment, Item
 from stats import Stats
 
 
@@ -24,8 +24,9 @@ class DamageParameters:
 
         # Stuff mode
         self.level: Tuple[int, int] = (1, 200)
-        self.stuff: List[str] = []
+        self.stuff: List[str] = list(Item.TYPES)
         self.stuff_stats_mode: Literal['min', 'ave', 'max'] = 'max'
+        self.equipment: str = ''
 
 
     def get_min_po(self):
@@ -78,6 +79,26 @@ class DamageParameters:
             result.resistances[k] += other.resistances[k]
 
         return result
+
+
+    def update_stuff_with_equipment(self, equipments: Dict[str, Equipment]):
+        if self.equipment == '':
+            return
+        if not self.equipment in equipments:
+            raise KeyError(f"Equipment '{self.equipment}' does not exist.")
+
+        for item_type in equipments[self.equipment].items:
+            if item_type in self.stuff:
+                self.stuff.remove(item_type)
+
+    def get_equipment_stats(self, items: Dict[str, Item], equipments: Dict[str, Equipment]) -> Stats:
+        if self.equipment == '':
+            return Stats()
+        if not self.equipment in equipments:
+            raise KeyError(f"Equipment '{self.equipment}' does not exist.")
+
+        # Sum of the stats of every item in the equipment
+        return sum(items[item_id].stats[self.stuff_stats_mode] for item_id in equipments[self.equipment].items.values())
 
 
     def to_string(self):
@@ -246,6 +267,13 @@ class DamageParameters:
             elif command in ('-stuffmode', '-mode'):
                 cls._check_parameter(parameter, 1, literals=('min', 'ave', 'max'))
                 damage_parameters.stuff_stats_mode = parameter[1]
+
+            elif command in ('-e', '-equip'):
+                cls._check_parameter(parameter, 1)
+                damage_parameters.equipment = parameter[1]
+
+        if len(damage_parameters.stuff) == 0:
+            damage_parameters.stuff.extend(Item.TYPES)
 
         # Sort in the same order as the Item.TYPES tuple
         damage_parameters.stuff.sort(key=lambda stuff_type: Item.TYPES.index(stuff_type))
