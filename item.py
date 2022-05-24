@@ -8,7 +8,8 @@ from stats import Stats
 
 
 class Item:
-    TYPES = ('pet', 'hat', 'amulet', 'belt', 'ring', 'boots', 'cloak', 'shield', 'dofus', 'weapon')
+    TYPES = ('hat', 'amulet', 'cloak', 'ring', 'weapon', 'shield', 'belt', 'boots', 'pet', 'dofus')
+    QUANTITY = {'hat': 1, 'amulet': 1, 'cloak': 1, 'ring': 2, 'weapon': 1, 'shield': 1, 'belt': 1, 'boots': 1, 'pet': 1, 'dofus': 6}
 
     def __init__(self) -> None:
         self.name: str = ''

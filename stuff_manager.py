@@ -66,18 +66,12 @@ class StuffManager:
 
         damages = self.items_manager.get_best_stuff_from_spells(spell_chain, total_stats, damages_parameters)
 
-        if damages_parameters.stuff == 'all':
-            self.print(0, f"Best stuff (parameters : '{self.manager.default_parameters}' ; initial states: ({','.join(sorted(damages_parameters.starting_states))})) :")
-            self.print(0, '')
-            for item in damages[0]:
-                self.print(0, f" - {item.type.capitalize(): <7} : {item.name}")
-            self.print(0, '')
-            self.print(0, f" => {damages[1][0]:.0f} : {damages[1][1]['min']:.0f} - {damages[1][1]['max']:.0f} ({damages[1][1]['crit_min']:.0f} - {damages[1][1]['crit_max']:.0f})")
-        else:
-            self.print(0, f"Best {damages_parameters.stuff}s (parameters : '{self.manager.default_parameters}' ; initial states: ({','.join(sorted(damages_parameters.starting_states))})) :")
-            self.print(0, '')
-            for item, (average_damages, detailed_damages) in damages:
-                self.print(0, f" - {item.name}\n    => {average_damages:.0f} : {detailed_damages['min']:.0f} - {detailed_damages['max']:.0f} ({detailed_damages['crit_min']:.0f} - {detailed_damages['crit_max']:.0f})")
+        self.print(0, f"Best stuff (parameters : '{self.manager.default_parameters}' ; initial states: ({','.join(sorted(damages_parameters.starting_states))})) :")
+        self.print(0, '')
+        for item in damages[0]:
+            self.print(0, f" - {item.type.capitalize(): <7} : {item.name}")
+        self.print(0, '')
+        self.print(0, f" => {damages[1][0]:.0f} : {damages[1][1]['min']:.0f} - {damages[1][1]['max']:.0f} ({damages[1][1]['crit_min']:.0f} - {damages[1][1]['crit_max']:.0f})")
 
 
 

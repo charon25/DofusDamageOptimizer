@@ -2,6 +2,7 @@ import re
 from typing import Dict, List, Literal, Set, Tuple, Union
 
 from characteristics_damages import *
+from item import Item
 from stats import Stats
 
 
@@ -23,7 +24,7 @@ class DamageParameters:
 
         # Stuff mode
         self.level: Tuple[int, int] = (1, 200)
-        self.stuff: Literal = 'all'
+        self.stuff: List[str] = []
         self.stuff_stats_mode: Literal['min', 'ave', 'max'] = 'max'
 
 
@@ -230,12 +231,24 @@ class DamageParameters:
                 damage_parameters.level = (damage_parameters.get_min_level(), max_level)
 
             elif command == '-stuff':
-                cls._check_parameter(parameter, 1, literals=('all', 'pet', 'hat', 'amulet', 'belt', 'ring', 'boots', 'cloak', 'shield', 'dofus', 'weapon'))
-                damage_parameters.stuff = parameter[1]
+                damage_parameters.stuff = []
+                # Sort reversed so everything starting with a '!' goes at the end
+                for argument in sorted(parameter[1:], reverse=True):
+                    if argument == '':continue
+                    if argument == 'all':
+                        damage_parameters.stuff.extend(Item.TYPES)
+                    elif not argument.startswith('!'):
+                        if argument in Item.TYPES:
+                            damage_parameters.stuff.append(argument)
+                    elif argument[1:] in damage_parameters.stuff:
+                        damage_parameters.stuff.remove(argument[1:])
 
             elif command in ('-stuffmode', '-mode'):
                 cls._check_parameter(parameter, 1, literals=('min', 'ave', 'max'))
                 damage_parameters.stuff_stats_mode = parameter[1]
+
+        # Sort in the same order as the Item.TYPES tuple
+        damage_parameters.stuff.sort(key=lambda stuff_type: Item.TYPES.index(stuff_type))
 
         # If the specified PO is one, this means the enemy is in melee range
         # If the minimum PO is > 1, the enemy is not in melee range

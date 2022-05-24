@@ -124,7 +124,6 @@ class TestSpellChain(unittest.TestCase):
         chain.add_spell(spell2)
 
         computation_data = chain._get_detailed_damages_of_permutation([0, 1], stats, parameters)
-        print(computation_data.damages)
 
         self.assertDictEqual(computation_data.damages, {'min': 10 + 5, 'max': 12 + 7, 'crit_min': 20 + 15, 'crit_max': 22 + 17})
         self.assertAlmostEqual(computation_data.average_damages, 17 * 0.9 + 37 * 0.1)
