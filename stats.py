@@ -56,7 +56,7 @@ class Stats:
             if characteristic == NEUTRAL:
                 continue
             if self.characteristics[characteristic] != 0:
-                characteristic_lines.append(f'{indentation * 2}{CHARACTERISTICS_NAMES[characteristic]}: {self.characteristics[characteristic]}')
+                characteristic_lines.append(f'{indentation * 2}{CHARACTERISTICS_NAMES[characteristic]}: {self.characteristics[characteristic]:.0f}')
 
         if characteristic_lines:
             output_lines.append(f'{indentation}-> Characteristics')
@@ -65,7 +65,7 @@ class Stats:
         damage_lines = []
         for damage in range(DAMAGES_COUNT):
             if self.damages[damage] != 0:
-                damage_lines.append(f'{indentation * 2}{DAMAGES_NAMES[damage]}: {self.damages[damage]}')
+                damage_lines.append(f'{indentation * 2}{DAMAGES_NAMES[damage]}: {self.damages[damage]:.0f}')
 
         if damage_lines:
             output_lines.append(f'{indentation}-> Damages')

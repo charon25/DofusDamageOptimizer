@@ -23,6 +23,7 @@ class StuffManager:
     OPTIMIZE_STUFF_COMMAND = ('optstuff', )
     EQUIPMENT_COMMAND = ('equip', 'equipment')
     SEARCH_COMMAND = ('search', )
+    ITEM_command = ('item', )
 
 
     def __init__(self, print_method: Callable[[int, str], Any], manager: Manager) -> None:
@@ -146,6 +147,7 @@ class StuffManager:
         elif command_action == 'add':
             if len(args) < 3:
                 self.print(1, 'Missing equipment name or items to add.')
+                return
 
             equip_name = args[1]
 
@@ -169,6 +171,7 @@ class StuffManager:
         elif command_action == 'del':
             if len(args) < 3:
                 self.print(1, 'Missing equipment name or items to add.')
+                return
 
             equip_name = args[1]
 
@@ -193,6 +196,7 @@ class StuffManager:
         elif command_action == 'copy':
             if len(args) < 3:
                 self.print(1, 'Missing current or new equipment.')
+                return
 
             current_equip_name = args[1]
 
@@ -214,6 +218,7 @@ class StuffManager:
     def _execute_search_command(self, args: List[str]):
         if len(args) < 1:
             self.print(1, 'Missing item name.')
+            return
 
         search_phrase = ' '.join(args)
         search_result = self.items_manager.search(search_phrase)
@@ -221,6 +226,24 @@ class StuffManager:
         self.print(0, '=== Search results\n')
         for item in search_result[:25]:
             self.print(0, f" - {item.name} ({item.type}): {item.id}")
+
+
+    def _execute_item_command(self, args: List[str]):
+        if len(args) < 1:
+            self.print(1, 'Missing item id.')
+            return
+
+        if not args[0].isnumeric() or not int(args[0]) in self.items_manager.items:
+            self.print(1, f"'{args[0]}' is not a valid item.")
+
+        item = self.items_manager.items[int(args[0])]
+
+        mode = 'max'
+        if len(args) >= 2 and args[1] in ('min', 'max', 'ave'):
+            mode = args[1]
+
+        self.print(0, f"=== Item '{item.name}' ({item.id})\n")
+        self.print(0, item.stats[mode].to_compact_string())
 
 
     def execute_command(self, command: str):
@@ -232,3 +255,5 @@ class StuffManager:
             self._execute_equipment_command(args)
         elif instr in StuffManager.SEARCH_COMMAND:
             self._execute_search_command(args)
+        elif instr in StuffManager.ITEM_command:
+            self._execute_item_command(args)
