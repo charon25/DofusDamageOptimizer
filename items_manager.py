@@ -5,20 +5,30 @@ from unicodedata import normalize
 
 from damage_parameters import DamageParameters
 from item import Item
+from item_set import ItemSet
 from spell_chain import ComputationData, SpellChains
 from stats import Stats
 
 
 class ItemsManager:
 
-    def __init__(self, filepath: str) -> None:
+    def __init__(self, items_filepath: str, item_sets_filepath: str) -> None:
         self.items: Dict[int, Item] = {}
         self.items_by_type: Dict[str, List[Item]] = {}
+        self.item_sets: Dict[int, ItemSet] = {}
 
-        self._load_items(filepath)
+        self._load_items(items_filepath, item_sets_filepath)
 
-    def _load_items(self, filepath: str):
-        with open(filepath, 'r', encoding='utf-8') as fi:
+    def _load_items(self, items_filepath: str, item_sets_filepath: str):
+        with open(item_sets_filepath, 'r', encoding='utf-8') as fi:
+            json_item_sets = json.load(fi)
+
+        for json_item_set in json_item_sets:
+            item_set: ItemSet = ItemSet.from_json_data(json_item_set)
+            self.item_sets[item_set.id] = item_set
+
+
+        with open(items_filepath, 'r', encoding='utf-8') as fi:
             json_items = json.load(fi)
 
         for json_item in json_items:
@@ -29,8 +39,13 @@ class ItemsManager:
                 self.items_by_type[item.type] = []
             self.items_by_type[item.type].append(item)
 
+            if item.set is not None:
+                self.item_sets[item.set].items[item.type] = item
+
+
     def _get_normalised_string(self, string: str) -> str:
         return normalize('NFKD', string.lower()).encode('ASCII', 'ignore')
+
 
     def search(self, search_phrase: str) -> List[Item]:
         results = []

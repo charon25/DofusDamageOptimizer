@@ -112,7 +112,7 @@ All equipments have a unique type in the list :
  - `belt`: for belts
  - `boots`: for boots
  - `pet`: for pets, petsmounts and mounts
- - `dofus`: for dofus and trophies
+ - `dofus`: for dofus and trophies (6 will be chosen when optimized)
 
 ## Parameters
 

@@ -68,12 +68,12 @@ class Item:
 
     def __init__(self) -> None:
         self.name: str = ''
-        self.id: int = 0
+        self.id: int = -1
         self.set: int = None
         self.type: str = ''
         self.level: int = 1
         self.stats: Dict[str, Stats] = {'min': Stats(), 'ave': Stats(), 'max': Stats()}
-        self.other_stats: Dict[str, Dict[str, int]] = {'min': {}, 'ave': {}, 'max': {}}
+        self.other_stats: Dict[str, Dict[str, float]] = {'min': {}, 'ave': {}, 'max': {}}
 
 
     def to_dict(self) -> Dict:
@@ -96,7 +96,7 @@ class Item:
     def check_json_validity(cls, json_data):
         for field in ('name', 'type', 'id', 'set', 'level', 'stats', 'other_stats'):
             if not field in json_data:
-                raise KeyError(f"JSON string does not contain a '{field}' field (Spell.check_json_validity).")
+                raise KeyError(f"JSON string does not contain a '{field}' field (Item.check_json_validity).")
 
     @classmethod
     def from_json_data(cls, json_data):

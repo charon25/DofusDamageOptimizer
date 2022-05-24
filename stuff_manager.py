@@ -34,7 +34,7 @@ class StuffManager:
         self._load_from_file()
 
     def _load_from_file(self):
-        self.items_manager = ItemsManager('stuff_data\\all_items.json')
+        self.items_manager = ItemsManager('stuff_data\\all_items.json', 'stuff_data\\all_item_sets.json')
 
 
     def _execute_optimize_stuff_command(self, args: List[str]):
