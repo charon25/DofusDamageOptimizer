@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict
+from typing import Dict, List
 
 from item import Item
 from stats import Stats
@@ -13,7 +13,7 @@ class ItemSet:
         self.stats: Dict[int, Stats] = {}
         self.other_stats: Dict[int, Dict[str, float]] = {}
         # May be empty
-        self.items: Dict[str, Item] = {}
+        self.items: Dict[str, List[Item]] = {}
 
 
     def get_level(self) -> int:
@@ -30,6 +30,11 @@ class ItemSet:
             'stats': {quantity: stats.to_dict() for quantity, stats in self.stats.items()},
             'other_stats': self.other_stats
         }
+
+
+    def __repr__(self) -> str:
+        return f"Item set '{self.name}' ({self.id})"
+
 
 
     @classmethod
