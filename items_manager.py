@@ -3,6 +3,11 @@ import json
 from typing import Dict, List, Tuple
 from unicodedata import normalize
 
+try:
+    from tqdm import tqdm as progress_bar
+except ImportError:  # If the 'tqdm' module is not installed, define the progress bar as the identity function
+    def progress_bar(iterator, *args, **kwargs): return iterator
+
 from damage_parameters import DamageParameters
 from item import Equipment, Item
 from item_set import ItemSet
@@ -129,7 +134,7 @@ class ItemsManager:
             best_items_by_type[item_type] = self._get_n_best_items_from_damages(damages, n=10000)
 
         damages_by_items: Dict[Tuple[int], Tuple[float, Dict[str, int]]] = {}
-        for item_set_ids in self.item_sets_combinations:
+        for item_set_ids in progress_bar(self.item_sets_combinations, total=len(self.item_sets_combinations), leave=False):
             is_item_set_possible, item_types_count = self._is_item_set_combination_possible(item_set_ids, parameters)
 
             if is_item_set_possible and all(parameters.level[0] <= self.item_sets[item_set_id].level <= parameters.level[1] for item_set_id in item_set_ids):
@@ -145,11 +150,17 @@ class ItemsManager:
                             count_left -= 1
                         current_index += 1
 
-                # print(items, item_types_count)
                 total_stats = base_stats + self._get_total_stats_from_items(items, parameters)
-
                 computation_data = spell_chain._get_detailed_damages_of_permutation(permutation, total_stats, parameters, previous_data=None)
                 damages_by_items[tuple(item.id for item in items)] = (computation_data.average_damages, computation_data.damages)
+
+        # Doing the computations without any care for item sets, to compare
+        items = [item for item_type in parameters.stuff for item in best_items_by_type[item_type][:Item.QUANTITY[item_type]]]
+        if parameters.equipment:
+            items += [self.items[item_id] for item_id in equipments[parameters.equipment].items.values()]
+        total_stats = self._get_total_stats_from_items(items, parameters)
+        computation_data = spell_chain._get_detailed_damages_of_permutation(permutation, total_stats, parameters, previous_data=None)
+        damages_by_items[tuple(item.id for item in items)] = (computation_data.average_damages, computation_data.damages)
 
         damages_by_items = {key: value for key, value in sorted(damages_by_items.items(), key=lambda key_value: key_value[1][0], reverse=True)}
         best_items = next(iter(damages_by_items))
