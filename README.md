@@ -10,6 +10,9 @@ It runs on a Python 3 console (developed on 3.9.10, probably work for older vers
 
 - commande pour optimiser les sorts avec un équipement donné
 - commande pour maximiser une caractéristique donnée (stuff entier ou un seul équipement)
+- correction bug si on a déjà un equipement complet
+- ajouter commande pour calculer dégats equipement
+- afficher les stats après optimisation stuff
 
 possibilité d'ajouter des stats de départ à chaque fois
 

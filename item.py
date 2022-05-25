@@ -7,6 +7,10 @@ from characteristics_damages import *
 from stats import Stats
 
 
+# Temporary, TODO better it
+TROPHYS_CONSTRAINTS = ['Sanguinaire majeur', 'Vigoureux majeur', 'Carapace air majeur', 'Carapace eau majeur', 'Carapace feu majeur', 'Carapace neutre majeur', 'Carapace terre majeur', 'Fonceur majeur', 'Solide majeur', 'Culbuteur majeur', 'Cavaleur majeur', 'Évasif majeur', 'Étourdisseur majeur', 'Temporiseur majeur', 'Dévastateur air majeur', 'Dévastateur eau majeur', 'Dévastateur feu majeur', 'Dévastateur neutre majeur', 'Dévastateur terre majeur', 'Fortification majeure', 'Chanceux majeur', 'Cascadeur majeur', 'Érudit majeur', 'Enragé majeur', 'Miraculé majeur', 'Guérisseur majeur', 'Déserteur majeur', 'Obstructeur majeur', 'Sanguinaire', 'Vigoureux', 'Carapace air', 'Carapace eau', 'Carapace feu', 'Carapace neutre', 'Nomade', 'Carapace terre', 'Fonceur', 'Solide', 'Culbuteur', 'Cavaleur', 'Évasif', 'Étourdisseur', 'Temporiseur', 'Dévastateur air', 'Dévastateur eau', 'Dévastateur feu', 'Dévastateur neutre', 'Dévastateur terre', 'Fortification', 'Chanceux', 'Cascadeur', 'Érudit', 'Enragé', 'Miraculé', 'Guérisseur', 'Déserteur', 'Obstructeur', 'Remueur', 'Sanguinaire mineur', 'Observateur', 'Vigoureux mineur', 'Carapace air mineur', 'Carapace eau mineur', 'Carapace feu mineur', 'Carapace neutre mineur', 'Carapace terre mineur', 'Fonceur mineur', 'Solide mineur', 'Culbuteur mineur', 'Cavaleur mineur', 'Évasif mineur', 'Étourdisseur mineur', 'Temporiseur mineur', 'Dévastateur air mineur', 'Dévastateur eau mineur', 'Dévastateur feu mineur', 'Dévastateur neutre mineur', 'Dévastateur terre mineur', 'Fortification mineure', 'Chanceux mineur', 'Cascadeur mineur', 'Érudit mineur', 'Enragé mineur', 'Miraculé mineur', 'Guérisseur mineur', 'Déserteur mineur', 'Obstructeur mineur']
+
+
 class Equipment:
     def __init__(self) -> None:
         self.items: Dict[str, int] = {}

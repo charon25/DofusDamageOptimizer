@@ -9,7 +9,7 @@ except ImportError:  # If the 'tqdm' module is not installed, define the progres
     def progress_bar(iterator, *args, **kwargs): return iterator
 
 from damage_parameters import DamageParameters
-from item import Equipment, Item
+from item import Equipment, Item, TROPHYS_CONSTRAINTS
 from item_set import ItemSet
 from spell_chain import ComputationData, SpellChains
 from stats import Stats
@@ -139,15 +139,17 @@ class ItemsManager:
 
             if is_item_set_possible and all(parameters.level[0] <= self.item_sets[item_set_id].level <= parameters.level[1] for item_set_id in item_set_ids):
                 items = [item for item_set_id in item_set_ids for items in self.item_sets[item_set_id].items.values() for item in items]
+                item_set_bonus_count = sum(len(self.item_sets[item_set_id].stats) for item_set_id in item_set_ids)
 
                 for item_type in Item.TYPES:
                     count_left = Item.QUANTITY[item_type] - item_types_count[item_type]
                     current_index = 0
-                    while count_left > 0:
+                    while count_left > 0 and current_index < len(best_items_by_type[item_type]):
                         current_item = best_items_by_type[item_type][current_index]
                         if not current_item in items:
-                            items.append(current_item)
-                            count_left -= 1
+                            if not (current_item.type == 'dofus' and current_item.name in TROPHYS_CONSTRAINTS and item_set_bonus_count >= 2):
+                                items.append(current_item)
+                                count_left -= 1
                         current_index += 1
 
                 total_stats = base_stats + self._get_total_stats_from_items(items, parameters)
