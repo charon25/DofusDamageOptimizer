@@ -14,13 +14,15 @@ class ItemSet:
         self.other_stats: Dict[int, Dict[str, float]] = {}
         # May be empty
         self.items: Dict[str, List[Item]] = {}
+        # May be wrong
+        self.level: int = 1
 
 
-    def get_level(self) -> int:
-        if self.items:
-            return max(item.level for item in self.items.values())
-        else:
-            return None
+    def get_stats(self, quantity: int) -> Stats:
+        if quantity <= 1:
+            return Stats()
+        
+        return self.stats[quantity]
 
 
     def to_dict(self):

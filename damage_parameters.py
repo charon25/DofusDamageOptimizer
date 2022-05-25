@@ -3,6 +3,7 @@ from typing import Dict, List, Literal, Set, Tuple, Union
 
 from characteristics_damages import *
 from item import Equipment, Item
+from item_set import ItemSet
 from stats import Stats
 
 
@@ -91,7 +92,7 @@ class DamageParameters:
             if item_type in self.stuff:
                 self.stuff.remove(item_type)
 
-    def get_equipment_stats(self, items: Dict[str, Item], equipments: Dict[str, Equipment]) -> Stats:
+    def get_equipment_stats(self, items: Dict[str, Item], item_sets: Dict[str, ItemSet], equipments: Dict[str, Equipment]) -> Stats:
         if self.equipment == '':
             return Stats()
         if not self.equipment in equipments:

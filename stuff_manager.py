@@ -31,10 +31,10 @@ class StuffManager:
         self.items_manager: ItemsManager = None
         self.manager: Manager = manager
 
-        self._load_from_file()
+        self._load_from_files()
 
-    def _load_from_file(self):
-        self.items_manager = ItemsManager('stuff_data\\all_items.json', 'stuff_data\\all_item_sets.json')
+    def _load_from_files(self):
+        self.items_manager = ItemsManager({'items': 'stuff_data\\all_items.json', 'item_sets': 'stuff_data\\all_item_sets.json', 'item_sets_combinations': 'stuff_data\\item_sets_combinations.json'})
 
 
     def _execute_optimize_stuff_command(self, args: List[str]):
@@ -65,13 +65,13 @@ class StuffManager:
         total_stats = damages_parameters.get_total_stats(self.manager.stats)
         if damages_parameters.equipment:
             damages_parameters.update_stuff_with_equipment(self.manager.equipments)
-            total_stats += damages_parameters.get_equipment_stats(self.items_manager.items, self.manager.equipments)
+            # total_stats += damages_parameters.get_equipment_stats(self.items_manager.items, self.manager.equipments)
 
         spell_chain = SpellChains()
         for spell in spell_list:
             spell_chain.add_spell(spell)
 
-        damages = self.items_manager.get_best_stuff_from_spells(spell_chain, total_stats, damages_parameters)
+        damages = self.items_manager.get_best_stuff_from_spells(spell_chain, total_stats, damages_parameters, self.manager.equipments)
 
         self.print(0, f"Best stuff (parameters : '{self.manager.default_parameters}' ; initial states: ({','.join(sorted(damages_parameters.starting_states))}) ; equipment: '{damages_parameters.equipment}') :")
         self.print(0, '')

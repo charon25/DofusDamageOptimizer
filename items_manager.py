@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple
 from unicodedata import normalize
 
 from damage_parameters import DamageParameters
-from item import Item
+from item import Equipment, Item
 from item_set import ItemSet
 from spell_chain import ComputationData, SpellChains
 from stats import Stats
@@ -12,15 +12,20 @@ from stats import Stats
 
 class ItemsManager:
 
-    def __init__(self, items_filepath: str, item_sets_filepath: str) -> None:
+    def __init__(self, filepaths: Dict[str, str]) -> None:
         self.items: Dict[int, Item] = {}
         self.items_by_type: Dict[str, List[Item]] = {}
         self.item_sets: Dict[int, ItemSet] = {}
+        self.item_sets_combinations: List[List[int]] = []
 
-        self._load_items(items_filepath, item_sets_filepath)
+        self._load_items(filepaths)
 
-    def _load_items(self, items_filepath: str, item_sets_filepath: str):
-        with open(item_sets_filepath, 'r', encoding='utf-8') as fi:
+    def _load_items(self, filepaths: Dict[str, str]):
+        assert 'items' in filepaths
+        assert 'item_sets' in filepaths
+        assert 'item_sets_combinations' in filepaths
+
+        with open(filepaths['item_sets'], 'r', encoding='utf-8') as fi:
             json_item_sets = json.load(fi)
 
         for json_item_set in json_item_sets:
@@ -28,7 +33,7 @@ class ItemsManager:
             self.item_sets[item_set.id] = item_set
 
 
-        with open(items_filepath, 'r', encoding='utf-8') as fi:
+        with open(filepaths['items'], 'r', encoding='utf-8') as fi:
             json_items = json.load(fi)
 
         for json_item in json_items:
@@ -41,6 +46,10 @@ class ItemsManager:
 
             if item.set is not None:
                 self.item_sets[item.set].items[item.type] = self.item_sets[item.set].items.get(item.type, []) + [item]
+                self.item_sets[item.set].level = max(self.item_sets[item.set].level, item.level)
+
+        with open(filepaths['item_sets_combinations'], 'r', encoding='utf-8') as fi:
+            self.item_sets_combinations = json.load(fi)
 
 
     def _get_normalised_string(self, string: str) -> str:
@@ -57,8 +66,31 @@ class ItemsManager:
         return sorted(results, key=lambda item:item.name)
 
 
+    def _get_total_stats_from_items(self, items: List[Item], parameters: DamageParameters) -> Stats:
+        total_stats = sum(item.stats[parameters.stuff_stats_mode] for item in items)
+
+        item_sets_counter = {}
+        for item in items:
+            if item.set is not None:
+                if not item.set in item_sets_counter:
+                    item_sets_counter[item.set] = 1
+                else:
+                    item_sets_counter[item.set] += 1
+
+        return total_stats + sum(self.item_sets[item_set_id].get_stats(quantity) for item_set_id, quantity in item_sets_counter.items())
+
+
+    def _is_item_set_combination_possible(self, item_set_ids: List[int], parameters: DamageParameters) -> Tuple[bool, Dict[str, int]]:
+        count = {item_type: (0 if item_type in parameters.stuff else 1) for item_type in Item.TYPES}
+        for item_set_id in item_set_ids:
+            for item_type, items in self.item_sets[item_set_id].items.items():
+                count[item_type] += len(items)
+        
+        return (all(count[item_type] <= Item.QUANTITY[item_type] for item_type in count), count)
+
+
     def _get_n_best_items_from_damages(self, damages: Dict[Tuple[str], Tuple[float, Dict[str, int]]], n: int = 1) -> List[Item]:
-        return list(item_id for item_id in list(damages.keys())[:n])
+        return list(self.items[item_id] for item_id in list(damages.keys())[:n])
 
 
     def _get_best_stuff_part_from_spells(self, stuff_part: str, spell_chain: SpellChains, stats: Stats, parameters: DamageParameters) -> Dict[Tuple[str], Tuple[float, Dict[str, int]]]:
@@ -84,14 +116,42 @@ class ItemsManager:
         return damages
 
 
-    def get_best_stuff_from_spells(self, spell_chain: SpellChains, stats: Stats, parameters: DamageParameters) -> Tuple[List[Item], Tuple[float, Dict[str, int]]]:
-        complete_stuff: List[Item] = []
-        for stuff_type in parameters.stuff:
-            damages = self._get_best_stuff_part_from_spells(stuff_type, spell_chain, stats, parameters)
-            complete_stuff.extend(self._get_n_best_items_from_damages(damages, n=Item.QUANTITY[stuff_type]))
+    def get_best_stuff_from_spells(self, spell_chain: SpellChains, base_stats: Stats, parameters: DamageParameters, equipments: Dict[str, Equipment]) -> Tuple[List[Item], Tuple[float, Dict[str, int]]]:
+        # base_stats are the stats given by the parameters (from stats page)
+        # initial_stats are the base stats plus the stats given by the initial equipment
+        initial_stats = base_stats + parameters.get_equipment_stats(self.items, self.item_sets, equipments)
 
-        total_stats = stats + sum(self.items[item_id].stats[parameters.stuff_stats_mode] for item_id in complete_stuff)
-        computation_data = spell_chain._get_detailed_damages_of_permutation(list(range(len(spell_chain.spells))), total_stats, parameters, previous_data=None)
+        permutation = list(range(len(spell_chain.spells)))  # Permutation of all specified spells in the specified order
 
-        return ([self.items[item_id] for item_id in complete_stuff], (computation_data.average_damages, computation_data.damages))
+        best_items_by_type: Dict[str, List[Item]] = {}
+        for item_type in parameters.stuff:
+            damages = self._get_best_stuff_part_from_spells(item_type, spell_chain, initial_stats, parameters)
+            best_items_by_type[item_type] = self._get_n_best_items_from_damages(damages, n=10000)
 
+        damages_by_items: Dict[Tuple[int], Tuple[float, Dict[str, int]]] = {}
+        for item_set_ids in self.item_sets_combinations:
+            is_item_set_possible, item_types_count = self._is_item_set_combination_possible(item_set_ids, parameters)
+
+            if is_item_set_possible and all(parameters.level[0] <= self.item_sets[item_set_id].level <= parameters.level[1] for item_set_id in item_set_ids):
+                items = [item for item_set_id in item_set_ids for items in self.item_sets[item_set_id].items.values() for item in items]
+
+                for item_type in Item.TYPES:
+                    count_left = Item.QUANTITY[item_type] - item_types_count[item_type]
+                    current_index = 0
+                    while count_left > 0:
+                        current_item = best_items_by_type[item_type][current_index]
+                        if not current_item in items:
+                            items.append(current_item)
+                            count_left -= 1
+                        current_index += 1
+
+                # print(items, item_types_count)
+                total_stats = base_stats + self._get_total_stats_from_items(items, parameters)
+
+                computation_data = spell_chain._get_detailed_damages_of_permutation(permutation, total_stats, parameters, previous_data=None)
+                damages_by_items[tuple(item.id for item in items)] = (computation_data.average_damages, computation_data.damages)
+
+        damages_by_items = {key: value for key, value in sorted(damages_by_items.items(), key=lambda key_value: key_value[1][0], reverse=True)}
+        best_items = next(iter(damages_by_items))
+
+        return ([self.items[item_id] for item_id in best_items], damages_by_items[best_items])

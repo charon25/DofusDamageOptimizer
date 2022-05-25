@@ -88,6 +88,10 @@ class Item:
         }
 
 
+    def __eq__(self, other: 'Item'):
+        return self.id == other.id
+
+
     def __repr__(self) -> str:
         return f"Item '{self.name}' ({self.id})"
 
