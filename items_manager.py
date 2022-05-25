@@ -40,9 +40,7 @@ class ItemsManager:
             self.items_by_type[item.type].append(item)
 
             if item.set is not None:
-                try:
-                    self.item_sets[item.set].items[item.type] = self.item_sets[item.set].items.get(item.type, []) + [item]
-                except:pass
+                self.item_sets[item.set].items[item.type] = self.item_sets[item.set].items.get(item.type, []) + [item]
 
 
     def _get_normalised_string(self, string: str) -> str:
@@ -97,75 +95,3 @@ class ItemsManager:
 
         return ([self.items[item_id] for item_id in complete_stuff], (computation_data.average_damages, computation_data.damages))
 
-
-class Code:
-    TYPES = Item.TYPES[:-1]
-    QUANTITY = (1, 1, 1, 2, 1, 1, 1, 1, 1)
-    MAX_CODE = 2 ** len(TYPES)
-
-    def __init__(self, code) -> None:
-        self.code: Tuple[int] = tuple(code)
-        assert len(self.code) == len(Code.QUANTITY)
-
-    def __and__(self, other: 'Code') -> int:
-        return sum(self.code[i] + other.code[i] > Code.QUANTITY[i] for i in range(len(Code.TYPES)))
-
-    def __or__(self, other: 'Code') -> 'Code':
-        return Code(tuple(self.code[i] + other.code[i] for i in range(len(Code.TYPES))))
-
-    def __repr__(self) -> str:
-        return str(self.code)
-
-    def __hash__(self) -> int:
-        return hash(self.code)
-
-    def plus_one_ring(self) -> 'Code':
-        return Code(tuple(x + 1 if k == 3 else x for k, x in enumerate(self.code)))
-
-    def __eq__(self, other: 'Code'):
-        return self.code == other.code
-
-    def __ne__(self, other: 'Code'):
-        return self.code != other.code
-
-if __name__ == '__main__':
-    manager = ItemsManager('stuff_data\\all_items.json', 'stuff_data\\all_item_sets.json')
-    TYPES = Item.TYPES[:-1]
-    MAX_CODE = 2 ** len(TYPES)
-    ALL_CODES = [Code(tuple(map(int, f'{n:>09b}'))) for n in range(MAX_CODE)]
-    ALL_CODES += [code.plus_one_ring() for code in ALL_CODES if code.code[3] == 1]
-
-    AVAILABLE: Dict[Code, List[int]] = {code: [] for code in ALL_CODES}
-
-
-    CODES: Dict[int, Code] = {}
-
-    combinations: List[List[Tuple[Tuple[int], int]]] = [[((), -1)], []]
-
-    for item_set in manager.item_sets.values():
-        code = Code((len(item_set.items.get(item_type, [])) for item_type in TYPES))
-        CODES[item_set.id] = code
-        for inverse_code in ALL_CODES:
-            if code & inverse_code == 0:
-                AVAILABLE[inverse_code].append(item_set.id)
-        combinations[1].append(((item_set.id, ), code))
-
-    previous_size = 1
-    while True:
-        current_size_combinations = []
-        for item_set_ids, code in combinations[previous_size]:
-            current_size_combinations.extend([(item_set_ids + (new_item_set_id, ), code | CODES[new_item_set_id]) for new_item_set_id in AVAILABLE[code]])
-
-        if len(current_size_combinations) == 0:
-            break
-
-        combinations.append(current_size_combinations)
-        previous_size += 1
-
-    flattened_combinations = []
-    for sized_combinations in combinations:
-        print(len(sized_combinations))
-        flattened_combinations.extend([combination[0] for combination in sized_combinations])
-    print(len(flattened_combinations))
-    with open('stuff_data\\item_sets_combinations.json', 'w', encoding='utf-8') as fo:
-        json.dump(flattened_combinations, fo, ensure_ascii=False)
