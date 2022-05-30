@@ -15,6 +15,17 @@ CHARACTERISTICS_NAMES = [
     "NEUTRAL"
 ]
 
+CHARACTERISTICS_ID = {
+    'strength': 0,
+    'str': 0,
+    'intelligence': 1,
+    'int': 1,
+    'luck': 2,
+    'agility': 3,
+    'agi': 3,
+    'neutral': 4
+}
+
 # Damages
 DAMAGES_COUNT = 14
 
@@ -49,3 +60,24 @@ DAMAGES_NAMES = [
     "MELEE",
     "FINAL"
 ]
+
+DAMAGES_ID = {
+    'power': 0,
+    'basic': 1,
+    'critdmg': 2,
+    'earthdmg': 3,
+    'strdmg': 3,
+    'firedmg': 4,
+    'intdmg': 4,
+    'waterdmg': 5,
+    'luckdmg': 5,
+    'airdmg': 6,
+    'agidmg': 6,
+    'neutraldmg': 7,
+    'spelldmg': 8,
+    'weapondmg': 9,
+    'weaponpower': 10,
+    'rangedmg': 11,
+    'meleedmg': 12,
+    'finaldmg': 13
+}

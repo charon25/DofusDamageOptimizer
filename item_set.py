@@ -1,7 +1,8 @@
 import json
 import os
-from typing import Dict, List
+from typing import Dict, List, Union
 
+from characteristics_damages import *
 from item import Item
 from stats import Stats
 
@@ -18,11 +19,38 @@ class ItemSet:
         self.level: int = 1
 
 
-    def get_stats(self, quantity: int) -> Stats:
+    def get_stats_page(self, quantity: int) -> Stats:
         if quantity <= 1:
             return Stats()
         
         return self.stats[quantity]
+
+    def get_stats(self, quantity: int, stats: str) -> Union[int, float]:
+        if quantity <= 1:
+            return 0
+
+        if stats in CHARACTERISTICS_ID:
+            return self.stats[quantity].get_characteristic(CHARACTERISTICS_ID[stats])
+
+        if stats in DAMAGES_ID:
+            return self.stats[quantity].get_damage(DAMAGES_ID[stats])
+
+        if stats in ('crit', '%crit'):
+            return self.stats[quantity].get_bonus_crit_chance()
+
+        if stats == 'pods':
+            return self.other_stats[quantity].get('pods', 0) + self.stats[quantity].get_characteristic(STRENGTH) * 5
+        elif stats in ('dodge', 'lock'):
+            return self.other_stats[quantity].get(stats, 0) + self.stats[quantity].get_characteristic(AGILITY) / 10
+        elif stats == 'prospec':
+            return self.other_stats[quantity].get('prospec', 0) + self.stats[quantity].get_characteristic(LUCK) / 10
+        elif stats in ('ap parry', 'mp parry', 'ap reduction', 'mp reduction'):
+            return self.other_stats[quantity].get(stats, 0) + self.other_stats[quantity].get('wisdom', 0) / 10
+        elif stats == 'init':
+            return self.other_stats[quantity].get(stats, 0) + sum(self.stats[quantity].get_characteristic(characteristic) for characteristic in (STRENGTH, INTELLIGENCE, LUCK, AGILITY))
+
+        return self.other_stats[quantity].get(stats, 0)
+
 
 
     def to_dict(self):
@@ -57,7 +85,7 @@ class ItemSet:
             quantity = int(quantity)
             item_set.stats[quantity] = Stats.from_dict(stats_data)
 
-        item_set.other_stats = json_data['other_stats']
+        item_set.other_stats = {int(key): value for key, value in json_data['other_stats'].items()}
 
         return item_set
 

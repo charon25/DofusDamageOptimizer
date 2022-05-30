@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from characteristics_damages import *
 from stats import Stats
@@ -90,6 +90,30 @@ class Item:
             'stats': {field: self.stats[field].to_dict() for field in ('min', 'max')},
             'other_stats': {field: self.other_stats[field] for field in ('min', 'max')}
         }
+
+
+    def get_stats(self, mode: str, stats: str) -> Union[int, float]:
+        if stats in CHARACTERISTICS_ID:
+            return self.stats[mode].get_characteristic(CHARACTERISTICS_ID[stats])
+
+        if stats in DAMAGES_ID:
+            return self.stats[mode].get_damage(DAMAGES_ID[stats])
+
+        if stats in ('crit', '%crit'):
+            return self.stats[mode].get_bonus_crit_chance()
+
+        if stats == 'pods':
+            return self.other_stats[mode].get('pods', 0) + self.stats[mode].get_characteristic(STRENGTH) * 5
+        elif stats in ('dodge', 'lock'):
+            return self.other_stats[mode].get(stats, 0) + self.stats[mode].get_characteristic(AGILITY) / 10
+        elif stats == 'prospec':
+            return self.other_stats[mode].get('prospec', 0) + self.stats[mode].get_characteristic(LUCK) / 10
+        elif stats in ('ap parry', 'mp parry', 'ap reduction', 'mp reduction'):
+            return self.other_stats[mode].get(stats, 0) + self.other_stats[mode].get('wisdom', 0) / 10
+        elif stats == 'init':
+            return self.other_stats[mode].get(stats, 0) + sum(self.stats[mode].get_characteristic(characteristic) for characteristic in (STRENGTH, INTELLIGENCE, LUCK, AGILITY))
+
+        return self.other_stats[mode].get(stats, 0)
 
 
     def __eq__(self, other: 'Item'):

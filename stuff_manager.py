@@ -21,6 +21,7 @@ from stats import Stats
 
 class StuffManager:
     OPTIMIZE_STUFF_COMMAND = ('optstuff', )
+    OPTIMIZE_STATS_COMMAND = ('optstats', )
     EQUIPMENT_COMMAND = ('equip', 'equipment')
     SEARCH_COMMAND = ('search', )
     ITEM_command = ('item', )
@@ -246,11 +247,47 @@ class StuffManager:
         self.print(0, item.stats[mode].to_compact_string())
 
 
+    def _execute_optimize_stats_command(self, args: List[str]):
+        if len(args) < 1:
+            self.print(1, 'Missing stats.')
+            return
+
+        optimized_stats = []
+
+        for index, arg in enumerate(args):
+            if arg.startswith('-'):
+                index -= 1  # Compensate for the case where the break does not occur
+                break
+
+            optimized_stats.append(arg.lower())
+
+        command = ' '.join(args[index + 1:])
+        try:
+            damages_parameters = DamageParameters.from_string(command, self.manager._get_default_parameters())
+        except ValueError as e:
+            self.print(1, f'Cannot parse parameters: {str(e)}')
+            return
+
+        if damages_parameters.equipment:
+            damages_parameters.update_stuff_with_equipment(self.manager.equipments)
+
+        items, value = self.items_manager.get_best_stuff_from_stats(' '.join(optimized_stats), damages_parameters, self.manager.equipments)
+
+        self.print(0, f"Best stuff to maximise '{' '.join(optimized_stats)} (parameters : '{self.manager.default_parameters}' - equipment: '{damages_parameters.equipment}') :")
+        self.print(0, '')
+        for item in items:
+            self.print(0, f" - {item.type.capitalize(): <7} : {item.name} ({item.id})")
+        self.print(0, '')
+        self.print(0, f" => {int(value):.0f} {' '.join(optimized_stats).capitalize()}")
+
+
     def execute_command(self, command: str):
         instr, *args = command.split(' ')
 
         if instr in StuffManager.OPTIMIZE_STUFF_COMMAND:
             self._execute_optimize_stuff_command(args)
+        elif instr in StuffManager.OPTIMIZE_STATS_COMMAND:
+            self._execute_optimize_stats_command(args)
         elif instr in StuffManager.EQUIPMENT_COMMAND:
             self._execute_equipment_command(args)
         elif instr in StuffManager.SEARCH_COMMAND:
