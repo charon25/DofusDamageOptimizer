@@ -271,14 +271,20 @@ class StuffManager:
         if damages_parameters.equipment:
             damages_parameters.update_stuff_with_equipment(self.manager.equipments)
 
-        items, value = self.items_manager.get_best_stuff_from_stats(' '.join(optimized_stats), damages_parameters, self.manager.equipments)
+        optimized_stats_string = ' '.join(optimized_stats)
 
-        self.print(0, f"Best stuff to maximise '{' '.join(optimized_stats)} (parameters : '{self.manager.default_parameters}' - equipment: '{damages_parameters.equipment}') :")
+        items, value = self.items_manager.get_best_stuff_from_stats(optimized_stats_string, damages_parameters, self.manager.equipments)
+
+        # Convert crit probability to crit percentage
+        if optimized_stats_string == 'crit':
+            value *= 100
+
+        self.print(0, f"Best stuff to maximise '{optimized_stats_string} (parameters : '{self.manager.default_parameters}' - equipment: '{damages_parameters.equipment}') :")
         self.print(0, '')
         for item in items:
             self.print(0, f" - {item.type.capitalize(): <7} : {item.name} ({item.id})")
         self.print(0, '')
-        self.print(0, f" => {int(value):.0f} {' '.join(optimized_stats).capitalize()}")
+        self.print(0, f" => {int(value):.0f} {optimized_stats_string.capitalize()}")
 
 
     def execute_command(self, command: str):

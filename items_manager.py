@@ -98,7 +98,7 @@ class ItemsManager:
 
 
     def _is_item_set_combination_possible(self, item_set_ids: List[int], parameters: DamageParameters) -> Tuple[bool, Dict[str, int]]:
-        count = {item_type: (0 if item_type in parameters.stuff else 1) for item_type in Item.TYPES}
+        count = {item_type: (0 if item_type in parameters.stuff else 99) for item_type in Item.TYPES}
         for item_set_id in item_set_ids:
             for item_type, items in self.item_sets[item_set_id].items.items():
                 count[item_type] += len(items)
