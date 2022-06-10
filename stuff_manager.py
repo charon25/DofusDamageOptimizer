@@ -22,6 +22,7 @@ from stats import Stats
 class StuffManager:
     OPTIMIZE_STUFF_COMMAND = ('optstuff', )
     OPTIMIZE_STATS_COMMAND = ('optstats', )
+    OPTIMIZE_HEURISTIC_COMMAND = ('optheur', 'optweights', 'optheuristic')
     EQUIPMENT_COMMAND = ('equip', 'equipment')
     SEARCH_COMMAND = ('search', )
     ITEM_command = ('item', )
@@ -279,12 +280,70 @@ class StuffManager:
         if optimized_stats_string == 'crit':
             value *= 100
 
-        self.print(0, f"Best stuff to maximise '{optimized_stats_string} (parameters : '{self.manager.default_parameters}' - equipment: '{damages_parameters.equipment}') :")
+        self.print(0, f"Best stuff to maximise '{optimized_stats_string}' (parameters : '{self.manager.default_parameters}' - equipment: '{damages_parameters.equipment}') :")
         self.print(0, '')
         for item in items:
             self.print(0, f" - {item.type.capitalize(): <7} : {item.name} ({item.id})")
         self.print(0, '')
         self.print(0, f" => {int(value):.0f} {optimized_stats_string.capitalize()}")
+
+
+    def _create_heuristic(self) -> Dict[str, float]:
+        heuristic: Dict[str, float] = {stats: 0.0 for stats in ALL_STATS_NAME}
+
+        self.print(0, 'Weights of the heuristic:')
+        for k, stats in enumerate(ALL_STATS_NAME):
+            if k == 0:
+                self.print(0, '\n=== Characteristics\n')
+            elif k == CHARACTERISTICS_COUNT - 1: #-1 because no Neutral
+                self.print(0, '\n=== Damages\n')
+            elif k == CHARACTERISTICS_COUNT - 1 + DAMAGES_COUNT:
+                self.print(0, '\n=== Other stats\n')
+            
+            input_value = input(f'{stats.upper()} (0): ').replace(',', '.')
+            if not input_value:
+                input_value = 0.0
+
+            if input_value == '/':
+                break
+
+            heuristic[stats] = float(input_value)
+            
+        input_value = input(f'\nBONUS CRIT CHANCE (0): ').replace(',', '.')
+        if not input_value:
+            input_value = 0.0
+
+        heuristic['crit'] = float(input_value)
+        
+        return heuristic
+
+
+    def _execute_optimize_heuristic_command(self, args: List[str]):
+        heuristic = None
+        parameters_command_start_index = 0
+        if len(args) >= 1 and not args[0].startswith('-'):
+            # default heuristic TODO
+            parameters_command_start_index = 1
+            pass
+
+        command = ' '.join(args[parameters_command_start_index:])
+        try:
+            damages_parameters = DamageParameters.from_string(command, self.manager._get_default_parameters())
+        except ValueError as e:
+            self.print(1, f'Cannot parse parameters: {str(e)}')
+            return
+
+        if heuristic is None:
+            heuristic = self._create_heuristic()
+
+        items, value = self.items_manager.get_best_stuff_from_heuristic(heuristic, damages_parameters, self.manager.equipments)
+
+        self.print(0, f"Best stuff to maximise given heuristic (parameters : '{self.manager.default_parameters}' - equipment: '{damages_parameters.equipment}') :")
+        self.print(0, '')
+        for item in items:
+            self.print(0, f" - {item.type.capitalize(): <7} : {item.name} ({item.id})")
+        self.print(0, '')
+        self.print(0, f" => H = {int(value):.1f}")
 
 
     def execute_command(self, command: str):
@@ -294,6 +353,8 @@ class StuffManager:
             self._execute_optimize_stuff_command(args)
         elif instr in StuffManager.OPTIMIZE_STATS_COMMAND:
             self._execute_optimize_stats_command(args)
+        elif instr in StuffManager.OPTIMIZE_HEURISTIC_COMMAND:
+            self._execute_optimize_heuristic_command(args)
         elif instr in StuffManager.EQUIPMENT_COMMAND:
             self._execute_equipment_command(args)
         elif instr in StuffManager.SEARCH_COMMAND:

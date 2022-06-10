@@ -93,6 +93,8 @@ class Item:
 
 
     def get_stats(self, mode: str, stats: str) -> Union[int, float]:
+        stats = stats.lower()
+
         if stats in CHARACTERISTICS_ID:
             return self.stats[mode].get_characteristic(CHARACTERISTICS_ID[stats])
 
@@ -114,6 +116,10 @@ class Item:
             return self.other_stats[mode].get(stats, 0) + sum(self.stats[mode].get_characteristic(characteristic) for characteristic in (STRENGTH, INTELLIGENCE, LUCK, AGILITY))
 
         return self.other_stats[mode].get(stats, 0)
+
+
+    def get_heuristic(self, mode: str, heuristic: Dict[str, float]) -> float:
+        return sum(self.get_stats(mode, stats) * weight for stats, weight in heuristic.items())
 
 
     def __eq__(self, other: 'Item'):

@@ -52,6 +52,10 @@ class ItemSet:
         return self.other_stats[quantity].get(stats, 0)
 
 
+    def get_heuristic(self, quantity: int, heuristic: Dict[str, float]) -> float:
+        return sum(self.get_stats(quantity, stats) * weight for stats, weight in heuristic.items())
+
+
 
     def to_dict(self):
         return {

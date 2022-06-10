@@ -81,3 +81,61 @@ DAMAGES_ID = {
     'meleedmg': 12,
     'finaldmg': 13
 }
+
+
+# Other
+OTHER_STATS_COUNT = 28
+
+OTHER_STATS_NAME = [
+    'air res',
+    'ap',
+    'ap parry',
+    'ap reduction',
+    'crit res',
+    'dodge',
+    'earth res',
+    'fire res',
+    'heal',
+    'health',
+    'init',
+    'lock',
+    'melee res',
+    'mp',
+    'mp parry',
+    'mp reduction',
+    'neutral res',
+    'pods',
+    'prospec',
+    'pushback dmg',
+    'pushback res',
+    'range',
+    'range res',
+    'reflect',
+    'summon',
+    'trap dmg',
+    'water res',
+    'wisdom',
+]
+
+
+ALL_STATS_NAME = [
+    'strength',
+    'intelligence',
+    'luck',
+    'agility',
+] + [
+    'power',
+    'basic',
+    'critdmg',
+    'earthdmg',
+    'firedmg',
+    'waterdmg',
+    'airdmg',
+    'neutraldmg',
+    'spelldmg',
+    'weapondmg',
+    'weaponpower',
+    'rangedmg',
+    'meleedmg',
+    'finaldmg'
+] + OTHER_STATS_NAME
