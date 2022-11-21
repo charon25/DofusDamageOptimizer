@@ -398,5 +398,24 @@ class TestSpell(unittest.TestCase):
         self.assertEqual(spell.buffs[0].damage_parameters['__all__'].vulnerability, 30)
 
 
+    def test_spell_with_crit_res(self):
+        spell = Spell()
+        stats = Stats()
+        parameters = DamageParameters.from_string('-rc 12')
+
+        spell.add_damaging_characteristic(AGILITY)
+        spell.set_base_damages(AGILITY, {'min': 10, 'max': 10, 'crit_min': 20, 'crit_max': 20})
+        spell.set_crit_chance(0.5)
+        spell_output = spell.get_detailed_damages(stats, parameters)
+
+        self.assertListEqual(spell_output.damages_by_characteristic, [
+            {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
+            {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
+            {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0},
+            {'min': 10, 'max': 10, 'crit_min': 8, 'crit_max': 8},
+            {'min': 0, 'max': 0, 'crit_min': 0, 'crit_max': 0}
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()

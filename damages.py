@@ -38,9 +38,13 @@ def compute_damages(base_damages, stats: Stats, characteristic: int, parameters:
     vulnerability_multiplier = max(0, 1.0 + parameters.vulnerability / 100) # Can't be negative damages
 
     # Game rounds down the damage between each steps
-    return (
+    damages = (
         int(int(int(int((base_damages['min'] + additional_base_damages) * characteristic_multiplier + flat_damages) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier) if (base_damages['min'] + additional_base_damages) > 0 else 0,
         int(int(int(int((base_damages['max'] + additional_base_damages) * characteristic_multiplier + flat_damages) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier) if (base_damages['max'] + additional_base_damages) > 0 else 0,
-        int(int(int(int((base_damages['crit_min'] + additional_base_damages) * characteristic_multiplier + flat_damages + stats.damages[CRIT]) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier) if (base_damages['crit_min'] + additional_base_damages) > 0 else 0,
-        int(int(int(int((base_damages['crit_max'] + additional_base_damages) * characteristic_multiplier + flat_damages + stats.damages[CRIT]) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier) if (base_damages['crit_max'] + additional_base_damages) > 0 else 0,
+        int(int(int(int((base_damages['crit_min'] + additional_base_damages) * characteristic_multiplier + flat_damages + stats.damages[CRIT] - parameters.crit_resistance) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier) if (base_damages['crit_min'] + additional_base_damages) > 0 else 0,
+        int(int(int(int((base_damages['crit_max'] + additional_base_damages) * characteristic_multiplier + flat_damages + stats.damages[CRIT] - parameters.crit_resistance) * final_multiplier) * vulnerability_multiplier) * resistance_multiplier) if (base_damages['crit_max'] + additional_base_damages) > 0 else 0,
     )
+
+    damages = [damage if damage > 0 else 0 for damage in damages]
+
+    return damages

@@ -22,6 +22,7 @@ class DamageParameters:
         self.starting_states: Set[str] = set()
         # 'unspecified' indicates we do not care about the position
         self.position: Literal['unspecified', 'none', 'line', 'diag'] = 'unspecified'
+        self.crit_resistance: int = 0
 
         # Stuff mode
         self.level: Tuple[int, int] = (1, 200)
@@ -65,7 +66,7 @@ class DamageParameters:
 
 
     def __add__(self, other: Union['DamageParameters', int]):
-        """Perform an addition of the 'addable' type : vulnerability and base damages."""
+        """Perform an addition of the 'addable' type : vulnerability, base damages and crit resistance."""
 
         if isinstance(other, int):  # Useful when doing stats + sum([]) - No matter the integer, return the stats
             return DamageParameters.from_existing(self)
@@ -78,6 +79,7 @@ class DamageParameters:
         for k in range(5):
             result.base_damages[k] += other.base_damages[k]
             result.resistances[k] += other.resistances[k]
+        result.crit_resistance += other.crit_resistance
 
         return result
 
@@ -103,10 +105,10 @@ class DamageParameters:
 
 
     def to_string(self):
-        return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -name {self.full_name} -bdmg {" ".join(map(str, self.base_damages))} -p {self.position}'
+        return f'-s {" ".join(self.stats)} -pa {self.pa} -pomin {self.get_min_po()} -pomax {self.get_max_po()} -t {self.type} -r {" ".join(map(str, self.resistances))} -d {self.distance} -v {self.vulnerability} -name {self.full_name} -bdmg {" ".join(map(str, self.base_damages))} -p {self.position} -rc {self.crit_resistance}'
 
     def to_compact_string(self):
-        return f'-r {" ".join(map(str, self.resistances))} -v {self.vulnerability} -bdmg {" ".join(map(str, self.base_damages))}'
+        return f'-r {" ".join(map(str, self.resistances))} -v {self.vulnerability} -bdmg {" ".join(map(str, self.base_damages))} -rc {self.crit_resistance}'
 
 
     def _assert_correct_parameters(self):
@@ -237,6 +239,10 @@ class DamageParameters:
                         damage_parameters.position = 'line'
                     damage_parameters.po = [abs(x) + abs(y), abs(x) + abs(y)]
 
+            elif command in ('-rcrit', '-cr', '-rc', '-critr', '-rescrit', '-critres'):
+                cls._check_parameter(parameter, 1, argument_type=int)
+                damage_parameters.crit_resistance = int(parameter[1])
+
             elif command in ('-lvl', '-level'):
                 cls._check_parameter(parameter, 1, argument_type=int)
                 level = int(parameter[1])
@@ -303,5 +309,6 @@ class DamageParameters:
         parameters.distance = default_parameters.distance
         parameters.vulnerability = default_parameters.vulnerability
         parameters.base_damages = default_parameters.base_damages[::]
+        parameters.crit_resistance = default_parameters.crit_resistance
 
         return parameters

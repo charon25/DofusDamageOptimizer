@@ -220,7 +220,7 @@ class Spell():
             self.set_short_name('')
 
 
-    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters, additional_damaging_characteristics: List[int] = None):
+    def get_detailed_damages(self, stats: Stats, parameters: DamageParameters, additional_damaging_characteristics: List[int] = None) -> SpellOutput:
         spell_output = SpellOutput()
 
         if not additional_damaging_characteristics:

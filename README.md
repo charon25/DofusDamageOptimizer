@@ -130,7 +130,8 @@ The possible parameters for every command that requires it are :
  - `-d` (or `-distance`) followed by one of `melee`, `range` : indicates if the damage computations should take into account RANGE or MELEE damages ;
  - `-v` (or `-vulne`, `-vulnerability`) followed by one integer (may be negative) : indicate the bonus (or reduced) damages dealt because of vulnerability or damage reduction (independant from resistances) ;
  - `-bdmg` (or `-bdamages`, `-base-damages`) followed by five integers (may be negative) : bonus (or malus) base damages of each element (in order : NEUTRAL, EARTH, FIRE, WATER, AIR) of the spell ;
- - `-states` (or `-state`) followed by as many states as wanted : the starting states used for the computations (only used in a damage command).
+ - `-states` (or `-state`) followed by as many states as wanted : the starting states used for the computations (only used in a damage command) ;
+ - `-critres` (or `-rc`) followed by an integer (may be negative) : the critical resistance of the target.
 
 The following additional parameters are only used for the stuff section :
  - `-lvl` (or `-level`) followed by an integer between 1 and 200 : the exact level of items ;

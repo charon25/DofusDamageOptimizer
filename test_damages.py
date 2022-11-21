@@ -242,5 +242,18 @@ class TestDamages(unittest.TestCase):
         self.assertListEqual(damages_bonus_spell_damages, [477, 573, 594, 594])
 
 
+    def test_crit_resistance(self):
+        stats = Stats()
+        parameters = DamageParameters.from_string('-rc 15')
+
+        damage_no_crit = compute_one_damage(20, stats, INTELLIGENCE, parameters, False, is_crit=False)
+        damage_crit = compute_one_damage(20, stats, INTELLIGENCE, parameters, False, is_crit=True)
+        damage_crit_not_enough = compute_one_damage(5, stats, INTELLIGENCE, parameters, False, is_crit=True)
+
+        self.assertAlmostEqual(damage_no_crit, 20)
+        self.assertAlmostEqual(damage_crit, 5)
+        self.assertAlmostEqual(damage_crit_not_enough, 0)
+
+
 if __name__ == '__main__':
     unittest.main()

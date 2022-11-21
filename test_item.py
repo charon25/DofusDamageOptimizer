@@ -14,14 +14,14 @@ class TestItem(unittest.TestCase):
         item = Item()
 
         self.assertEqual(item.name, '')
-        self.assertEqual(item.id, 0)
+        self.assertEqual(item.id, -1)
         self.assertEqual(item.set, None)
         self.assertEqual(item.type, '')
-        self.assertEqual(len(item.stats), 2)
-        self.assertEqual(len(item.other_stats), 2)
+        self.assertEqual(len(item.stats), 3)
+        self.assertEqual(len(item.other_stats), 3)
 
     def test_create_from_valid_json(self):
-        valid_json_string = '{"name": "Kanigloups", "id": 0, "set": 1000267, "type": "Familier", "stats": {"min": {"characteristics": [0, 0, 120, 0, 0], "damages": [0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0], "bonus_crit_chance": 0.0, "name": "", "short_name": ""}, "max": {"characteristics": [0, 0, 120, 0, 0], "damages": [0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0], "bonus_crit_chance": 0.0, "name": "", "short_name": ""}}, "other_stats": {"min": {}, "max": {}}}'
+        valid_json_string = '{"level": 1, "name": "Kanigloups", "id": 0, "set": 1000267, "type": "Familier", "stats": {"min": {"characteristics": [0, 0, 120, 0, 0], "damages": [0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0], "bonus_crit_chance": 0.0, "name": "", "short_name": ""}, "max": {"characteristics": [0, 0, 120, 0, 0], "damages": [0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0], "bonus_crit_chance": 0.0, "name": "", "short_name": ""}}, "other_stats": {"min": {}, "max": {}}}'
 
         Item.from_json_data(json.loads(valid_json_string))
 
