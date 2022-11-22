@@ -216,7 +216,7 @@ class ItemsManager:
             if not (min_level <= item.level <= max_level):
                 continue
 
-            stats[item.id] = item.get_stats(parameters.stuff_stats_mode, optimized_stats)
+            stats[item.id] = item.get_stats(stuff_stats_mode, optimized_stats)
 
         stats = {key: value for key, value in sorted(stats.items(), key=lambda key_value: (key_value[1], -self.items[key_value[0]].level), reverse=True)}
 
